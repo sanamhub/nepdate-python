@@ -6,8 +6,17 @@ tithi, holiday or event data; that lives in the separate ``nepdate-patro`` distr
 (``nepdate_patro``).
 """
 
-from ._date import NepaliDate
+from ._date import MAX, MIN, NepaliDate
 from ._errors import ErrorKind, NepDateError
 from ._names import Lang, Month, Weekday
 
-__all__ = ["ErrorKind", "Lang", "Month", "NepDateError", "NepaliDate", "Weekday"]
+__all__ = [
+    "MAX",
+    "MIN",
+    "ErrorKind",
+    "Lang",
+    "Month",
+    "NepDateError",
+    "NepaliDate",
+    "Weekday",
+]

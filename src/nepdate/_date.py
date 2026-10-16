@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import datetime
 import operator
 
-from ._calendar import MAX_YEAR, MIN_YEAR, MONTH_LENGTHS, MONTH_START_ORD
+from ._calendar import (
+    BUCKET,
+    MAX_YEAR,
+    MIN_YEAR,
+    MONTH_LENGTHS,
+    MONTH_NUM,
+    MONTH_START_ORD,
+    MONTH_YEAR,
+)
 from ._errors import ErrorKind, NepDateError
-from ._names import Month
+from ._names import Month, Weekday
+
+_TOTAL_DAYS = MONTH_START_ORD[-1] - MONTH_START_ORD[0]
 
 
 class NepaliDate:
@@ -63,6 +74,82 @@ class NepaliDate:
         """The BS day of the month."""
         return self._d
 
+    @property
+    def month_enum(self) -> Month:
+        """The BS month as a ``Month``."""
+        return Month(self._m)
+
+    @property
+    def weekday(self) -> Weekday:
+        """The day of the week, Sunday = 0 (not datetime's Monday = 0)."""
+        return Weekday(self._o % 7)
+
+    @property
+    def day_of_year(self) -> int:
+        """The 1-based day within the BS year."""
+        return self._o - MONTH_START_ORD[(self._y - MIN_YEAR) * 12] + 1
+
+    @property
+    def month_length(self) -> int:
+        """The number of days in the month of this date."""
+        return MONTH_LENGTHS[(self._y - MIN_YEAR) * 12 + (self._m - 1)]
+
+    def first_of_month(self) -> NepaliDate:
+        """The first day of the month of this date."""
+        return _from_parts(self._y, self._m, 1, self._o - self._d + 1)
+
+    def last_of_month(self) -> NepaliDate:
+        """The last day of the month of this date."""
+        length = self.month_length
+        return _from_parts(self._y, self._m, length, self._o - self._d + length)
+
+    def to_date(self) -> datetime.date:
+        """The proleptic Gregorian date of this date, as a ``datetime.date``."""
+        return datetime.date.fromordinal(self._o)
+
+    def to_ordinal(self) -> int:
+        """The proleptic Gregorian ordinal, shared with ``datetime.date``."""
+        return self._o
+
+    @classmethod
+    def from_date(cls, d: datetime.date) -> NepaliDate:
+        """Build the BS date of a ``datetime.date`` (or ``datetime``, using its date part).
+
+        Args:
+            d: The Gregorian date. An aware ``datetime`` uses its own ``.date()``; callers
+                that mean "the date in Nepal" must convert to ``Asia/Kathmandu`` first.
+
+        Returns:
+            The matching BS date.
+
+        Raises:
+            NepDateError: The date is outside 1844-04-11 through 2143-04-15.
+        """
+        return cls.from_ordinal(d.toordinal())
+
+    @classmethod
+    def from_ordinal(cls, n: int) -> NepaliDate:
+        """Build the BS date for a proleptic Gregorian ordinal.
+
+        Args:
+            n: The ordinal, as used by ``datetime.date.toordinal()``.
+
+        Returns:
+            The matching BS date.
+
+        Raises:
+            NepDateError: The ordinal is outside the supported range.
+        """
+        k = n - MONTH_START_ORD[0]
+        if k < 0 or k >= _TOTAL_DAYS:
+            raise NepDateError(ErrorKind.OUT_OF_RANGE, f"ordinal {n} is outside the range")
+        i = BUCKET[k >> 5]
+        if n >= MONTH_START_ORD[i + 1]:
+            i += 1
+        if n >= MONTH_START_ORD[i + 1]:
+            i += 1
+        return _from_parts(MONTH_YEAR[i], MONTH_NUM[i], n - MONTH_START_ORD[i] + 1, n)
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, NepaliDate):
             return NotImplemented
@@ -110,3 +197,7 @@ def _from_parts(year: int, month: int, day: int, ordinal: int) -> NepaliDate:
     date._d = day
     date._o = ordinal
     return date
+
+
+MIN = _from_parts(MIN_YEAR, Month.BAISHAKH, 1, MONTH_START_ORD[0])
+MAX = _from_parts(MAX_YEAR, Month.CHAITRA, MONTH_LENGTHS[-1], MONTH_START_ORD[-1] - 1)
