@@ -44,6 +44,7 @@ dev = [
 line-length = 100
 target-version = "py311"
 src = ["src", "packages/nepdate-patro/src", "scripts", "tests"]
+exclude = ["shared"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PL", "N", "D"]
