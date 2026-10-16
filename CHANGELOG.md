@@ -6,3 +6,9 @@ share this file and a version number (ADR-0005). The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- `NepaliDate` with construction, accessors, BS to AD and AD to BS conversion, ordinals,
+  comparisons and `MIN`/`MAX`.
+- The `Lang`, `Month`, `Weekday` and `ErrorKind` enums and the `NepDateError` exception.
