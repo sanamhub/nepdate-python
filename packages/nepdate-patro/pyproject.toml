@@ -1,0 +1,31 @@
+[project]
+name = "nepdate-patro"
+version = "0.0.0"
+description = "Tithi, public holidays and events for nepdate (Bikram Sambat calendar)"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "NepDate contributors" }]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading",
+    "Typing :: Typed",
+]
+dependencies = [
+    "nepdate>=0.0,<0.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "nepdate_patro"
+
+[tool.uv.sources]
+nepdate = { workspace = true }
