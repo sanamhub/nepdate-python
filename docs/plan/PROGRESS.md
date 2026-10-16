@@ -29,3 +29,4 @@ Checked against the PyPI JSON API on 2026-10-17:
 The core distribution name stays `nepdate` until the owner decides. If the owner picks
 `nepdate-bs`, the switch is one place per file: the core `[project] name`, the patro `dependencies`
 entry and the patro `[tool.uv.sources]` key. The import name stays `nepdate` either way.
+| P0 review | merged | see git log | `ci: 7/7 gates passed` | Reviewer fixed: `ci.py` now reads both distribution names from the pyproject files (the "three spots" claim missed the hardcoded wheel prefix, coverage target and patro range; a trial rename to `nepdate-bs` passes 7/7), CI runs `uv run --locked` (an unlocked dependency change fails). Open for the owner: PyPI name (`nepdate` is taken by a 2021 package), remote, trusted publishers, environments. CODE_OF_CONDUCT comes with the publish-ready phase. |
