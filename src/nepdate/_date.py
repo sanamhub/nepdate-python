@@ -14,6 +14,7 @@ from ._calendar import (
     MONTH_START_ORD,
     MONTH_YEAR,
 )
+from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._names import Month, Overflow, Weekday
 
@@ -225,6 +226,34 @@ class NepaliDate:
             NepDateError: The result is outside the supported range.
         """
         return self.add_months(n * 12, overflow)
+
+    def diff(self, other: NepaliDate) -> DateDiff:
+        """The calendar breakdown between this date and ``other`` (ALGORITHM §8a).
+
+        Args:
+            other: The date to diff against.
+
+        Returns:
+            The signed years, months and days, plus the total day difference.
+        """
+        if self <= other:
+            a, b = self, other
+            negative = False
+        else:
+            a, b = other, self
+            negative = True
+        months = (b._y - a._y) * 12 + (b._m - a._m)
+        anchor = a.add_months(months)
+        if anchor > b:
+            months -= 1
+            anchor = a.add_months(months)
+        return DateDiff(
+            negative=negative,
+            years=months // 12,
+            months=months % 12,
+            days=b._o - anchor._o,
+            total_days=self.days_until(other),
+        )
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.
