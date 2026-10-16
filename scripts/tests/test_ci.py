@@ -84,3 +84,9 @@ def test_archive_prefix_follows_the_normalized_name(ci: Any) -> None:
     assert ci._archive_prefix("nepdate") == "nepdate-"
     assert ci._archive_prefix("nepdate-bs") == "nepdate_bs-"
     assert ci._archive_prefix("nepdate-patro") == "nepdate_patro-"
+
+
+def test_outside_flags_only_foreign_modules(ci: Any) -> None:
+    """The package's own modules and the allowlist pass; anything else is reported."""
+    modules = {"nepdate", "nepdate._date", "enum", "json", "nepdatex"}
+    assert ci._outside(modules, "nepdate", frozenset({"enum"})) == ["json", "nepdatex"]

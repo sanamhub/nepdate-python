@@ -58,8 +58,12 @@ PATRO_MODULE = "nepdate_patro"
 CORE_PREFIX = _archive_prefix(CORE_DIST)
 PATRO_PREFIX = _archive_prefix(PATRO_DIST)
 EVENT_ANCHOR = "World Day Against Human Trafficking"
-CORE_IMPORT_LIMIT_US = 5_000
-PATRO_IMPORT_LIMIT_US = 10_000
+# Coarse ceilings that catch a gross regression on a loaded CI runner. The ADR-0002 §7 budget
+# (5 ms) is measured by the P5 benchmark on a quiet machine, not here.
+CORE_IMPORT_LIMIT_US = 50_000
+PATRO_IMPORT_LIMIT_US = 50_000
+# The only modules outside our own packages that `import nepdate` may add to a bare interpreter.
+CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
 
@@ -195,16 +199,62 @@ def _parse_importtime(output: str) -> dict[str, int]:
     return times
 
 
+def _new_modules(setup: str, statement: str) -> set[str]:
+    """Return the modules that a statement adds to ``sys.modules`` after a setup statement.
+
+    Args:
+        setup: Code that runs first; its modules count as already loaded.
+        statement: The import whose new modules are returned.
+
+    Returns:
+        The module names that appeared while the statement ran.
+    """
+    script = "; ".join(
+        [
+            "import sys",
+            setup or "pass",
+            "base = set(sys.modules)",
+            statement,
+            "print(' '.join(sorted(set(sys.modules) - base)))",
+        ]
+    )
+    result = _run(["uv", "run", "python", "-c", script], capture=True)
+    return set(result.stdout.split())
+
+
+def _outside(modules: set[str], package: str, allowed: frozenset[str]) -> list[str]:
+    """Return the modules that are neither in the package nor allowed.
+
+    Args:
+        modules: The module names to check.
+        package: The top-level package whose own modules are always allowed.
+        allowed: Other module names that may appear.
+
+    Returns:
+        The offending module names, sorted.
+    """
+    return sorted(
+        m for m in modules if m != package and not m.startswith(f"{package}.") and m not in allowed
+    )
+
+
 def gate_import_time() -> None:
-    """Check the import budget and that the core never loads the patro."""
-    core_us, core_times = _import_time(f"import {CORE_MODULE}", CORE_MODULE)
-    if PATRO_MODULE in core_times:
-        raise GateError(f"import nepdate loaded {PATRO_MODULE}")
+    """Check what each import loads, that the core never loads the patro, and a coarse ceiling."""
+    core_new = _new_modules("", f"import {CORE_MODULE}")
+    if extra := _outside(core_new, CORE_MODULE, CORE_IMPORT_ALLOWED):
+        raise GateError(f"import {CORE_MODULE} loaded unexpected modules: {', '.join(extra)}")
+    if PATRO_MODULE in core_new:
+        raise GateError(f"import {CORE_MODULE} loaded {PATRO_MODULE}")
+    patro_new = _new_modules(f"import {CORE_MODULE}", f"import {PATRO_MODULE}")
+    if extra := _outside(patro_new, PATRO_MODULE, frozenset()):
+        raise GateError(f"import {PATRO_MODULE} loaded unexpected modules: {', '.join(extra)}")
+    core_us, _ = _import_time(f"import {CORE_MODULE}", CORE_MODULE)
     if core_us >= CORE_IMPORT_LIMIT_US:
-        raise GateError(f"import nepdate takes {core_us} us, limit {CORE_IMPORT_LIMIT_US}")
+        raise GateError(f"import {CORE_MODULE} takes {core_us} us, limit {CORE_IMPORT_LIMIT_US}")
     patro_us, _ = _import_time(f"import {CORE_MODULE}; import {PATRO_MODULE}", PATRO_MODULE)
     if patro_us >= PATRO_IMPORT_LIMIT_US:
         raise GateError(f"import {PATRO_MODULE} takes {patro_us} us, limit {PATRO_IMPORT_LIMIT_US}")
+    print(f"ci: import {CORE_MODULE} {core_us} us, {PATRO_MODULE} {patro_us} us (not a benchmark)")
 
 
 def _find_archive(prefix: str, suffix: str) -> Path:
