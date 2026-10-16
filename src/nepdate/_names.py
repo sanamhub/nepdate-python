@@ -46,3 +46,17 @@ class Overflow(enum.Enum):
 
     CLAMP = "clamp"
     SPILL = "spill"
+
+
+class Quarter(enum.IntEnum):
+    """A fiscal quarter: Q1 = Shrawan..Ashoj through Q4 = Baishakh..Ashad."""
+
+    Q1 = 1
+    Q2 = 2
+    Q3 = 3
+    Q4 = 4
+
+    def months(self) -> tuple[Month, Month, Month]:
+        """The three BS months of this quarter, in calendar order."""
+        first = ((self.value - 1) * 3 + 4 - 1) % 12 + 1
+        return (Month(first), Month(first % 12 + 1), Month((first + 1) % 12 + 1))

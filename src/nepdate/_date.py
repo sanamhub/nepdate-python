@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import operator
+from typing import TYPE_CHECKING, cast
 
 from ._calendar import (
     BUCKET,
@@ -16,7 +17,10 @@ from ._calendar import (
 )
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._names import Month, Overflow, Weekday
+from ._names import Month, Overflow, Quarter, Weekday
+
+if TYPE_CHECKING:
+    from ._fiscal import FiscalYear
 
 _TOTAL_DAYS = MONTH_START_ORD[-1] - MONTH_START_ORD[0]
 _TOTAL_MONTHS = len(MONTH_LENGTHS)
@@ -254,6 +258,22 @@ class NepaliDate:
             days=b._o - anchor._o,
             total_days=self.days_until(other),
         )
+
+    def fiscal_year(self) -> FiscalYear:
+        """The fiscal year containing this date (ALGORITHM §8b)."""
+        package = __name__.rsplit(".", 1)[0]
+        fiscal = __import__(f"{package}._fiscal", fromlist=["FiscalYear"])
+        return cast("FiscalYear", fiscal.FiscalYear).containing(self)
+
+    def quarter(self) -> Quarter:
+        """The fiscal quarter of this date (ALGORITHM §8b)."""
+        if Month.SHRAWAN <= self._m <= Month.ASHOJ:
+            return Quarter.Q1
+        if Month.KARTIK <= self._m <= Month.POUSH:
+            return Quarter.Q2
+        if Month.MAGH <= self._m <= Month.CHAITRA:
+            return Quarter.Q3
+        return Quarter.Q4
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.
