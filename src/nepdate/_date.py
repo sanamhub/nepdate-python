@@ -15,9 +15,10 @@ from ._calendar import (
     MONTH_YEAR,
 )
 from ._errors import ErrorKind, NepDateError
-from ._names import Month, Weekday
+from ._names import Month, Overflow, Weekday
 
 _TOTAL_DAYS = MONTH_START_ORD[-1] - MONTH_START_ORD[0]
+_TOTAL_MONTHS = len(MONTH_LENGTHS)
 
 
 class NepaliDate:
@@ -169,6 +170,61 @@ class NepaliDate:
             ``other.to_ordinal() - self.to_ordinal()``.
         """
         return other._o - self._o
+
+    def add_months(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate:
+        """The date ``n`` months from this one (ALGORITHM §8).
+
+        Args:
+            n: The whole number of months to add; a negative value subtracts.
+            overflow: CLAMP caps the day at the target month's length; SPILL carries
+                the leftover days into the next month.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: The result is outside the supported range.
+        """
+        total = (self._y - MIN_YEAR) * 12 + (self._m - 1) + n
+        if total < 0 or total >= _TOTAL_MONTHS:
+            raise NepDateError(ErrorKind.OUT_OF_RANGE, f"month offset {n} is outside the range")
+        year, month0 = divmod(total, 12)
+        year += MIN_YEAR
+        month = month0 + 1
+        index = (year - MIN_YEAR) * 12 + (month - 1)
+        length = MONTH_LENGTHS[index]
+        if self._d <= length:
+            return _from_parts(year, month, self._d, MONTH_START_ORD[index] + self._d - 1)
+        if overflow is Overflow.SPILL:
+            if month == Month.CHAITRA:
+                year += 1
+                month = 1
+            else:
+                month += 1
+            if year > MAX_YEAR:
+                raise NepDateError(
+                    ErrorKind.OUT_OF_RANGE, f"month offset {n} spills past the range"
+                )
+            index = (year - MIN_YEAR) * 12 + (month - 1)
+            day = self._d - length
+            return _from_parts(year, month, day, MONTH_START_ORD[index] + day - 1)
+        return _from_parts(year, month, length, MONTH_START_ORD[index] + length - 1)
+
+    def add_years(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate:
+        """The date ``n`` years from this one, as ``add_months(12 * n)``.
+
+        Args:
+            n: The whole number of years to add; a negative value subtracts.
+            overflow: CLAMP caps the day at the target month's length; SPILL carries
+                the leftover days into the next month.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: The result is outside the supported range.
+        """
+        return self.add_months(n * 12, overflow)
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.

@@ -39,3 +39,10 @@ class Weekday(enum.IntEnum):
     THURSDAY = 4
     FRIDAY = 5
     SATURDAY = 6
+
+
+class Overflow(enum.Enum):
+    """How ``add_months`` and ``add_years`` handle a day past the month end."""
+
+    CLAMP = "clamp"
+    SPILL = "spill"
