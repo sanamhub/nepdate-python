@@ -1,0 +1,61 @@
+[project]
+name = "nepdate"
+version = "0.0.0"
+description = "Bikram Sambat (Nepali calendar) for Python, dependency-free and typed"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "shared/data/NOTICE"]
+authors = [{ name = "NepDate contributors" }]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading",
+    "Typing :: Typed",
+]
+dependencies = [
+    "tzdata; sys_platform == 'win32'",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "nepdate"
+
+[tool.uv.workspace]
+members = ["packages/nepdate-patro"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pytest>=8.3.0",
+    "pytest-cov>=5.0.0",
+    "hypothesis>=6.120.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "packages/nepdate-patro/src", "scripts", "tests"]
+exclude = ["shared"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PL", "N", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: long-running tests, deselect with -m 'not slow'",
+]
