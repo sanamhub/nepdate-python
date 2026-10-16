@@ -15,7 +15,7 @@ Thanks for helping. This repository holds the Python `nepdate` and `nepdate-patr
 
 ## Making a change
 
-1. Run `uv run python scripts/ci.py` before you open a pull request. It must pass.
+1. Run `uv run --locked python scripts/ci.py` before you open a pull request. It must pass.
 2. One change per pull request.
 3. Add tests for every behaviour change.
 4. Add a changelog line for anything a user would notice.

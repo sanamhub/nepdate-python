@@ -65,8 +65,8 @@ def test_archive_not_contains_targz(ci: Any, tmp_path: Path) -> None:
 
 def test_same_minor_range(ci: Any) -> None:
     """The patro dependency range tracks the minor version."""
-    assert ci._same_minor_range("0.0.0") == "nepdate>=0.0,<0.1"
-    assert ci._same_minor_range("0.1.0") == "nepdate>=0.1,<0.2"
+    assert ci._same_minor_range("0.0.0") == f"{ci.CORE_DIST}>=0.0,<0.1"
+    assert ci._same_minor_range("0.1.0") == f"{ci.CORE_DIST}>=0.1,<0.2"
 
 
 def test_parse_importtime(ci: Any) -> None:
@@ -77,3 +77,10 @@ def test_parse_importtime(ci: Any) -> None:
         "import time:      300 |        500 | nepdate_patro\n"
     )
     assert ci._parse_importtime(output) == {"nepdate": 200, "nepdate_patro": 500}
+
+
+def test_archive_prefix_follows_the_normalized_name(ci: Any) -> None:
+    """A renamed core (for example ``nepdate-bs``) still finds its wheel and sdist."""
+    assert ci._archive_prefix("nepdate") == "nepdate-"
+    assert ci._archive_prefix("nepdate-bs") == "nepdate_bs-"
+    assert ci._archive_prefix("nepdate-patro") == "nepdate_patro-"

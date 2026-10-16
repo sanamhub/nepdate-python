@@ -6,7 +6,7 @@
 
 ## How tested
 
-<!-- Paste the last line of `uv run python scripts/ci.py`. -->
+<!-- Paste the last line of `uv run --locked python scripts/ci.py`. -->
 
 ## What to look at first
 

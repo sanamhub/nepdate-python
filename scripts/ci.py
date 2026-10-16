@@ -1,7 +1,8 @@
 """Run every quality gate in order and stop at the first failure.
 
-The entry point is ``uv run python scripts/ci.py``. Each gate is defined in ADR-0004. Gates 6 and
-7 install the wheels built from this checkout into throwaway virtualenvs and test each
+The entry point is ``uv run --locked python scripts/ci.py``; ``--locked`` makes a stale
+``uv.lock`` fail instead of being rewritten. Each gate is defined in ADR-0004. Gates 6 and 7
+install the wheels built from this checkout into throwaway virtualenvs and test each
 distribution on its own, so a core-only install is proven to have no ``nepdate_patro``.
 """
 
@@ -13,17 +14,49 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 import zipfile
 from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-CORE_DIST = "nepdate"
-PATRO_DIST = "nepdate-patro"
+
+
+def _project_name(pyproject: Path) -> str:
+    """Read ``[project] name`` from a pyproject.toml.
+
+    Args:
+        pyproject: The pyproject.toml path.
+
+    Returns:
+        The distribution name as written.
+    """
+    with pyproject.open("rb") as f:
+        name: str = tomllib.load(f)["project"]["name"]
+    return name
+
+
+def _archive_prefix(dist: str) -> str:
+    """Return the file name prefix of a distribution's wheel and sdist (PEP 427, PEP 625).
+
+    Args:
+        dist: The distribution name.
+
+    Returns:
+        The normalized name with ``-`` and ``.`` as ``_``, followed by ``-``.
+    """
+    return dist.lower().replace("-", "_").replace(".", "_") + "-"
+
+
+# The distribution names come from the pyproject files, so changing the core's PyPI name is an
+# edit there only. The import names never change.
+CORE_DIST = _project_name(ROOT / "pyproject.toml")
+PATRO_DIST = _project_name(ROOT / "packages" / "nepdate-patro" / "pyproject.toml")
+CORE_MODULE = "nepdate"
 PATRO_MODULE = "nepdate_patro"
-CORE_PREFIX = "nepdate-"
-PATRO_PREFIX = "nepdate_patro-"
+CORE_PREFIX = _archive_prefix(CORE_DIST)
+PATRO_PREFIX = _archive_prefix(PATRO_DIST)
 EVENT_ANCHOR = "World Day Against Human Trafficking"
 CORE_IMPORT_LIMIT_US = 5_000
 PATRO_IMPORT_LIMIT_US = 10_000
@@ -79,7 +112,7 @@ def gate_pytest() -> None:
             "tests",
             "packages/nepdate-patro/tests",
             "scripts/tests",
-            f"--cov={CORE_DIST}",
+            f"--cov={CORE_MODULE}",
             f"--cov={PATRO_MODULE}",
             "--cov-report=term",
         ]
@@ -91,7 +124,7 @@ def gate_pytest() -> None:
             "run",
             "coverage",
             "report",
-            f"--include=*/{CORE_DIST}/*",
+            f"--include=*/{CORE_MODULE}/*",
             f"--fail-under={COVERAGE_MIN}",
         ]
     )
@@ -164,12 +197,12 @@ def _parse_importtime(output: str) -> dict[str, int]:
 
 def gate_import_time() -> None:
     """Check the import budget and that the core never loads the patro."""
-    core_us, core_times = _import_time("import nepdate", CORE_DIST)
+    core_us, core_times = _import_time(f"import {CORE_MODULE}", CORE_MODULE)
     if PATRO_MODULE in core_times:
         raise GateError(f"import nepdate loaded {PATRO_MODULE}")
     if core_us >= CORE_IMPORT_LIMIT_US:
         raise GateError(f"import nepdate takes {core_us} us, limit {CORE_IMPORT_LIMIT_US}")
-    patro_us, _ = _import_time(f"import nepdate; import {PATRO_MODULE}", PATRO_MODULE)
+    patro_us, _ = _import_time(f"import {CORE_MODULE}; import {PATRO_MODULE}", PATRO_MODULE)
     if patro_us >= PATRO_IMPORT_LIMIT_US:
         raise GateError(f"import {PATRO_MODULE} takes {patro_us} us, limit {PATRO_IMPORT_LIMIT_US}")
 
@@ -352,10 +385,11 @@ def _same_minor_range(version: str) -> str:
         version: A ``major.minor.patch`` version.
 
     Returns:
-        The ``nepdate>=major.minor,<major.(minor+1)`` requirement.
+        The ``<core>>=major.minor,<major.(minor+1)`` requirement, ``<core>`` being the core
+        distribution name.
     """
     major, minor, _ = version.split(".")
-    return f"nepdate>={major}.{minor},<{major}.{int(minor) + 1}"
+    return f"{CORE_DIST}>={major}.{minor},<{major}.{int(minor) + 1}"
 
 
 GATES: tuple[tuple[str, Callable[[], None]], ...] = (
@@ -384,6 +418,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ci: unknown arguments {argv}", file=sys.stderr)
         return 2
 
+    # Every uv call below must use uv.lock as committed: a pyproject change without a lock update
+    # fails here instead of being re-locked silently.
+    os.environ["UV_LOCKED"] = "1"
     _run(["uv", "sync", "--all-packages"])
     for number, (name, gate) in enumerate(GATES, start=1):
         print(f"--- gate {number}: {name} ---")
