@@ -293,9 +293,7 @@ class NepaliDate:
             raise NepDateError(ErrorKind.OUT_OF_RANGE, "timedelta must be a whole number of days")
         return self.add_days(td.days)
 
-    def __sub__(
-        self, other: NepaliDate | datetime.timedelta
-    ) -> datetime.timedelta | NepaliDate:
+    def __sub__(self, other: NepaliDate | datetime.timedelta) -> datetime.timedelta | NepaliDate:
         """Subtract a date (to a timedelta) or a whole-day timedelta (to a date).
 
         Args:
