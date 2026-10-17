@@ -166,3 +166,25 @@ class Quarter(enum.IntEnum):
         """The three BS months of this quarter, in calendar order."""
         first = ((self.value - 1) * 3 + 4 - 1) % 12 + 1
         return (Month(first), Month(first % 12 + 1), Month((first + 1) % 12 + 1))
+
+
+class DateOrder(enum.Enum):
+    """The field order of ``NepaliDate.short`` (FORMATTING §3)."""
+
+    YMD = "YMD"
+    YDM = "YDM"
+    MYD = "MYD"
+    MDY = "MDY"
+    DYM = "DYM"
+    DMY = "DMY"
+
+
+class Separator(enum.Enum):
+    """The separator of ``NepaliDate.short`` (FORMATTING §3)."""
+
+    SLASH = "/"
+    BACKSLASH = "\\"
+    DOT = "."
+    UNDERSCORE = "_"
+    DASH = "-"
+    SPACE = " "

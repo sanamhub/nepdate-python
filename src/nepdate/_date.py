@@ -16,7 +16,8 @@ from ._calendar import (
 )
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._names import Month, Overflow, Quarter, Weekday
+from ._format import format_default, format_iso, format_long, format_short
+from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
 # module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
@@ -276,6 +277,68 @@ class NepaliDate:
         if Month.MAGH <= self._m <= Month.CHAITRA:
             return Quarter.Q3
         return Quarter.Q4
+
+    def __str__(self) -> str:
+        """The default display, ``YYYY/MM/DD`` with ASCII digits."""
+        return format_default(self._y, self._m, self._d, Lang.EN)
+
+    def __repr__(self) -> str:
+        """The unambiguous constructor form, for example ``NepaliDate(2081, 4, 15)``."""
+        return f"NepaliDate({self._y}, {self._m}, {self._d})"
+
+    def isoformat(self) -> str:
+        """The sortable ``YYYY-MM-DD`` form (D-11)."""
+        return format_iso(self._y, self._m, self._d, Lang.EN)
+
+    def short(
+        self,
+        order: DateOrder = DateOrder.YMD,
+        sep: Separator = Separator.SLASH,
+        pad: bool = True,
+        lang: Lang = Lang.EN,
+    ) -> str:
+        """The short form of FORMATTING §3.
+
+        Args:
+            order: The field order; the default is year, month, day.
+            sep: The separator between the fields.
+            pad: Whether month and day are two digits.
+            lang: The language of the digits.
+
+        Returns:
+            The short form, for example ``"2080-05-15"`` or ``"१५-५-२०८०"``.
+        """
+        return format_short(self._y, self._m, self._d, order, sep, pad, lang)
+
+    def long(
+        self,
+        *,
+        weekday: bool = False,
+        year: bool = True,
+        pad: bool = True,
+        lang: Lang = Lang.EN,
+    ) -> str:
+        """The long form of FORMATTING §4.
+
+        Args:
+            weekday: Whether to start with the weekday name.
+            year: Whether to end with the year.
+            pad: Whether the day is two digits.
+            lang: The language of the names and digits.
+
+        Returns:
+            The long form, for example ``"Tuesday, Shrawan 15, 2081"``.
+        """
+        return format_long(
+            self._y,
+            self._m,
+            self._d,
+            self._o % 7,
+            with_weekday=weekday,
+            include_year=year,
+            pad=pad,
+            lang=lang,
+        )
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.
