@@ -463,8 +463,9 @@ def test_nepalidatepropertiestests_monthname_returnscorrectenum() -> None:
 
 
 def test_nepalidatepropertiestests_today_returnscurrentnepalidate() -> None:
-    """today() is the P4 interop task."""
-    pytest.skip("pending P4-03: today()")
+    """``today`` returns a date inside the supported range."""
+    today = NepaliDate.today()
+    assert MIN <= today <= MAX
 
 
 def test_nepalidatepropertiestests_dayofyear_firstdayofyear_returns1() -> None:
@@ -1422,43 +1423,43 @@ def test_nepalidaterangeextendedtests_forcalendaryear_lengthisreasonable() -> No
 
 
 def test_nepalidaterangeextendedtests_currentmonth_startisfirstdayofcurrentmonth() -> None:
-    """Current-month helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-month helper; build it from today() and month()."""
+    pytest.skip("n/a: D-09, DateRange has no current-month helper")
 
 
 def test_nepalidaterangeextendedtests_currentmonth_endislastdayofcurrentmonth() -> None:
-    """Current-month helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-month helper; build it from today() and month()."""
+    pytest.skip("n/a: D-09, DateRange has no current-month helper")
 
 
 def test_nepalidaterangeextendedtests_currentmonth_containstoday() -> None:
-    """Current-month helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-month helper; build it from today() and month()."""
+    pytest.skip("n/a: D-09, DateRange has no current-month helper")
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_containstoday() -> None:
-    """Current-fiscal helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
+    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_startisshrawan() -> None:
-    """Current-fiscal helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
+    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_endisashadh() -> None:
-    """Current-fiscal helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
+    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_containstoday() -> None:
-    """Current-calendar helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-calendar-year helper; build it from today() and year()."""
+    pytest.skip("n/a: D-09, DateRange has no current-calendar-year helper")
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_startisbaishakh1() -> None:
-    """Current-calendar helpers need today()."""
-    pytest.skip("pending P4-03: today()")
+    """DateRange has no current-calendar-year helper; build it from today() and year()."""
+    pytest.skip("n/a: D-09, DateRange has no current-calendar-year helper")
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_emptyrange_returnsemptyarray() -> None:

@@ -157,6 +157,21 @@ class NepaliDate:
         return _from_serial(n)
 
     @classmethod
+    def today(cls, tz: datetime.tzinfo | None = None) -> NepaliDate:
+        """The current date in ``tz``; None means Nepal time (ADR-0003).
+
+        Args:
+            tz: The time zone to read the clock in.
+
+        Returns:
+            The current BS date.
+
+        Raises:
+            NepDateError: The clock is outside 1844-04-11 through 2143-04-15.
+        """
+        return _today_from(_now(), tz, cls)
+
+    @classmethod
     def parse(cls, s: str) -> NepaliDate:
         """Parse a date from the strict form of PARSING §1.
 
@@ -504,3 +519,32 @@ def _from_parts(year: int, month: int, day: int, ordinal: int) -> NepaliDate:
 
 MIN = _from_parts(MIN_YEAR, Month.BAISHAKH, 1, MONTH_START_ORD[0])
 MAX = _from_parts(MAX_YEAR, Month.CHAITRA, MONTH_LENGTHS[-1], MONTH_START_ORD[-1] - 1)
+
+
+def _now() -> datetime.datetime:
+    """Return the current UTC instant; tests replace this to inject a clock."""
+    return datetime.datetime.now(datetime.UTC)
+
+
+def _today_from(
+    now: datetime.datetime, tz: datetime.tzinfo | None, date_type: type[NepaliDate]
+) -> NepaliDate:
+    """Convert an injected instant to a BS date in ``tz``.
+
+    Args:
+        now: An aware instant.
+        tz: The zone to convert to; None means ``Asia/Kathmandu``.
+        date_type: The ``NepaliDate`` class.
+
+    Returns:
+        The BS date of ``now`` in ``tz``.
+
+    Raises:
+        NepDateError: The date is outside the supported range.
+    """
+    if tz is None:
+        # Imported here so `import nepdate` stays inside the ADR-0004 gate 5 allowlist.
+        from zoneinfo import ZoneInfo  # noqa: PLC0415
+
+        tz = ZoneInfo("Asia/Kathmandu")
+    return date_type.from_date(now.astimezone(tz).date())
