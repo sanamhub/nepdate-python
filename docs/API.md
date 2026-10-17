@@ -79,8 +79,8 @@ class ErrorKind(enum.Enum):
 class NepDateError(ValueError):
     kind: ErrorKind
 
-@dataclasses.dataclass(frozen=True, slots=True)
-class DateDiff: negative: bool; years: int; months: int; days: int; total_days: int
+class DateDiff:                         # immutable value with __slots__, ==, hash and repr; written
+    negative: bool; years: int; months: int; days: int; total_days: int  # by hand, no dataclasses
 
 class FiscalYear:                       # starting BS year: FY 2082/83 = FiscalYear(2082)
     def __init__(self, start_year: int) -> None: ...
@@ -112,15 +112,14 @@ class DateRange:                        # inclusive; D-09: no set operations
 ```python
 # nepdate_patro/__init__.py  (distribution nepdate-patro, ADR-0001 §1; a separate install)
 # Usage: from nepdate_patro import info, coverage, public_holidays
+# The three value types below are immutable hand-written classes like DateDiff, not dataclasses:
+# the import gate allows `import nepdate_patro` to add only its own modules.
 from nepdate import DateRange, Lang, NepaliDate
 
-@dataclasses.dataclass(frozen=True, slots=True)
 class Tithi: np: str; en: str
     def label(self, lang: Lang = Lang.EN) -> str: ...  # np for Lang.NE, en for Lang.EN
-@dataclasses.dataclass(frozen=True, slots=True)
 class Event: np: str; en: str
     def label(self, lang: Lang = Lang.EN) -> str: ...
-@dataclasses.dataclass(frozen=True, slots=True)
 class CalendarInfo: tithi: Tithi | None; is_public_holiday: bool; events: tuple[Event, ...]
 def info(d: NepaliDate) -> CalendarInfo: ...     # PATRO §2; never raises; empty outside coverage;
                                                  # returns a shared prebuilt object (ADR-0002 §6)

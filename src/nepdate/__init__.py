@@ -7,16 +7,24 @@ tithi, holiday or event data; that lives in the separate ``nepdate-patro`` distr
 """
 
 from ._date import MAX, MIN, NepaliDate
+from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._names import Lang, Month, Weekday
+from ._fiscal import FiscalYear
+from ._names import Lang, Month, Overflow, Quarter, Weekday
+from ._range import DateRange
 
 __all__ = [
     "MAX",
     "MIN",
+    "DateDiff",
+    "DateRange",
     "ErrorKind",
+    "FiscalYear",
     "Lang",
     "Month",
     "NepDateError",
     "NepaliDate",
+    "Overflow",
+    "Quarter",
     "Weekday",
 ]

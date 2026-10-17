@@ -63,6 +63,8 @@ EVENT_ANCHOR = "World Day Against Human Trafficking"
 CORE_IMPORT_LIMIT_US = 50_000
 PATRO_IMPORT_LIMIT_US = 50_000
 # The only modules outside our own packages that `import nepdate` may add to a bare interpreter.
+# Widen this only with a reason in the commit; dataclasses alone adds 27 modules
+# and breaks the ADR-0002 §7 budget, so value types are written by hand.
 CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3

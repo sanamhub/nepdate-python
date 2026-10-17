@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from nepdate import NepaliDate, _calendar
@@ -17,3 +17,14 @@ def test_round_trip(serial: int) -> None:
     date = NepaliDate.from_ordinal(_OFFSET + serial)
     assert NepaliDate.from_date(date.to_date()) == date
     assert date.to_ordinal() == _OFFSET + serial
+
+
+@given(
+    serial=st.integers(0, _MAX_SERIAL),
+    n=st.integers(-_MAX_SERIAL, _MAX_SERIAL),
+)
+def test_add_days_inverse(serial: int, n: int) -> None:
+    """add_days(n).days_until(d) == -n, for any in-range shift (ADR-0004)."""
+    assume(0 <= serial + n <= _MAX_SERIAL)
+    date = NepaliDate.from_ordinal(_OFFSET + serial)
+    assert date.add_days(n).days_until(date) == -n

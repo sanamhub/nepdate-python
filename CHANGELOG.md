@@ -12,3 +12,6 @@ share this file and a version number (ADR-0005). The format follows
 - `NepaliDate` with construction, accessors, BS to AD and AD to BS conversion, ordinals,
   comparisons and `MIN`/`MAX`.
 - The `Lang`, `Month`, `Weekday` and `ErrorKind` enums and the `NepDateError` exception.
+- Day, month and year arithmetic (`add_days`, `add_months`, `add_years`, `days_until`,
+  `diff` and the timedelta operators), the `Overflow`, `Quarter`, `DateDiff` and
+  `FiscalYear` types, and `DateRange`.

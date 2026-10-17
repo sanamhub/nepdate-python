@@ -14,10 +14,18 @@ from ._calendar import (
     MONTH_START_ORD,
     MONTH_YEAR,
 )
+from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._names import Month, Weekday
+from ._names import Month, Overflow, Quarter, Weekday
+
+# `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
+# module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from ._fiscal import FiscalYear
 
 _TOTAL_DAYS = MONTH_START_ORD[-1] - MONTH_START_ORD[0]
+_TOTAL_MONTHS = len(MONTH_LENGTHS)
 
 
 class NepaliDate:
@@ -143,12 +151,168 @@ class NepaliDate:
         k = n - MONTH_START_ORD[0]
         if k < 0 or k >= _TOTAL_DAYS:
             raise NepDateError(ErrorKind.OUT_OF_RANGE, f"ordinal {n} is outside the range")
-        i = BUCKET[k >> 5]
-        if n >= MONTH_START_ORD[i + 1]:
-            i += 1
-        if n >= MONTH_START_ORD[i + 1]:
-            i += 1
-        return _from_parts(MONTH_YEAR[i], MONTH_NUM[i], n - MONTH_START_ORD[i] + 1, n)
+        return _from_serial(n)
+
+    def add_days(self, n: int) -> NepaliDate:
+        """The date ``n`` days from this one, by ordinal addition.
+
+        Args:
+            n: The whole number of days to add; a negative value subtracts.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: The result is outside 1901-01-01 through 2199-12-30.
+        """
+        return self.from_ordinal(self._o + n)
+
+    def days_until(self, other: NepaliDate) -> int:
+        """The signed day count from this date to ``other`` (``other - self``, D-07).
+
+        Args:
+            other: The date to count towards.
+
+        Returns:
+            ``other.to_ordinal() - self.to_ordinal()``.
+        """
+        return other._o - self._o
+
+    def add_months(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate:
+        """The date ``n`` months from this one (ALGORITHM §8).
+
+        Args:
+            n: The whole number of months to add; a negative value subtracts.
+            overflow: CLAMP caps the day at the target month's length; SPILL carries
+                the leftover days into the next month.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: The result is outside the supported range.
+        """
+        total = (self._y - MIN_YEAR) * 12 + (self._m - 1) + n
+        if total < 0 or total >= _TOTAL_MONTHS:
+            raise NepDateError(ErrorKind.OUT_OF_RANGE, f"month offset {n} is outside the range")
+        year, month0 = divmod(total, 12)
+        year += MIN_YEAR
+        month = month0 + 1
+        index = (year - MIN_YEAR) * 12 + (month - 1)
+        length = MONTH_LENGTHS[index]
+        if self._d <= length:
+            return _from_parts(year, month, self._d, MONTH_START_ORD[index] + self._d - 1)
+        if overflow is Overflow.SPILL:
+            if month == Month.CHAITRA:
+                year += 1
+                month = 1
+            else:
+                month += 1
+            if year > MAX_YEAR:
+                raise NepDateError(
+                    ErrorKind.OUT_OF_RANGE, f"month offset {n} spills past the range"
+                )
+            index = (year - MIN_YEAR) * 12 + (month - 1)
+            day = self._d - length
+            return _from_parts(year, month, day, MONTH_START_ORD[index] + day - 1)
+        return _from_parts(year, month, length, MONTH_START_ORD[index] + length - 1)
+
+    def add_years(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate:
+        """The date ``n`` years from this one, as ``add_months(12 * n)``.
+
+        Args:
+            n: The whole number of years to add; a negative value subtracts.
+            overflow: CLAMP caps the day at the target month's length; SPILL carries
+                the leftover days into the next month.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: The result is outside the supported range.
+        """
+        return self.add_months(n * 12, overflow)
+
+    def diff(self, other: NepaliDate) -> DateDiff:
+        """The calendar breakdown between this date and ``other`` (ALGORITHM §8a).
+
+        Args:
+            other: The date to diff against.
+
+        Returns:
+            The signed years, months and days, plus the total day difference.
+        """
+        if self <= other:
+            a, b = self, other
+            negative = False
+        else:
+            a, b = other, self
+            negative = True
+        months = (b._y - a._y) * 12 + (b._m - a._m)
+        anchor = a.add_months(months)
+        if anchor > b:
+            months -= 1
+            anchor = a.add_months(months)
+        return DateDiff(
+            negative=negative,
+            years=months // 12,
+            months=months % 12,
+            days=b._o - anchor._o,
+            total_days=self.days_until(other),
+        )
+
+    def fiscal_year(self) -> FiscalYear:
+        """The fiscal year containing this date (ALGORITHM §8b)."""
+        from ._fiscal import FiscalYear  # noqa: PLC0415 - _fiscal imports this module at load
+
+        return FiscalYear.containing(self)
+
+    def quarter(self) -> Quarter:
+        """The fiscal quarter of this date (ALGORITHM §8b)."""
+        if Month.SHRAWAN <= self._m <= Month.ASHOJ:
+            return Quarter.Q1
+        if Month.KARTIK <= self._m <= Month.POUSH:
+            return Quarter.Q2
+        if Month.MAGH <= self._m <= Month.CHAITRA:
+            return Quarter.Q3
+        return Quarter.Q4
+
+    def __add__(self, td: datetime.timedelta) -> NepaliDate:
+        """Add a whole-day timedelta, like ``datetime.date + timedelta``.
+
+        Args:
+            td: The amount to add; it must be a whole number of days.
+
+        Returns:
+            The resulting date.
+
+        Raises:
+            NepDateError: ``td`` has a fractional day, or the result is out of range.
+        """
+        if not isinstance(td, datetime.timedelta):
+            return NotImplemented
+        if td.seconds or td.microseconds:
+            raise NepDateError(ErrorKind.OUT_OF_RANGE, "timedelta must be a whole number of days")
+        return self.add_days(td.days)
+
+    def __sub__(self, other: NepaliDate | datetime.timedelta) -> datetime.timedelta | NepaliDate:
+        """Subtract a date (to a timedelta) or a whole-day timedelta (to a date).
+
+        Args:
+            other: Another date, or a whole-day timedelta.
+
+        Returns:
+            ``self - other`` as a timedelta when ``other`` is a date, or the date
+            ``self + (-other)`` when ``other`` is a timedelta.
+
+        Raises:
+            NepDateError: A timedelta with a fractional day, or an out-of-range result.
+        """
+        if isinstance(other, NepaliDate):
+            return datetime.timedelta(days=self._o - other._o)
+        if isinstance(other, datetime.timedelta):
+            return self + (-other)
+        return NotImplemented
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, NepaliDate):
@@ -177,6 +341,24 @@ class NepaliDate:
 
     def __hash__(self) -> int:
         return hash(self._o)
+
+
+def _from_serial(n: int) -> NepaliDate:
+    """Build a date from an in-range ordinal without re-checking the range.
+
+    Args:
+        n: A proleptic Gregorian ordinal inside the supported range.
+
+    Returns:
+        The matching date.
+    """
+    k = n - MONTH_START_ORD[0]
+    i = BUCKET[k >> 5]
+    if n >= MONTH_START_ORD[i + 1]:
+        i += 1
+    if n >= MONTH_START_ORD[i + 1]:
+        i += 1
+    return _from_parts(MONTH_YEAR[i], MONTH_NUM[i], n - MONTH_START_ORD[i] + 1, n)
 
 
 def _from_parts(year: int, month: int, day: int, ordinal: int) -> NepaliDate:
