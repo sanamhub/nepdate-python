@@ -62,44 +62,10 @@ EVENT_ANCHOR = "World Day Against Human Trafficking"
 # (5 ms) is measured by the P5 benchmark on a quiet machine, not here.
 CORE_IMPORT_LIMIT_US = 50_000
 PATRO_IMPORT_LIMIT_US = 50_000
-# The modules outside our own packages that `import nepdate` may add to a bare interpreter.
-# dataclasses, and everything it pulls in, come from the frozen DateDiff dataclass
-# (docs/API.md); the rest are what enum and datetime need.
-CORE_IMPORT_ALLOWED = frozenset(
-    {
-        "__future__",
-        "_ast",
-        "_datetime",
-        "_opcode",
-        "_opcode_metadata",
-        "_sre",
-        "_tokenize",
-        "_typing",
-        "_weakrefset",
-        "ast",
-        "copy",
-        "copyreg",
-        "dataclasses",
-        "datetime",
-        "dis",
-        "enum",
-        "importlib",
-        "importlib._bootstrap",
-        "importlib._bootstrap_external",
-        "importlib.machinery",
-        "inspect",
-        "opcode",
-        "re",
-        "re._casefix",
-        "re._compiler",
-        "re._constants",
-        "re._parser",
-        "token",
-        "tokenize",
-        "typing",
-        "weakref",
-    }
-)
+# The only modules outside our own packages that `import nepdate` may add to a bare interpreter.
+# Widen this only with a reason in the commit; dataclasses alone adds 27 modules
+# and breaks the ADR-0002 §7 budget, so value types are written by hand.
+CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
 

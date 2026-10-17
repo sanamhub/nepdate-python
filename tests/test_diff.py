@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -55,3 +56,20 @@ def test_diff_properties(a_serial: int, b_serial: int) -> None:
     result = a.diff(b)
     assert result.total_days == a.days_until(b)
     assert result.negative == (b < a)
+
+
+def test_date_diff_is_an_immutable_value() -> None:
+    """Equal breakdowns compare and hash equal, print their fields and refuse changes."""
+    a = DateDiff(negative=False, years=1, months=2, days=3, total_days=430)
+    b = DateDiff(False, 1, 2, 3, 430)
+    assert a == b
+    assert hash(a) == hash(b)
+    assert a != DateDiff(negative=True, years=1, months=2, days=3, total_days=-430)
+    assert a != (False, 1, 2, 3, 430)
+    assert repr(a) == "DateDiff(negative=False, years=1, months=2, days=3, total_days=430)"
+    with pytest.raises(AttributeError):
+        a.years = 5  # type: ignore[misc]
+    with pytest.raises(AttributeError):
+        del a.days
+    with pytest.raises(AttributeError):
+        a.extra = 1  # type: ignore[attr-defined]

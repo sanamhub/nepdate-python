@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 import operator
-from typing import TYPE_CHECKING, cast
 
 from ._calendar import (
     BUCKET,
@@ -19,6 +18,9 @@ from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._names import Month, Overflow, Quarter, Weekday
 
+# `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
+# module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
+TYPE_CHECKING = False
 if TYPE_CHECKING:
     from ._fiscal import FiscalYear
 
@@ -261,9 +263,9 @@ class NepaliDate:
 
     def fiscal_year(self) -> FiscalYear:
         """The fiscal year containing this date (ALGORITHM §8b)."""
-        package = __name__.rsplit(".", 1)[0]
-        fiscal = __import__(f"{package}._fiscal", fromlist=["FiscalYear"])
-        return cast("FiscalYear", fiscal.FiscalYear).containing(self)
+        from ._fiscal import FiscalYear  # noqa: PLC0415 - _fiscal imports this module at load
+
+        return FiscalYear.containing(self)
 
     def quarter(self) -> Quarter:
         """The fiscal quarter of this date (ALGORITHM §8b)."""
