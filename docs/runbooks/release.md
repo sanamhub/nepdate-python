@@ -16,10 +16,12 @@ distributions with the same version. `<core-name>` is the core distribution name
 1. `main` is green. `uv run python scripts/ci.py` passes locally.
 2. Both `pyproject.toml` files (root and `packages/nepdate-patro/`) have version `X.Y.Z`; the patro
    dependency is `<core-name>>=X.Y,<X.(Y+1)`; `CHANGELOG.md` has `## [X.Y.Z] - YYYY-MM-DD`.
-3. `uv run python scripts/ci.py release-check X.Y.Z` passes.
-4. Optional: run `release.yml` by hand with `dry-run: true` to publish to TestPyPI first. TestPyPI
-   also refuses a version twice, so a second dry run of the same version needs `skip-existing`
-   on that step or a new pre-release version.
+3. `uv run python scripts/ci.py release-check X.Y.Z` passes. It checks both `pyproject.toml`
+   versions, the patro range and the dated `## [X.Y.Z] - YYYY-MM-DD` changelog heading.
+4. Optional: run `release.yml` by hand with the `version` input and `dry-run: true` to publish to
+   TestPyPI first. A dispatch never publishes to PyPI; only a `v*` tag does. TestPyPI also refuses
+   a version twice, so a second dry run of the same version needs `skip-existing` on that step or a
+   new pre-release version.
 
 ## Releasing
 

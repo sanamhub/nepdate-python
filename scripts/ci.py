@@ -8,7 +8,9 @@ distribution on its own, so a core-only install is proven to have no ``nepdate_p
 
 from __future__ import annotations
 
+import datetime
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -18,6 +20,7 @@ import tomllib
 import zipfile
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
@@ -35,6 +38,22 @@ def _project_name(pyproject: Path) -> str:
     with pyproject.open("rb") as f:
         name: str = tomllib.load(f)["project"]["name"]
     return name
+
+
+def _project_table(pyproject: Path) -> dict[str, Any]:
+    """Read the ``[project]`` table from a pyproject.toml.
+
+    Args:
+        pyproject: The pyproject.toml path.
+
+    Returns:
+        The project table.
+    """
+    with pyproject.open("rb") as f:
+        data = tomllib.load(f)
+    project = data["project"]
+    assert isinstance(project, dict)
+    return project
 
 
 def _archive_prefix(dist: str) -> str:
@@ -68,6 +87,7 @@ PATRO_IMPORT_LIMIT_US = 50_000
 CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
+VERSION_RE = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
 
 
 class GateError(Exception):
@@ -75,7 +95,7 @@ class GateError(Exception):
 
 
 def _run(
-    cmd: list[str], *, check: bool = True, capture: bool = False
+    cmd: list[str], *, check: bool = True, capture: bool = False, cwd: Path | None = None
 ) -> subprocess.CompletedProcess[str]:
     """Run a command from the repository root and print it first.
 
@@ -83,6 +103,7 @@ def _run(
         cmd: The command and its arguments, no shell involved.
         check: Raise GateError when the command exits non-zero.
         capture: Capture stdout and stderr instead of streaming them.
+        cwd: The working directory; defaults to the repository root.
 
     Returns:
         The completed process, with stdout and stderr as text.
@@ -91,7 +112,7 @@ def _run(
         GateError: The command exited non-zero and ``check`` is true.
     """
     print("+", " ".join(cmd))
-    result = subprocess.run(cmd, cwd=ROOT, capture_output=capture, text=True, check=False)
+    result = subprocess.run(cmd, cwd=cwd or ROOT, capture_output=capture, text=True, check=False)
     if check and result.returncode != 0:
         raise GateError(f"command failed ({result.returncode}): {' '.join(cmd)}")
     return result
@@ -442,6 +463,164 @@ def gate_docs() -> None:
     _run(["uv", "run", "python", "scripts/docs_check.py"])
 
 
+def gate_consumer() -> None:
+    """Install both built wheels in a fresh venv outside the repo and use each one."""
+    core_wheel = _find_archive(CORE_PREFIX, ".whl")
+    patro_wheel = _find_archive(PATRO_PREFIX, ".whl")
+    with tempfile.TemporaryDirectory() as tmp:
+        outside = Path(tmp) / "consumer"
+        outside.mkdir()
+        venv = outside / "venv"
+        _run(["uv", "venv", str(venv)])
+        _run(
+            [
+                "uv",
+                "pip",
+                "install",
+                "--python",
+                str(venv),
+                str(core_wheel),
+                str(patro_wheel),
+            ]
+        )
+        code = (
+            "from nepdate import NepaliDate\n"
+            "from nepdate_patro import info\n"
+            "d = NepaliDate(2080, 5, 15)\n"
+            "assert d.to_date().isoformat() == '2023-09-01'\n"
+            "assert info(d).tithi.label() == 'Dwitiya'\n"
+            "print('consumer: one conversion and one patro lookup passed')\n"
+        )
+        _run([str(_venv_python(venv)), "-c", code], cwd=outside)
+
+
+def _changelog_errors(version: str, root: Path) -> list[str]:
+    """Check the dated changelog heading for one version.
+
+    Args:
+        version: The released ``X.Y.Z`` version.
+        root: The repository root.
+
+    Returns:
+        One message per problem; an empty list when the section is present and dated.
+    """
+    changelog = root / "CHANGELOG.md"
+    if not changelog.is_file():
+        return ["CHANGELOG.md is missing"]
+    text = changelog.read_text(encoding="utf-8")
+    heading = re.search(
+        rf"^## \[{re.escape(version)}\] - ([0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}})$",
+        text,
+        re.MULTILINE,
+    )
+    if heading is None:
+        return [f"CHANGELOG.md has no '## [{version}] - YYYY-MM-DD' section"]
+    try:
+        datetime.date.fromisoformat(heading.group(1))
+    except ValueError:
+        return [f"CHANGELOG.md has an invalid date: {heading.group(1)}"]
+    return []
+
+
+def release_check(version: str, root: Path = ROOT) -> list[str]:
+    """Check the version, the patro requirement and the dated changelog section.
+
+    Args:
+        version: The ``X.Y.Z`` version being released.
+        root: The repository root. Tests pass a temporary copy.
+
+    Returns:
+        One message per inconsistency; an empty list means the release is consistent.
+    """
+    if not VERSION_RE.fullmatch(version):
+        return [f"not a strict semver: {version}"]
+    errors: list[str] = []
+    core_path = root / "pyproject.toml"
+    patro_path = root / "packages" / "nepdate-patro" / "pyproject.toml"
+    core_project = _project_table(core_path)
+    patro_project = _project_table(patro_path)
+    core_name = core_project.get("name")
+    if not isinstance(core_name, str):
+        errors.append("core pyproject has no name")
+        core_name = CORE_DIST
+    for label, project in (("core", core_project), ("patro", patro_project)):
+        actual = project.get("version")
+        if actual != version:
+            errors.append(f"{label} pyproject version is {actual!r}, expected {version!r}")
+    dependencies = patro_project.get("dependencies", [])
+    if not isinstance(dependencies, list):
+        errors.append("patro dependencies is not a list")
+        dependencies = []
+    specifiers: set[str] = set()
+    for dependency in dependencies:
+        if isinstance(dependency, str):
+            found = _requirement_specifiers(f"Requires-Dist: {dependency}", core_name)
+            if found:
+                specifiers = found
+                break
+    expected = _same_minor_specifiers(version)
+    if specifiers != expected:
+        errors.append(
+            f"patro requires {core_name} with {sorted(specifiers)}, expected {sorted(expected)}"
+        )
+    errors.extend(_changelog_errors(version, root))
+    return errors
+
+
+def release_notes(version: str, root: Path = ROOT) -> str:
+    """Return the changelog section for ``version``, ready for a GitHub Release.
+
+    Args:
+        version: The released ``X.Y.Z`` version.
+        root: The repository root.
+
+    Returns:
+        The section body without its heading.
+
+    Raises:
+        GateError: The changelog has no matching section.
+    """
+    text = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+    heading = re.search(rf"^## \[{re.escape(version)}\] - .*$", text, re.MULTILINE)
+    if heading is None:
+        raise GateError(f"CHANGELOG.md has no section for {version}")
+    rest = text[heading.end() :]
+    following = re.search(r"^## \[", rest, re.MULTILINE)
+    body = rest[: following.start()] if following else rest
+    return body.strip() + "\n"
+
+
+def sort_dist(root: Path = ROOT) -> None:
+    """Move the built files into ``dist/core/`` and ``dist/patro/``.
+
+    Args:
+        root: The repository root.
+
+    Raises:
+        GateError: An artifact does not belong to either distribution.
+    """
+    dist = root / "dist"
+    core_prefix = _archive_prefix(_project_name(root / "pyproject.toml"))
+    patro_prefix = _archive_prefix(
+        _project_name(root / "packages" / "nepdate-patro" / "pyproject.toml")
+    )
+    core_dir = dist / "core"
+    patro_dir = dist / "patro"
+    core_dir.mkdir(parents=True, exist_ok=True)
+    patro_dir.mkdir(parents=True, exist_ok=True)
+    for artifact in sorted(dist.iterdir()):
+        if not artifact.is_file():
+            continue
+        if artifact.name.startswith(core_prefix):
+            target = core_dir
+        elif artifact.name.startswith(patro_prefix):
+            target = patro_dir
+        else:
+            raise GateError(f"unknown artifact in dist: {artifact.name}")
+        shutil.move(str(artifact), str(target / artifact.name))
+        print(f"release: {artifact.name} -> {target.relative_to(root)}")
+
+
 def _same_minor_range(version: str) -> str:
     """Build the core dependency range a patro release must pin.
 
@@ -506,6 +685,7 @@ GATES: tuple[tuple[str, Callable[[], None]], ...] = (
     ("core alone", gate_core_alone),
     ("patro alone", gate_patro_alone),
     ("docs", gate_docs),
+    ("consumer", gate_consumer),
 )
 
 
@@ -521,8 +701,7 @@ def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
     if argv:
-        print(f"ci: unknown arguments {argv}", file=sys.stderr)
-        return 2
+        return _run_command(argv)
 
     # Every uv call below must use uv.lock as committed: a pyproject change without a lock update
     # fails here instead of being re-locked silently.
@@ -536,6 +715,42 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ci: gate {number} ({name}) failed: {exc}")
             return 1
     print(f"ci: {len(GATES)}/{len(GATES)} gates passed")
+    return 0
+
+
+def _run_command(argv: list[str]) -> int:
+    """Run a release helper command.
+
+    Args:
+        argv: ``release-check VERSION``, ``release-notes VERSION`` or ``sort-dist``.
+
+    Returns:
+        0 on success, 1 on a release inconsistency, 2 on an unknown command.
+    """
+    command, *rest = argv
+    if command == "release-check" and len(rest) == 1:
+        errors = release_check(rest[0])
+        for error in errors:
+            print(f"release: {error}", file=sys.stderr)
+        if errors:
+            return 1
+        print(f"release: {rest[0]} is consistent")
+        return 0
+    if command == "release-notes" and len(rest) == 1:
+        try:
+            sys.stdout.write(release_notes(rest[0]))
+        except GateError as exc:
+            print(f"release: {exc}", file=sys.stderr)
+            return 1
+    elif command == "sort-dist" and not rest:
+        try:
+            sort_dist()
+        except GateError as exc:
+            print(f"release: {exc}", file=sys.stderr)
+            return 1
+    else:
+        print(f"ci: unknown arguments {argv}", file=sys.stderr)
+        return 2
     return 0
 
 

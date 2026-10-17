@@ -33,10 +33,13 @@
 8. **Docs:** `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md` and `docs/*.md` have no
    em dash, no task ID and no relative link that does not resolve. Plans and ADRs keep their task
    IDs and are not part of this gate.
+9. **Consumer:** a fresh venv outside the repository gets the two built wheels and runs one BS to AD
+   conversion and one `nepdate_patro.info` lookup. The venv has no pytest and no checkout on
+   `sys.path`.
 
 Gates 6 and 7 run pytest with `-o addopts=""` so only the named test directory runs, against the
 installed wheels. The pytest config never sets `pythonpath = ["src"]`, so `src/` can't shadow a
-wheel. The last line is `ci: 8/8 gates passed` (or names the gate that failed).
+wheel. The last line is `ci: 9/9 gates passed` (or names the gate that failed).
 
 Tests:
 - Core tests live in `tests/`, patro tests in `packages/nepdate-patro/tests/`, generator and CI
