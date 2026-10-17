@@ -18,7 +18,7 @@ from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._format import format_default, format_iso, format_long, format_short
 from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
-from ._parse import parse_strict
+from ._parse import parse_lenient, parse_strict
 from ._pattern import format_pattern
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
@@ -170,6 +170,21 @@ class NepaliDate:
             NepDateError: The text is malformed or names an invalid date.
         """
         return parse_strict(s, cls)
+
+    @classmethod
+    def parse_lenient(cls, s: str) -> NepaliDate:
+        """Parse human-written text with the lenient rules of PARSING §2.
+
+        Args:
+            s: Text such as ``"15 Shrawan 2080"``, ``"2080/04/15 BS"`` or ``"१५ साउन २०८०"``.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: No rule matches or the date is invalid.
+        """
+        return parse_lenient(s, cls)
 
     def add_days(self, n: int) -> NepaliDate:
         """The date ``n`` days from this one, by ordinal addition.
