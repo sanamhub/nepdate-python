@@ -2,6 +2,7 @@
 name = "nepdate-patro"
 version = "0.0.0"
 description = "Tithi, public holidays and events for nepdate (Bikram Sambat calendar)"
+readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE"]

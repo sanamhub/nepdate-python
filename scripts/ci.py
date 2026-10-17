@@ -118,6 +118,13 @@ def gate_pytest() -> None:
             "tests",
             "packages/nepdate-patro/tests",
             "scripts/tests",
+            "README.md",
+            "packages/nepdate-patro/README.md",
+            "--doctest-glob=README.md",
+            "--import-mode=importlib",
+            "--doctest-modules",
+            "src/nepdate/_date.py",
+            "packages/nepdate-patro/src/nepdate_patro/__init__.py",
             f"--cov={CORE_MODULE}",
             f"--cov={PATRO_MODULE}",
             "--cov-report=term",
@@ -430,6 +437,11 @@ def gate_patro_alone() -> None:
         _run([str(python), "-m", "pytest", "packages/nepdate-patro/tests", "-o", "addopts="])
 
 
+def gate_docs() -> None:
+    """Check the README, changelog, community files and top-level docs pages."""
+    _run(["uv", "run", "python", "scripts/docs_check.py"])
+
+
 def _same_minor_range(version: str) -> str:
     """Build the core dependency range a patro release must pin.
 
@@ -493,6 +505,7 @@ GATES: tuple[tuple[str, Callable[[], None]], ...] = (
     ("import-time", gate_import_time),
     ("core alone", gate_core_alone),
     ("patro alone", gate_patro_alone),
+    ("docs", gate_docs),
 )
 
 
@@ -522,7 +535,7 @@ def main(argv: list[str] | None = None) -> int:
         except GateError as exc:
             print(f"ci: gate {number} ({name}) failed: {exc}")
             return 1
-    print("ci: 7/7 gates passed")
+    print(f"ci: {len(GATES)}/{len(GATES)} gates passed")
     return 0
 
 

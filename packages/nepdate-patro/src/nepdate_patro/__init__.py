@@ -253,6 +253,10 @@ def info(d: NepaliDate) -> CalendarInfo:
 
     Returns:
         The prebuilt ``CalendarInfo`` of the day. The call builds no object.
+
+    Examples:
+        >>> info(NepaliDate(2080, 5, 15)).tithi.label()
+        'Dwitiya'
     """
     index = d.to_ordinal() - COVERAGE_FIRST
     if 0 <= index < len(_DAY_INFO):
