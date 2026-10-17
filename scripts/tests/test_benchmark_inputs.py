@@ -45,3 +45,9 @@ def test_patro_literals_match_the_coverage(benchmark_inputs: Any) -> None:
     inside = coverage()
     for bs in benchmark_inputs.DATES_PATRO:
         assert NepaliDate(*bs) in inside
+
+
+def test_literal_check_negative_control(benchmark_inputs: Any) -> None:
+    """A different end date changes the recomputed list, so the comparison can fail."""
+    other = benchmark_inputs._sample((2001, 1, 1), (2090, 12, 30))
+    assert other != benchmark_inputs.DATES_BS
