@@ -16,7 +16,10 @@ from ._calendar import (
 )
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._names import Month, Overflow, Quarter, Weekday
+from ._format import format_default, format_iso, format_long, format_short
+from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
+from ._parse import parse_lenient, parse_strict
+from ._pattern import format_pattern
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
 # module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
@@ -153,6 +156,36 @@ class NepaliDate:
             raise NepDateError(ErrorKind.OUT_OF_RANGE, f"ordinal {n} is outside the range")
         return _from_serial(n)
 
+    @classmethod
+    def parse(cls, s: str) -> NepaliDate:
+        """Parse a date from the strict form of PARSING §1.
+
+        Args:
+            s: The text, year then month then day, in ASCII or Devanagari digits.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: The text is malformed or names an invalid date.
+        """
+        return parse_strict(s, cls)
+
+    @classmethod
+    def parse_lenient(cls, s: str) -> NepaliDate:
+        """Parse human-written text with the lenient rules of PARSING §2.
+
+        Args:
+            s: Text such as ``"15 Shrawan 2080"``, ``"2080/04/15 BS"`` or ``"१५ साउन २०८०"``.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: No rule matches or the date is invalid.
+        """
+        return parse_lenient(s, cls)
+
     def add_days(self, n: int) -> NepaliDate:
         """The date ``n`` days from this one, by ordinal addition.
 
@@ -276,6 +309,94 @@ class NepaliDate:
         if Month.MAGH <= self._m <= Month.CHAITRA:
             return Quarter.Q3
         return Quarter.Q4
+
+    def __str__(self) -> str:
+        """The default display, ``YYYY/MM/DD`` with ASCII digits."""
+        return format_default(self._y, self._m, self._d, Lang.EN)
+
+    def __repr__(self) -> str:
+        """The unambiguous constructor form, for example ``NepaliDate(2081, 4, 15)``."""
+        return f"NepaliDate({self._y}, {self._m}, {self._d})"
+
+    def isoformat(self) -> str:
+        """The sortable ``YYYY-MM-DD`` form (D-11)."""
+        return format_iso(self._y, self._m, self._d, Lang.EN)
+
+    def short(
+        self,
+        order: DateOrder = DateOrder.YMD,
+        sep: Separator = Separator.SLASH,
+        pad: bool = True,
+        lang: Lang = Lang.EN,
+    ) -> str:
+        """The short form of FORMATTING §3.
+
+        Args:
+            order: The field order; the default is year, month, day.
+            sep: The separator between the fields.
+            pad: Whether month and day are two digits.
+            lang: The language of the digits.
+
+        Returns:
+            The short form, for example ``"2080-05-15"`` or ``"१५-५-२०८०"``.
+        """
+        return format_short(self._y, self._m, self._d, order, sep, pad, lang)
+
+    def long(
+        self,
+        *,
+        weekday: bool = False,
+        year: bool = True,
+        pad: bool = True,
+        lang: Lang = Lang.EN,
+    ) -> str:
+        """The long form of FORMATTING §4.
+
+        Args:
+            weekday: Whether to start with the weekday name.
+            year: Whether to end with the year.
+            pad: Whether the day is two digits.
+            lang: The language of the names and digits.
+
+        Returns:
+            The long form, for example ``"Tuesday, Shrawan 15, 2081"``.
+        """
+        return format_long(
+            self._y,
+            self._m,
+            self._d,
+            self._o % 7,
+            with_weekday=weekday,
+            include_year=year,
+            pad=pad,
+            lang=lang,
+        )
+
+    def format(self, pattern: str, lang: Lang = Lang.EN) -> str:
+        """Format this date with a standard or custom pattern (FORMATTING §5).
+
+        Args:
+            pattern: ``""``, ``G``, ``g`` or ``d`` for the default display, ``D`` for the long
+                form, ``s`` for ``YYYY-MM-DD``, or a custom pattern such as ``"dd MMMM yyyy"``.
+            lang: The language of the names and digits.
+
+        Returns:
+            The formatted date; literal characters are never localised.
+        """
+        return format_pattern(pattern, self._y, self._m, self._d, self._o % 7, lang)
+
+    def __format__(self, spec: str) -> str:
+        """Format for f-strings and ``str.format``; an empty spec is ``str``.
+
+        Args:
+            spec: The format spec, interpreted as a FORMATTING §5 pattern.
+
+        Returns:
+            The formatted date in English.
+        """
+        if spec == "":
+            return str(self)
+        return self.format(spec)
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.

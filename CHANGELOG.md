@@ -15,3 +15,7 @@ share this file and a version number (ADR-0005). The format follows
 - Day, month and year arithmetic (`add_days`, `add_months`, `add_years`, `days_until`,
   `diff` and the timedelta operators), the `Overflow`, `Quarter`, `DateDiff` and
   `FiscalYear` types, and `DateRange`.
+- Formatting: `str`, `repr`, `isoformat`, `short`, `long`, `format` and `__format__`, the
+  `DateOrder` and `Separator` enums, the month and weekday labels, and `to_nepali_digits`.
+- Parsing: `NepaliDate.parse` for the strict form and `NepaliDate.parse_lenient` for
+  human-written dates with month names, era markers or Devanagari digits.

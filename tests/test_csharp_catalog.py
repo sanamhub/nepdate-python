@@ -8,16 +8,35 @@ from pathlib import Path
 
 import pytest
 
-from nepdate import MAX, MIN, DateRange, FiscalYear, NepaliDate, Overflow, Quarter, _calendar
+from nepdate import (
+    MAX,
+    MIN,
+    DateOrder,
+    DateRange,
+    FiscalYear,
+    Lang,
+    NepaliDate,
+    Overflow,
+    Quarter,
+    Separator,
+    _calendar,
+    to_nepali_digits,
+)
 from nepdate._errors import ErrorKind, NepDateError
 from nepdate._names import Month, Weekday
 
 _PHASE_1_ROWS = 113
 _PHASE_2_ROWS = 180
+_PHASE_3_ROWS = 148
 
 _D1 = NepaliDate(2081, 1, 1)
 _D2 = NepaliDate(2081, 1, 2)
 _D3 = NepaliDate(2081, 2, 1)
+_FORMAT_DATE = NepaliDate(2081, 4, 15)
+_VERIFY_DATE = NepaliDate(2080, 5, 15)
+_YEAR_2080 = 2080
+_MONTH_NUMBERS = tuple(range(1, 13))
+_DISPLAY_LENGTH = 10
 _MIN_MONTH_LENGTH = 29
 _MAX_MONTH_LENGTH = 32
 
@@ -70,6 +89,30 @@ def _assert_construction_error(args: tuple[int, int, int], kind: ErrorKind) -> N
     assert caught.value.kind is kind
 
 
+def _assert_parse_error(text: str, kind: ErrorKind) -> None:
+    """Assert ``NepaliDate.parse(text)`` raises ``NepDateError`` with the given kind.
+
+    Args:
+        text: The strict input.
+        kind: The expected ErrorKind.
+    """
+    with pytest.raises(NepDateError) as caught:
+        NepaliDate.parse(text)
+    assert caught.value.kind is kind
+
+
+def _assert_lenient_error(text: str, kind: ErrorKind) -> None:
+    """Assert ``NepaliDate.parse_lenient(text)`` raises ``NepDateError`` with the given kind.
+
+    Args:
+        text: The lenient input.
+        kind: The expected ErrorKind.
+    """
+    with pytest.raises(NepDateError) as caught:
+        NepaliDate.parse_lenient(text)
+    assert caught.value.kind is kind
+
+
 def test_all_phase_1_rows_have_a_test(repo_root: Path) -> None:
     """Every catalogue row tagged phase 1 has a test named after its id."""
     rows = [row for row in _catalog_rows(repo_root) if row["phase"] == "1"]
@@ -86,6 +129,15 @@ def test_all_phase_2_rows_have_a_test(repo_root: Path) -> None:
     module = sys.modules[__name__]
     missing = [row["id"] for row in rows if not hasattr(module, _test_name(row["id"]))]
     assert not missing, f"phase 2 rows without a test: {missing}"
+
+
+def test_all_phase_3_rows_have_a_test(repo_root: Path) -> None:
+    """Every catalogue row tagged phase 3 has a test named after its id."""
+    rows = [row for row in _catalog_rows(repo_root) if row["phase"] == "3"]
+    assert len(rows) == _PHASE_3_ROWS
+    module = sys.modules[__name__]
+    missing = [row["id"] for row in rows if not hasattr(module, _test_name(row["id"]))]
+    assert not missing, f"phase 3 rows without a test: {missing}"
 
 
 # --- Abilities/NepaliDateComparableTests.cs ---
@@ -272,33 +324,33 @@ def test_nepalidateconstructiontests_constructor_invalidnepalidate_throwsexcepti
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``2080/05/15``."""
+    assert NepaliDate.parse("2080/05/15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_2() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``2080-05-15``."""
+    assert NepaliDate.parse("2080-05-15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_3() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``2080.05.15``."""
+    assert NepaliDate.parse("2080.05.15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_4() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``2080_05_15``."""
+    assert NepaliDate.parse("2080_05_15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_5() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts backslash separators."""
+    assert NepaliDate.parse("2080\\05\\15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_validstringformats_createsinstance_6() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts space separators."""
+    assert NepaliDate.parse("2080 05 15").year == _YEAR_2080
 
 
 def test_nepalidateconstructiontests_constructor_autoadjustedformats_createsinstance_1() -> None:
@@ -343,23 +395,23 @@ def test_nepalidateconstructiontests_tryparse_autoadjust_monthoverflowwithbounda
 
 
 def test_nepalidateconstructiontests_constructor_invalidstringformats_throwsexception_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """An empty string has no groups."""
+    _assert_parse_error("", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_nepalidateconstructiontests_constructor_invalidstringformats_throwsexception_2() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """Letters are not a valid character."""
+    _assert_parse_error("invalid", ErrorKind.INVALID_CHARACTER)
 
 
 def test_nepalidateconstructiontests_constructor_invalidstringformats_throwsexception_3() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """Two groups are too few."""
+    _assert_parse_error("2080/5", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_nepalidateconstructiontests_constructor_validformatinvaliddate_throwsexception_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """A valid shape with day 40 is an invalid day."""
+    _assert_parse_error("2080/5/40", ErrorKind.INVALID_DAY)
 
 
 def test_nepalidateconstructiontests_constructor_englishdate_convertscorrectly() -> None:
@@ -442,73 +494,73 @@ def test_nepalidatepropertiestests_equals_differenttype_returnsfalse() -> None:
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``/``."""
+    assert NepaliDate.parse("2080/05/15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_2() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``-``."""
+    assert NepaliDate.parse("2080-05-15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_3() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``.``."""
+    assert NepaliDate.parse("2080.05.15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_4() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``_``."""
+    assert NepaliDate.parse("2080_05_15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_5() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts a backslash."""
+    assert NepaliDate.parse("2080\\05\\15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_6() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts a space."""
+    assert NepaliDate.parse("2080 05 15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_7() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts the danda ``।``."""
+    assert NepaliDate.parse("2080।05।15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_allseparators_parsecorrectly_8() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """The strict parser accepts ``|``."""
+    assert NepaliDate.parse("2080|05|15").year == _YEAR_2080
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """An empty string has no groups."""
+    _assert_parse_error("", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_2() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """Letters are not a valid character."""
+    _assert_parse_error("invalid", ErrorKind.INVALID_CHARACTER)
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_3() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """Two groups are too few."""
+    _assert_parse_error("2080/05", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_4() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """One group is too few."""
+    _assert_parse_error("2080", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_5() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """A fourth group is rejected."""
+    _assert_parse_error("2080/05/15/99", ErrorKind.WRONG_GROUP_COUNT)
 
 
 def test_optimizationverificationtests_constructor_invalidstrings_throwsexception_6() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """Letters are not a valid character."""
+    _assert_parse_error("abc/def/ghi", ErrorKind.INVALID_CHARACTER)
 
 
 def test_optimizationverificationtests_constructor_nullstring_throwsexception() -> None:
@@ -517,18 +569,18 @@ def test_optimizationverificationtests_constructor_nullstring_throwsexception() 
 
 
 def test_optimizationverificationtests_constructor_withoutleadingzeros_parsescorrectly_1() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """``2080/5/15`` parses without leading zeros."""
+    assert NepaliDate.parse("2080/5/15") == NepaliDate(2080, 5, 15)
 
 
 def test_optimizationverificationtests_constructor_withoutleadingzeros_parsescorrectly_2() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """``2080/05/5`` parses without a leading zero on the day."""
+    assert NepaliDate.parse("2080/05/5") == NepaliDate(2080, 5, 5)
 
 
 def test_optimizationverificationtests_constructor_withoutleadingzeros_parsescorrectly_3() -> None:
-    """The string constructor is the P3 strict parser."""
-    pytest.skip("pending P3-04: string parsing")
+    """``2080/1/1`` parses without leading zeros."""
+    assert NepaliDate.parse("2080/1/1") == NepaliDate(2080, 1, 1)
 
 
 def test_optimizationverificationtests_operator_equality_samedates_returnstrue() -> None:
@@ -1838,3 +1890,850 @@ def test_optimizationverificationtests_subtraction_crossmonth_correctdays() -> N
 def test_optimizationverificationtests_subtraction_crossyear_correctdays() -> None:
     """Days across a year boundary differ by one day."""
     assert NepaliDate(2081, 1, 1) - NepaliDate(2080, 12, 30) == datetime.timedelta(days=1)
+
+
+# --- phase 3: Abilities/NepaliDateFormattableTests.cs ---
+
+_NE_2080_05_15 = "\u0968\u0966\u096e\u0966/\u0966\u096b/\u0967\u096b"
+_NE_2080_04_15 = "\u0968\u0966\u096e\u0966/\u0966\u096a/\u0967\u096b"
+
+
+def test_nepalidateformattabletests_tostring_nullformat_returnsdefault() -> None:
+    """A null format is the default display."""
+    assert format(_FORMAT_DATE, "") == "2081/04/15"
+
+
+def test_nepalidateformattabletests_tostring_g_sameasdefault() -> None:
+    """``G`` and ``g`` are the default display.
+
+    The catalogue ids ``ToString_G_SameAsDefault`` and ``ToString_g_SameAsDefault`` lower-case to
+    the same function name, so one function covers both rows.
+    """
+    assert format(_FORMAT_DATE, "G") == str(_FORMAT_DATE)
+    assert format(_FORMAT_DATE, "g") == str(_FORMAT_DATE)
+
+
+def test_nepalidateformattabletests_tostring_d_sameasdefault() -> None:
+    """``d`` is the default display."""
+    assert format(_FORMAT_DATE, "d") == "2081/04/15"
+
+
+def test_nepalidateformattabletests_tostring_d_returnslongdatestring() -> None:
+    """``D`` is the long form, which contains the year."""
+    assert "2081" in format(_FORMAT_DATE, "D")
+
+
+def test_nepalidateformattabletests_tostring_s_returnssortableisoformat() -> None:
+    """``s`` is the sortable ISO form."""
+    assert format(_FORMAT_DATE, "s") == "2081-04-15"
+
+
+def test_nepalidateformattabletests_customformat_yyyy_mm_dd_withdash() -> None:
+    """``yyyy-MM-dd`` formats with dashes."""
+    assert _FORMAT_DATE.format("yyyy-MM-dd") == "2081-04-15"
+
+
+def test_nepalidateformattabletests_customformat_dd_mm_yyyy_withdot() -> None:
+    """``dd.MM.yyyy`` formats day first with dots."""
+    assert _FORMAT_DATE.format("dd.MM.yyyy") == "15.04.2081"
+
+
+def test_nepalidateformattabletests_customformat_mm_slash_dd_slash_yyyy() -> None:
+    """``MM/dd/yyyy`` formats month first with slashes."""
+    assert _FORMAT_DATE.format("MM/dd/yyyy") == "04/15/2081"
+
+
+def test_nepalidateformattabletests_customformat_mmmxxx_returnsthreecharmonthabbreviation() -> None:
+    """``MMM`` is the three-letter month abbreviation, followed by literals."""
+    assert _FORMAT_DATE.format("MMMxxx") == "Shrxxx"
+
+
+def test_nepalidateformattabletests_customformat_mmmm_returnsfullmonthname() -> None:
+    """``MMMM`` is the full month name."""
+    assert _FORMAT_DATE.format("MMMM") == "Shrawan"
+
+
+def test_nepalidateformattabletests_customformat_yy_returnstwodigityear() -> None:
+    """``yy`` is the last two digits of the year."""
+    assert _FORMAT_DATE.format("yy/MM/dd") == "81/04/15"
+
+
+def test_nepalidateformattabletests_customformat_m_withoutleadingzero_returnsunpadded() -> None:
+    """``M`` is the month without a leading zero."""
+    assert _FORMAT_DATE.format("M/d/yyyy") == "4/15/2081"
+
+
+def test_nepalidateformattabletests_customformat_singledigitmonth_withoutleadingzero() -> None:
+    """A single-digit month and day have no leading zero with ``M`` and ``d``."""
+    assert NepaliDate(2081, 1, 5).format("M/d/yyyy") == "1/5/2081"
+
+
+def test_nepalidateformattabletests_customformat_literalinsinglequotes() -> None:
+    """Text in single quotes is a literal."""
+    assert _FORMAT_DATE.format("yyyy'BS'") == "2081BS"
+
+
+def test_nepalidateformattabletests_customformat_backslashescapedtokens_produceliterals() -> None:
+    """A backslash before a token letter writes the letter literally."""
+    assert _FORMAT_DATE.format("yyyy\\M\\M-\\d\\d") == "2081MM-dd"
+
+
+def test_nepalidateformattabletests_customformat_backslashbeforeliteralchar_ispassedthrough() -> (
+    None
+):
+    """A backslash before a non-token character passes that character through."""
+    assert _FORMAT_DATE.format("yyyy\\-MM\\-dd") == "2081-04-15"
+
+
+def test_nepalidateformattabletests_stringinterpolation_withformatspecifier_usesiformattable() -> (
+    None
+):
+    """An f-string spec reaches ``__format__``."""
+    assert f"{_FORMAT_DATE:yyyy-MM-dd}" == "2081-04-15"
+
+
+def test_nepalidateformattabletests_stringformatmethod_withspecifier() -> None:
+    """``str.format`` reaches ``__format__``."""
+    assert str.format("{0:yyyy-MM-dd}", _FORMAT_DATE) == "2081-04-15"
+
+
+def test_nepalidateformattabletests_sortableformat_lexicographicorderequalschronologicalorder() -> (
+    None
+):
+    """The ``s`` form sorts lexicographically in chronological order."""
+    assert _D1.format("s") < _D3.format("s")
+
+
+# --- phase 3: Abilities/NepaliDateParsableTests.cs ---
+
+
+def test_nepalidateparsabletests_parse_via_genericconstraint_returns_correctdate() -> None:
+    """``parse`` returns the date of a valid string."""
+    assert NepaliDate.parse("2081/04/15") == _FORMAT_DATE
+
+
+def test_nepalidateparsabletests_tryparse_via_genericconstraint_validdate_returns_true() -> None:
+    """Python has no TryParse: ``parse`` returns the date on success."""
+    assert NepaliDate.parse("2081/04/15") == _FORMAT_DATE
+
+
+def test_nepalidateparsabletests_tryparse_via_genericconstraint_invaliddate_returns_false() -> None:
+    """Python has no TryParse: ``parse`` raises where C# returns false."""
+    _assert_parse_error("invalid", ErrorKind.INVALID_CHARACTER)
+
+
+def test_nepalidateparsabletests_spanparse_via_genericconstraint_returns_correctdate() -> None:
+    """C# ReadOnlySpan has no Python equivalent."""
+    pytest.skip("n/a: C# ReadOnlySpan")
+
+
+def test_nepalidateparsabletests_spantryparse_via_genericconstraint_validdate_returns_true() -> (
+    None
+):
+    """C# ReadOnlySpan has no Python equivalent."""
+    pytest.skip("n/a: C# ReadOnlySpan")
+
+
+# --- phase 3: Core/NepaliDateMonthNameTests.cs ---
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_1() -> None:
+    """Baishakh is month 1."""
+    assert NepaliDate(2080, 1, 1).month_enum is Month.BAISHAKH
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_2() -> None:
+    """Jestha is month 2."""
+    assert NepaliDate(2080, 2, 1).month_enum is Month.JESTHA
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_3() -> None:
+    """Ashad is month 3."""
+    assert NepaliDate(2080, 3, 1).month_enum is Month.ASHAD
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_4() -> None:
+    """Shrawan is month 4."""
+    assert NepaliDate(2080, 4, 1).month_enum is Month.SHRAWAN
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_5() -> None:
+    """Bhadra is month 5."""
+    assert NepaliDate(2080, 5, 1).month_enum is Month.BHADRA
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_6() -> None:
+    """Ashoj is month 6."""
+    assert NepaliDate(2080, 6, 1).month_enum is Month.ASHOJ
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_7() -> None:
+    """Kartik is month 7."""
+    assert NepaliDate(2080, 7, 1).month_enum is Month.KARTIK
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_8() -> None:
+    """Mangsir is month 8."""
+    assert NepaliDate(2080, 8, 1).month_enum is Month.MANGSIR
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_9() -> None:
+    """Poush is month 9."""
+    assert NepaliDate(2080, 9, 1).month_enum is Month.POUSH
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_10() -> None:
+    """Magh is month 10."""
+    assert NepaliDate(2080, 10, 1).month_enum is Month.MAGH
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_11() -> None:
+    """Falgun is month 11."""
+    assert NepaliDate(2080, 11, 1).month_enum is Month.FALGUN
+
+
+def test_nepalidatemonthnametests_monthname_allmonths_returncorrectenum_12() -> None:
+    """Chaitra is month 12."""
+    assert NepaliDate(2080, 12, 1).month_enum is Month.CHAITRA
+
+
+def test_nepalidatemonthnametests_monthname_samemonthdifferentdays_allreturnsameenum() -> None:
+    """Different days of Shrawan all report Shrawan."""
+    length = NepaliDate(2080, 4, 1).month_length
+    for day in (1, 15, length):
+        assert NepaliDate(2080, 4, day).month_enum is Month.SHRAWAN
+
+
+def test_nepalidatemonthnametests_monthname_samemonthdifferentyears_allreturnsameenum_1() -> None:
+    """Poush 2070 reports Poush."""
+    assert NepaliDate(2070, 9, 1).month_enum is Month.POUSH
+
+
+def test_nepalidatemonthnametests_monthname_samemonthdifferentyears_allreturnsameenum_2() -> None:
+    """Poush 2080 reports Poush."""
+    assert NepaliDate(2080, 9, 1).month_enum is Month.POUSH
+
+
+def test_nepalidatemonthnametests_monthname_samemonthdifferentyears_allreturnsameenum_3() -> None:
+    """Poush 2090 reports Poush."""
+    assert NepaliDate(2090, 9, 1).month_enum is Month.POUSH
+
+
+def test_nepalidatemonthnametests_monthname_samemonthdifferentyears_allreturnsameenum_4() -> None:
+    """Poush 2100 reports Poush."""
+    assert NepaliDate(2100, 9, 1).month_enum is Month.POUSH
+
+
+def test_nepalidatemonthnametests_monthname_addingonemonth_advancesenum() -> None:
+    """Adding a month advances the month enum."""
+    assert NepaliDate(2080, 11, 1).add_months(1).month_enum is Month.CHAITRA
+
+
+def test_nepalidatemonthnametests_monthname_yearboundary_wrapsfromchaitratobasikhakh() -> None:
+    """Adding a month to Chaitra wraps to Baishakh of the next year."""
+    chaitra = NepaliDate(2080, 12, 1)
+    assert chaitra.month_enum is Month.CHAITRA
+    assert chaitra.add_months(1).month_enum is Month.BAISHAKH
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_1() -> None:
+    """Baishakh has integer value 1."""
+    assert int(Month.BAISHAKH) == _MONTH_NUMBERS[0]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_2() -> None:
+    """Jestha has integer value 2."""
+    assert int(Month.JESTHA) == _MONTH_NUMBERS[1]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_3() -> None:
+    """Ashad has integer value 3."""
+    assert int(Month.ASHAD) == _MONTH_NUMBERS[2]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_4() -> None:
+    """Shrawan has integer value 4."""
+    assert int(Month.SHRAWAN) == _MONTH_NUMBERS[3]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_5() -> None:
+    """Bhadra has integer value 5."""
+    assert int(Month.BHADRA) == _MONTH_NUMBERS[4]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_6() -> None:
+    """Ashoj has integer value 6."""
+    assert int(Month.ASHOJ) == _MONTH_NUMBERS[5]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_7() -> None:
+    """Kartik has integer value 7."""
+    assert int(Month.KARTIK) == _MONTH_NUMBERS[6]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_8() -> None:
+    """Mangsir has integer value 8."""
+    assert int(Month.MANGSIR) == _MONTH_NUMBERS[7]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_9() -> None:
+    """Poush has integer value 9."""
+    assert int(Month.POUSH) == _MONTH_NUMBERS[8]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_10() -> None:
+    """Magh has integer value 10."""
+    assert int(Month.MAGH) == _MONTH_NUMBERS[9]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_11() -> None:
+    """Falgun has integer value 11."""
+    assert int(Month.FALGUN) == _MONTH_NUMBERS[10]
+
+
+def test_nepalidatemonthnametests_nepalimonthsenum_integervaluematchesmonthnumber_12() -> None:
+    """Chaitra has integer value 12."""
+    assert int(Month.CHAITRA) == _MONTH_NUMBERS[11]
+
+
+# --- phase 3: Core/OptimizationVerificationTests.cs ---
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_1() -> None:
+    """2080-05-15 displays as ``2080/05/15``."""
+    assert str(NepaliDate(2080, 5, 15)) == "2080/05/15"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_2() -> None:
+    """2080-01-01 displays as ``2080/01/01``."""
+    assert str(NepaliDate(2080, 1, 1)) == "2080/01/01"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_3() -> None:
+    """2080-12-30 displays as ``2080/12/30``."""
+    assert str(NepaliDate(2080, 12, 30)) == "2080/12/30"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_4() -> None:
+    """1901-01-01 displays as ``1901/01/01``."""
+    assert str(NepaliDate(1901, 1, 1)) == "1901/01/01"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_5() -> None:
+    """2199-12-30 displays as ``2199/12/30``."""
+    assert str(NepaliDate(2199, 12, 30)) == "2199/12/30"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_6() -> None:
+    """2000-06-09 displays as ``2000/06/09``."""
+    assert str(NepaliDate(2000, 6, 9)) == "2000/06/09"
+
+
+def test_optimizationverificationtests_tostring_producesexactformat_7() -> None:
+    """2100-10-29 displays as ``2100/10/29``."""
+    assert str(NepaliDate(2100, 10, 29)) == "2100/10/29"
+
+
+def test_optimizationverificationtests_tostring_outputisexactly10characters() -> None:
+    """The default display is ten characters."""
+    assert len(str(_VERIFY_DATE)) == _DISPLAY_LENGTH
+
+
+def test_optimizationverificationtests_tostring_allmonthszeropadded() -> None:
+    """Every month is two digits."""
+    for month in range(1, 13):
+        assert str(NepaliDate(2080, month, 1))[5:7] == f"{month:02d}"
+
+
+def test_optimizationverificationtests_tostring_alldayszeropadded() -> None:
+    """Every day is two digits."""
+    length = _VERIFY_DATE.month_length
+    for day in range(1, length + 1):
+        assert str(NepaliDate(2080, 5, day))[8:10] == f"{day:02d}"
+
+
+def test_optimizationverificationtests_tostring_roundtripswithconstructor() -> None:
+    """The display form parses back to the same fields."""
+    parsed = NepaliDate.parse(str(_VERIFY_DATE))
+    assert (parsed.year, parsed.month, parsed.day) == (2080, 5, 15)
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_1() -> (
+    None
+):
+    """YMD with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.SLASH) == "2080/05/15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_2() -> (
+    None
+):
+    """YMD with a dash."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.DASH) == "2080-05-15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_3() -> (
+    None
+):
+    """YMD with a dot."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.DOT) == "2080.05.15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_4() -> (
+    None
+):
+    """YMD with an underscore."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.UNDERSCORE) == "2080_05_15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_5() -> (
+    None
+):
+    """YMD with a space."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.SPACE) == "2080 05 15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_6() -> (
+    None
+):
+    """YMD with a backslash."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.BACKSLASH) == "2080\\05\\15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_7() -> (
+    None
+):
+    """DMY with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.DMY, Separator.SLASH) == "15/05/2080"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_8() -> (
+    None
+):
+    """DMY with a dash."""
+    assert _VERIFY_DATE.short(DateOrder.DMY, Separator.DASH) == "15-05-2080"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_9() -> (
+    None
+):
+    """MDY with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.MDY, Separator.SLASH) == "05/15/2080"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_10() -> (
+    None
+):
+    """YDM with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.YDM, Separator.SLASH) == "2080/15/05"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_11() -> (
+    None
+):
+    """MYD with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.MYD, Separator.SLASH) == "05/2080/15"
+
+
+def test_optimizationverificationtests_tostring_withformatandseparator_producescorrectoutput_12() -> (
+    None
+):
+    """DYM with a slash."""
+    assert _VERIFY_DATE.short(DateOrder.DYM, Separator.SLASH) == "15/2080/05"
+
+
+def test_optimizationverificationtests_tostring_withoutleadingzeros_producescorrectoutput_1() -> (
+    None
+):
+    """YMD without padding."""
+    assert _VERIFY_DATE.short(DateOrder.YMD, Separator.SLASH, pad=False) == "2080/5/15"
+
+
+def test_optimizationverificationtests_tostring_withoutleadingzeros_producescorrectoutput_2() -> (
+    None
+):
+    """DMY without padding."""
+    assert _VERIFY_DATE.short(DateOrder.DMY, Separator.DASH, pad=False) == "15-5-2080"
+
+
+def test_optimizationverificationtests_tostring_withoutleadingzeros_producescorrectoutput_3() -> (
+    None
+):
+    """MDY without padding."""
+    assert _VERIFY_DATE.short(DateOrder.MDY, Separator.DOT, pad=False) == "5.15.2080"
+
+
+def test_optimizationverificationtests_tounicodestring_defaultformat_convertsalldigits() -> None:
+    """The Unicode form is the default display in Nepali digits."""
+    assert _VERIFY_DATE.short(lang=Lang.NE) == _NE_2080_05_15
+
+
+def test_optimizationverificationtests_tounicodestring_eachdigitconvertscorrectly() -> None:
+    """Every ASCII digit maps to its Devanagari counterpart."""
+    assert to_nepali_digits(1234567890) == "१२३४५६७८९०"
+
+
+def test_optimizationverificationtests_tounicodestring_separatorspreserved() -> None:
+    """Separators are not localised."""
+    assert "-" in _VERIFY_DATE.short(sep=Separator.DASH, lang=Lang.NE)
+
+
+def test_optimizationverificationtests_tounicodestring_samelengthastostring() -> None:
+    """The Unicode form has the same length as the ASCII form."""
+    assert len(_VERIFY_DATE.short(lang=Lang.NE)) == len(str(_VERIFY_DATE))
+
+
+def test_optimizationverificationtests_smartdateparser_nepalidigits_parsecorrectly_1() -> None:
+    """Lenient parse accepts Devanagari digits with slashes."""
+    assert (
+        NepaliDate.parse_lenient("\u0968\u0966\u096e\u0966/\u0966\u096b/\u0967\u096b").year
+        == _YEAR_2080
+    )
+
+
+def test_optimizationverificationtests_smartdateparser_nepalidigits_parsecorrectly_2() -> None:
+    """Lenient parse accepts Devanagari digits with dashes."""
+    assert (
+        NepaliDate.parse_lenient("\u0968\u0966\u096e\u0966-\u0966\u096b-\u0967\u096b").year
+        == _YEAR_2080
+    )
+
+
+def test_optimizationverificationtests_smartdateparser_pureenglishdigits_noconversionneeded() -> (
+    None
+):
+    """Plain ASCII digits parse without conversion."""
+    assert NepaliDate.parse_lenient("2080/05/15").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_mixednepalienglishdigits_parsecorrectly() -> (
+    None
+):
+    """A number may mix ASCII and Devanagari digits (D-05)."""
+    assert NepaliDate.parse_lenient("\u0968\u0966\u096e0/0\u096b/15").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_1() -> (
+    None
+):
+    """The ``B.S.`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 B.S.").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_2() -> (
+    None
+):
+    """The ``BS`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 BS").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_3() -> (
+    None
+):
+    """The ``V.S.`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 V.S.").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_4() -> (
+    None
+):
+    """The ``VS`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 VS").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_5() -> (
+    None
+):
+    """A lower-case ``bs`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 bs").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withindicators_removesandparsescorrectly_6() -> (
+    None
+):
+    """A lower-case ``v.s.`` era marker is dropped."""
+    assert NepaliDate.parse_lenient("2080/05/15 v.s.").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withnepalikeywords_removesandparses() -> (
+    None
+):
+    """``मिति`` and ``गते`` are dropped."""
+    assert NepaliDate.parse_lenient("मिति 2080/05/15 गते").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_withextraspaces_parsescorrectly() -> None:
+    """Leading, trailing and repeated spaces are harmless."""
+    assert NepaliDate.parse_lenient("  2080 / 05 / 15  ").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_1() -> None:
+    """Baisakh parses as month 1."""
+    assert NepaliDate.parse_lenient("15 Baisakh 2080") == NepaliDate(2080, 1, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_2() -> None:
+    """Jestha parses as month 2."""
+    assert NepaliDate.parse_lenient("15 Jestha 2080") == NepaliDate(2080, 2, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_3() -> None:
+    """Asar parses as month 3."""
+    assert NepaliDate.parse_lenient("15 Asar 2080") == NepaliDate(2080, 3, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_4() -> None:
+    """Shrawan parses as month 4."""
+    assert NepaliDate.parse_lenient("15 Shrawan 2080") == NepaliDate(2080, 4, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_5() -> None:
+    """Bhadra parses as month 5."""
+    assert NepaliDate.parse_lenient("15 Bhadra 2080") == NepaliDate(2080, 5, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_6() -> None:
+    """Ashwin parses as month 6."""
+    assert NepaliDate.parse_lenient("15 Ashwin 2080") == NepaliDate(2080, 6, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_7() -> None:
+    """Kartik parses as month 7."""
+    assert NepaliDate.parse_lenient("15 Kartik 2080") == NepaliDate(2080, 7, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_8() -> None:
+    """Mangsir parses as month 8."""
+    assert NepaliDate.parse_lenient("15 Mangsir 2080") == NepaliDate(2080, 8, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_9() -> None:
+    """Poush parses as month 9."""
+    assert NepaliDate.parse_lenient("15 Poush 2080") == NepaliDate(2080, 9, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_10() -> None:
+    """Magh parses as month 10."""
+    assert NepaliDate.parse_lenient("15 Magh 2080") == NepaliDate(2080, 10, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_11() -> None:
+    """Falgun parses as month 11."""
+    assert NepaliDate.parse_lenient("15 Falgun 2080") == NepaliDate(2080, 11, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_allmonthnames_parsecorrectly_12() -> None:
+    """Chaitra parses as month 12."""
+    assert NepaliDate.parse_lenient("15 Chaitra 2080") == NepaliDate(2080, 12, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_monthnamedifferentpositions_parsescorrectly_1() -> (
+    None
+):
+    """The month name may come first."""
+    assert NepaliDate.parse_lenient("Baisakh 15, 2080") == NepaliDate(2080, 1, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_monthnamedifferentpositions_parsescorrectly_2() -> (
+    None
+):
+    """The month name may come second."""
+    assert NepaliDate.parse_lenient("2080 Baisakh 15") == NepaliDate(2080, 1, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_nepaliunicodemonthnames_parsecorrectly_1() -> (
+    None
+):
+    """``वैशाख`` parses as month 1."""
+    assert NepaliDate.parse_lenient("15 वैशाख 2080") == NepaliDate(2080, 1, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_nepaliunicodemonthnames_parsecorrectly_2() -> (
+    None
+):
+    """``जेष्ठ`` parses as month 2."""
+    assert NepaliDate.parse_lenient("15 जेष्ठ 2080") == NepaliDate(2080, 2, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_nepaliunicodemonthnames_parsecorrectly_3() -> (
+    None
+):
+    """``असार`` parses as month 3."""
+    assert NepaliDate.parse_lenient("15 असार 2080") == NepaliDate(2080, 3, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_nepaliunicodemonthnames_parsecorrectly_4() -> (
+    None
+):
+    """``श्रावण`` parses as month 4."""
+    assert NepaliDate.parse_lenient("15 श्रावण 2080") == NepaliDate(2080, 4, 15)
+
+
+def test_optimizationverificationtests_smartdateparser_twodigityear_adjustedto2000s() -> None:
+    """D-06: a two-digit year is Ambiguous, not expanded to 2080."""
+    _assert_lenient_error("15/04/80", ErrorKind.AMBIGUOUS)
+
+
+def test_optimizationverificationtests_smartdateparser_invalidinput_throwsformatexception() -> None:
+    """Invalid text raises ``NepDateError``."""
+    _assert_lenient_error("not a date", ErrorKind.UNRECOGNIZED)
+
+
+def test_optimizationverificationtests_smartdateparser_nullinput_throwsexception() -> None:
+    """C# throws on a null string; Python has no null reference."""
+    pytest.skip("n/a: C# null reference")
+
+
+def test_optimizationverificationtests_smartdateparser_emptyinput_throwsexception() -> None:
+    """An empty string is Unrecognized in the lenient parser."""
+    _assert_lenient_error("", ErrorKind.UNRECOGNIZED)
+
+
+def test_optimizationverificationtests_smartdateparser_whitespaceinput_throwsexception() -> None:
+    """Whitespace is Unrecognized in the lenient parser."""
+    _assert_lenient_error(" ", ErrorKind.UNRECOGNIZED)
+
+
+def test_optimizationverificationtests_smartdateparser_tryparse_validinput_returnstrue() -> None:
+    """Python has no TryParse: ``parse_lenient`` returns the date on success."""
+    assert NepaliDate.parse_lenient("2080/05/15").year == _YEAR_2080
+
+
+def test_optimizationverificationtests_smartdateparser_tryparse_invalidinput_returnsfalse() -> None:
+    """Python has no TryParse: ``parse_lenient`` raises where C# returns false."""
+    _assert_lenient_error("garbage", ErrorKind.UNRECOGNIZED)
+
+
+def test_optimizationverificationtests_smartdateparser_tryparse_nullinput_returnsfalse() -> None:
+    """C# TryParse has no Python equivalent and there is no null reference."""
+    pytest.skip("n/a: C# TryParse and null reference")
+
+
+def test_optimizationverificationtests_tostring_everymonthfirstday_roundtripsviaconstructor() -> (
+    None
+):
+    """Every month's first day round-trips through the display form and the parser."""
+    for month in range(1, 13):
+        date = NepaliDate(2080, month, 1)
+        assert NepaliDate.parse(str(date)) == date
+
+
+def test_optimizationverificationtests_unicodeconversion_alldigits_roundtripcorrectly() -> None:
+    """The Nepali display form parses back to the same date."""
+    assert NepaliDate.parse(_VERIFY_DATE.short(lang=Lang.NE)) == _VERIFY_DATE
+
+
+def test_optimizationverificationtests_tolongdatestring_default_containsmonthnameandday() -> None:
+    """The default long form contains the day."""
+    assert "15" in _VERIFY_DATE.long()
+
+
+def test_optimizationverificationtests_tolongdatestring_withdayname_containsdayofweek() -> None:
+    """The long form with weekday contains the weekday name."""
+    assert _VERIFY_DATE.weekday.label() in _VERIFY_DATE.long(weekday=True)
+
+
+def test_optimizationverificationtests_tolongdatestring_withoutyear_doesnotcontainyear() -> None:
+    """The long form without the year does not contain the year."""
+    assert "2080" not in _VERIFY_DATE.long(year=False)
+
+
+# --- phase 3: Core/SmartDateParserTests.cs ---
+
+
+def test_smartdateparsertests_parse_standardformat_returnscorrectdate() -> None:
+    """The standard form parses."""
+    assert NepaliDate.parse_lenient("2080/04/15") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_invertedformat_returnscorrectdate() -> None:
+    """Day, month, year parses when the year is last and has four digits."""
+    assert NepaliDate.parse_lenient("15/04/2080") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_monthdayyearformat_returnscorrectdate() -> None:
+    """D-06: the port does not guess a month-first three-number form."""
+    _assert_lenient_error("04/15/2080", ErrorKind.INVALID_MONTH)
+
+
+def test_smartdateparsertests_parse_withmonthnames_returnscorrectdate() -> None:
+    """A Latin month name parses."""
+    assert NepaliDate.parse_lenient("15 Shrawan 2080") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_withnepaliunicode_returnscorrectdate() -> None:
+    """Devanagari digits parse."""
+    assert NepaliDate.parse_lenient(_NE_2080_04_15) == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_mixedformats_returnscorrectdate() -> None:
+    """A Nepali month name among ASCII digits parses."""
+    assert NepaliDate.parse_lenient("15 साउन 2080") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_withsuffixes_returnscorrectdate() -> None:
+    """An era marker suffix is dropped."""
+    assert NepaliDate.parse_lenient("15 Shrawan 2080 B.S.") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_withtypos_returnscorrectdate() -> None:
+    """``Srawan`` is on the closed month-name list."""
+    assert NepaliDate.parse_lenient("15 Srawan 2080") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_parse_shorteryearformats_returnscorrectdate() -> None:
+    """D-06: a two-digit year is Ambiguous, not expanded."""
+    _assert_lenient_error("15/04/80", ErrorKind.AMBIGUOUS)
+
+
+def test_smartdateparsertests_parse_invalidformat_throwsformatexception() -> None:
+    """Invalid text raises ``NepDateError``."""
+    _assert_lenient_error("not a date", ErrorKind.UNRECOGNIZED)
+
+
+def test_smartdateparsertests_tryparse_validformat_returnstrue() -> None:
+    """Python has no TryParse: ``parse_lenient`` returns the date on success."""
+    assert NepaliDate.parse_lenient("2080/04/15") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_tryparse_invalidformat_returnsfalse() -> None:
+    """Python has no TryParse: ``parse_lenient`` raises where C# returns false."""
+    _assert_lenient_error("garbage", ErrorKind.UNRECOGNIZED)
+
+
+def test_smartdateparsertests_extensionmethod_tonepalidate_parsescorrectly() -> None:
+    """The extension method is the strict parser."""
+    assert NepaliDate.parse("2080/04/15") == NepaliDate(2080, 4, 15)
+
+
+def test_smartdateparsertests_extensionmethod_trytonepalidate_parsescorrectly() -> None:
+    """The Try extension method's success path is ``parse``."""
+    assert NepaliDate.parse("2080/04/15") == NepaliDate(2080, 4, 15)
+
+
+# --- phase 3: Extensions/StringExtensionsTests.cs ---
+
+
+def test_stringextensionstests_tonepalidate_validdatestring_returnsnepalidate() -> None:
+    """A valid string parses to the date."""
+    assert NepaliDate.parse("2080/05/15") == NepaliDate(2080, 5, 15)
+
+
+def test_stringextensionstests_tonepalidate_nepalidigits_returnsnepalidate() -> None:
+    """Devanagari digits parse to the date."""
+    assert NepaliDate.parse(_NE_2080_05_15) == NepaliDate(2080, 5, 15)
+
+
+def test_stringextensionstests_tonepalidate_invaliddatestring_throwsformatexception() -> None:
+    """An invalid string raises ``NepDateError``."""
+    _assert_parse_error("not a date", ErrorKind.INVALID_CHARACTER)
+
+
+def test_stringextensionstests_trytonepalidate_validdatestring_returnstrue() -> None:
+    """The Try extension method's success path is ``parse``."""
+    assert NepaliDate.parse("2080/05/15") == NepaliDate(2080, 5, 15)
+
+
+def test_stringextensionstests_trytonepalidate_invaliddatestring_returnsfalse() -> None:
+    """The Try extension method's failure path is ``parse`` raising."""
+    _assert_parse_error("not a date", ErrorKind.INVALID_CHARACTER)
