@@ -18,6 +18,7 @@ from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._format import format_default, format_iso, format_long, format_short
 from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
+from ._pattern import format_pattern
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
 # module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
@@ -339,6 +340,32 @@ class NepaliDate:
             pad=pad,
             lang=lang,
         )
+
+    def format(self, pattern: str, lang: Lang = Lang.EN) -> str:
+        """Format this date with a standard or custom pattern (FORMATTING §5).
+
+        Args:
+            pattern: ``""``, ``G``, ``g`` or ``d`` for the default display, ``D`` for the long
+                form, ``s`` for ``YYYY-MM-DD``, or a custom pattern such as ``"dd MMMM yyyy"``.
+            lang: The language of the names and digits.
+
+        Returns:
+            The formatted date; literal characters are never localised.
+        """
+        return format_pattern(pattern, self._y, self._m, self._d, self._o % 7, lang)
+
+    def __format__(self, spec: str) -> str:
+        """Format for f-strings and ``str.format``; an empty spec is ``str``.
+
+        Args:
+            spec: The format spec, interpreted as a FORMATTING §5 pattern.
+
+        Returns:
+            The formatted date in English.
+        """
+        if spec == "":
+            return str(self)
+        return self.format(spec)
 
     def __add__(self, td: datetime.timedelta) -> NepaliDate:
         """Add a whole-day timedelta, like ``datetime.date + timedelta``.
