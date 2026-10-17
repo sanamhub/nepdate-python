@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+import nepdate_patro
 from nepdate import MAX, MIN, DateRange, Lang, NepaliDate
 from nepdate_patro import (
     _EMPTY,
@@ -16,6 +17,19 @@ from nepdate_patro import (
 )
 
 _HOLIDAYS = 294
+
+
+def test_public_surface() -> None:
+    """``__all__`` is exactly the six names of docs/API.md."""
+    assert set(nepdate_patro.__all__) == {
+        "CalendarInfo",
+        "Event",
+        "Tithi",
+        "coverage",
+        "info",
+        "public_holidays",
+    }
+
 
 _ANCHORS = (
     (
