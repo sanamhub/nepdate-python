@@ -1423,43 +1423,50 @@ def test_nepalidaterangeextendedtests_forcalendaryear_lengthisreasonable() -> No
 
 
 def test_nepalidaterangeextendedtests_currentmonth_startisfirstdayofcurrentmonth() -> None:
-    """DateRange has no current-month helper; build it from today() and month()."""
-    pytest.skip("n/a: D-09, DateRange has no current-month helper")
+    """The current month starts on day 1 of today's month. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert DateRange.month(today.year, today.month).start == NepaliDate(today.year, today.month, 1)
 
 
 def test_nepalidaterangeextendedtests_currentmonth_endislastdayofcurrentmonth() -> None:
-    """DateRange has no current-month helper; build it from today() and month()."""
-    pytest.skip("n/a: D-09, DateRange has no current-month helper")
+    """The current month ends on the last day of today's month. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert DateRange.month(today.year, today.month).end == today.last_of_month()
 
 
 def test_nepalidaterangeextendedtests_currentmonth_containstoday() -> None:
-    """DateRange has no current-month helper; build it from today() and month()."""
-    pytest.skip("n/a: D-09, DateRange has no current-month helper")
+    """The current month contains today. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert today in DateRange.month(today.year, today.month)
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_containstoday() -> None:
-    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
-    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
+    """The current fiscal year contains today. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert today in today.fiscal_year().range()
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_startisshrawan() -> None:
-    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
-    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
+    """The current fiscal year starts on 1 Shrawan. (built from today(), as the other ports do)."""
+    start = NepaliDate.today().fiscal_year().range().start
+    assert (start.month, start.day) == (Month.SHRAWAN, 1)
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_endisashadh() -> None:
-    """DateRange has no current-fiscal-year helper; build it from today() and fiscal_year()."""
-    pytest.skip("n/a: D-09, DateRange has no current-fiscal-year helper")
+    """The current fiscal year ends in Ashadh. (built from today(), as the other ports do)."""
+    assert NepaliDate.today().fiscal_year().range().end.month == Month.ASHAD
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_containstoday() -> None:
-    """DateRange has no current-calendar-year helper; build it from today() and year()."""
-    pytest.skip("n/a: D-09, DateRange has no current-calendar-year helper")
+    """The current calendar year contains today. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert today in DateRange.year(today.year)
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_startisbaishakh1() -> None:
-    """DateRange has no current-calendar-year helper; build it from today() and year()."""
-    pytest.skip("n/a: D-09, DateRange has no current-calendar-year helper")
+    """The current calendar year starts on 1 Baishakh. (built from today(), as the other ports do)."""
+    today = NepaliDate.today()
+    assert DateRange.year(today.year).start == NepaliDate(today.year, Month.BAISHAKH, 1)
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_emptyrange_returnsemptyarray() -> None:
