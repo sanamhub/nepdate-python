@@ -10,7 +10,7 @@ from ._date import MAX, MIN, NepaliDate
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._fiscal import FiscalYear
-from ._names import Lang, Month, Overflow, Quarter, Weekday
+from ._names import Lang, Month, Overflow, Quarter, Weekday, to_nepali_digits
 from ._range import DateRange
 
 __all__ = [
@@ -27,4 +27,5 @@ __all__ = [
     "Overflow",
     "Quarter",
     "Weekday",
+    "to_nepali_digits",
 ]
