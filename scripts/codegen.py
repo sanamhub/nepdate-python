@@ -11,12 +11,15 @@ import argparse
 import datetime
 import json
 import sys
+import unicodedata
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parent.parent
 CALENDAR_JSON = ROOT / "shared" / "data" / "calendar" / "bs-calendar.json"
 CALENDAR_PY = ROOT / "src" / "nepdate" / "_calendar.py"
+PATRO_DIR = ROOT / "shared" / "data" / "patro"
+PATRO_TABLES_PY = ROOT / "packages" / "nepdate-patro" / "src" / "nepdate_patro" / "_tables.py"
 ROOT_LICENSE = ROOT / "LICENSE"
 ROOT_NOTICE = ROOT / "shared" / "data" / "NOTICE"
 PATRO_LICENSE = ROOT / "packages" / "nepdate-patro" / "LICENSE"
@@ -29,6 +32,9 @@ MAX_MONTH_LENGTH = 32
 BLOCK_DAYS = 32
 LINE_LIMIT = 100
 INDENT = "    "
+_DATE_PARTS = 3
+_MIN_PART_WIDTH = 2
+_MAX_TITHI_NAMES = 256
 
 
 def load_calendar(path: Path | None = None) -> dict[str, Any]:
@@ -308,17 +314,436 @@ def generate_calendar_py(data: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def generated_files(data: dict[str, Any]) -> dict[Path, bytes]:
+def _validate_patro_name(pair: dict[str, Any], date: str, what: str) -> None:
+    """Check one ``np``/``en`` pair has two non-empty strings.
+
+    Args:
+        pair: The JSON object with the two strings.
+        date: The day the pair belongs to, for the error message.
+        what: ``"tithi"`` or ``"event"``, for the error message.
+
+    Raises:
+        ValueError: A field is missing or empty.
+    """
+    for key in ("np", "en"):
+        value = pair.get(key)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"{date}: {what} has an empty or missing {key!r}")
+
+
+def _validate_patro_day(date: str, info: dict[str, Any]) -> None:
+    """Check one patro day has the shape PATRO §1 describes.
+
+    Args:
+        date: The BS date text.
+        info: The day's JSON object.
+
+    Raises:
+        ValueError: A field has the wrong type.
+    """
+    if not isinstance(info, dict):
+        raise ValueError(f"{date}: day data must be a JSON object")
+    if "tithi" in info:
+        tithi = info["tithi"]
+        if not isinstance(tithi, dict):
+            raise ValueError(f"{date}: tithi must be a JSON object")
+        _validate_patro_name(tithi, date, "tithi")
+    holiday = info.get("holiday", False)
+    if not isinstance(holiday, bool):
+        raise ValueError(f"{date}: holiday must be true or false")
+    events = info.get("events", [])
+    if not isinstance(events, list):
+        raise ValueError(f"{date}: events must be a JSON list")
+    for event in events:
+        if not isinstance(event, dict):
+            raise ValueError(f"{date}: every event must be a JSON object")
+        _validate_patro_name(event, date, "event")
+
+
+def load_patro(directory: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Read every patro JSON file into one day map.
+
+    Args:
+        directory: The patro data directory. Defaults to the shared copy.
+
+    Returns:
+        The BS date text keyed to its parsed day object.
+
+    Raises:
+        OSError: A file cannot be read.
+        ValueError: A file or day does not have the expected shape, a day appears twice, or
+            there is no day at all.
+    """
+    if directory is None:
+        directory = PATRO_DIR
+    days: dict[str, dict[str, Any]] = {}
+    for path in sorted(directory.glob("*.json")):
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict):
+            raise ValueError(f"{path.name} must contain a JSON object")
+        if raw.get("schema") != 1:
+            raise ValueError(f"{path.name} has an unsupported schema")
+        year = raw.get("year")
+        if not isinstance(year, int):
+            raise ValueError(f"{path.name} must have an integer year")
+        file_days = raw.get("days")
+        if not isinstance(file_days, dict):
+            raise ValueError(f"{path.name} must have a days object")
+        prefix = f"{year:04d}-"
+        for date, info in cast(dict[str, Any], file_days).items():
+            if not isinstance(date, str) or not date.startswith(prefix):
+                raise ValueError(f"{path.name} has a day outside its year: {date!r}")
+            if date in days:
+                raise ValueError(f"duplicate patro day {date}")
+            _validate_patro_day(date, info)
+            days[date] = info
+    if not days:
+        raise ValueError(f"no patro data in {directory}")
+    return days
+
+
+def _date_parts(text: str) -> tuple[int, int, int]:
+    """Split a canonical ``YYYY-MM-DD`` BS date.
+
+    Args:
+        text: The date text.
+
+    Returns:
+        The year, month and day.
+
+    Raises:
+        ValueError: The text is not a canonical padded date.
+    """
+    parts = text.split("-")
+    if len(parts) != _DATE_PARTS or any(len(part) < _MIN_PART_WIDTH for part in parts):
+        raise ValueError(f"invalid patro date {text!r}")
+    year = int(parts[0])
+    month = int(parts[1])
+    day = int(parts[2])
+    if f"{year:04d}-{month:02d}-{day:02d}" != text:
+        raise ValueError(f"invalid patro date {text!r}")
+    return year, month, day
+
+
+def _patro_ordinals(
+    days: dict[str, dict[str, Any]], calendar: dict[str, Any]
+) -> dict[int, dict[str, Any]]:
+    """Map every BS day to its proleptic Gregorian ordinal.
+
+    Args:
+        days: The parsed patro day map.
+        calendar: The validated calendar JSON.
+
+    Returns:
+        The ordinal keyed to the day object.
+
+    Raises:
+        ValueError: A date is invalid or outside the calendar range.
+    """
+    lengths = build_month_lengths(calendar)
+    starts = build_month_starts(lengths)
+    offset = build_ordinal_offset(calendar)
+    min_year = calendar["min_year"]
+    max_year = calendar["max_year"]
+    by_ordinal: dict[int, dict[str, Any]] = {}
+    for text in sorted(days):
+        year, month, day = _date_parts(text)
+        if not min_year <= year <= max_year:
+            raise ValueError(f"{text}: outside the calendar range")
+        if not 1 <= month <= MONTH_COUNT:
+            raise ValueError(f"{text}: month outside 1..12")
+        index = (year - min_year) * MONTH_COUNT + (month - 1)
+        if not 1 <= day <= lengths[index]:
+            raise ValueError(f"{text}: day outside the month")
+        ordinal = offset + starts[index] + day - 1
+        if ordinal in by_ordinal:
+            raise ValueError(f"{text}: duplicate ordinal")
+        by_ordinal[ordinal] = days[text]
+    if not by_ordinal:
+        raise ValueError("no patro days")
+    return by_ordinal
+
+
+def _tithi_tables(
+    by_ordinal: dict[int, dict[str, Any]],
+) -> tuple[int, bytes, tuple[tuple[str, str], ...]]:
+    """Build the tithi range, one-byte index and name table.
+
+    Args:
+        by_ordinal: The patro days keyed by ordinal.
+
+    Returns:
+        The first tithi ordinal, the index bytes and the name pairs.
+
+    Raises:
+        ValueError: A tithi is missing inside its range or there are more than 256 names.
+    """
+    tithi_ordinals = [ordinal for ordinal, info in by_ordinal.items() if "tithi" in info]
+    if not tithi_ordinals:
+        raise ValueError("no tithi data")
+    first = min(tithi_ordinals)
+    last = max(tithi_ordinals)
+    index = bytearray()
+    names: list[tuple[str, str]] = []
+    lookup: dict[tuple[str, str], int] = {}
+    for ordinal in range(first, last + 1):
+        info = by_ordinal.get(ordinal)
+        if info is None or "tithi" not in info:
+            raise ValueError(f"missing tithi at ordinal {ordinal}")
+        pair = (str(info["tithi"]["np"]), str(info["tithi"]["en"]))
+        found = lookup.get(pair)
+        if found is None:
+            found = len(names)
+            if found >= _MAX_TITHI_NAMES:
+                raise ValueError(f"more than {_MAX_TITHI_NAMES} tithi names")
+            lookup[pair] = found
+            names.append(pair)
+        index.append(found)
+    return first, bytes(index), tuple(names)
+
+
+def _event_tables(
+    by_ordinal: dict[int, dict[str, Any]],
+) -> tuple[
+    tuple[int, ...],
+    tuple[tuple[int, int], ...],
+    tuple[int, ...],
+    tuple[tuple[str, str], ...],
+]:
+    """Build the event days, spans, ids and deduplicated name table.
+
+    Args:
+        by_ordinal: The patro days keyed by ordinal.
+
+    Returns:
+        The event days, spans, id list and name pairs.
+    """
+    names: list[tuple[str, str]] = []
+    lookup: dict[tuple[str, str], int] = {}
+    event_days: list[int] = []
+    event_spans: list[tuple[int, int]] = []
+    event_ids: list[int] = []
+    for ordinal in sorted(by_ordinal):
+        events = by_ordinal[ordinal].get("events", [])
+        if not events:
+            continue
+        start = len(event_ids)
+        for event in events:
+            pair = (str(event["np"]), str(event["en"]))
+            found = lookup.get(pair)
+            if found is None:
+                found = len(names)
+                lookup[pair] = found
+                names.append(pair)
+            event_ids.append(found)
+        event_days.append(ordinal)
+        event_spans.append((start, len(event_ids)))
+    return tuple(event_days), tuple(event_spans), tuple(event_ids), tuple(names)
+
+
+def build_patro_tables(days: dict[str, dict[str, Any]], calendar: dict[str, Any]) -> dict[str, Any]:
+    """Compile the day map into the compact tables of ADR-0002 §6.
+
+    Args:
+        days: The parsed patro day map.
+        calendar: The validated calendar JSON, used to convert BS dates to ordinals.
+
+    Returns:
+        The table dictionary, keyed by the names ``_tables.py`` uses.
+
+    Raises:
+        ValueError: A date is invalid, a tithi is missing inside its range, or a table
+            would not fit its compact representation.
+    """
+    by_ordinal = _patro_ordinals(days, calendar)
+    tithi_first, tithi_index, tithi_names = _tithi_tables(by_ordinal)
+    holidays = tuple(
+        ordinal for ordinal in sorted(by_ordinal) if by_ordinal[ordinal].get("holiday", False)
+    )
+    event_days, event_spans, event_ids, names = _event_tables(by_ordinal)
+    return {
+        "coverage_first": min(by_ordinal),
+        "coverage_last": max(by_ordinal),
+        "tithi_first": tithi_first,
+        "tithi_index": tithi_index,
+        "tithi_names": tithi_names,
+        "holidays": holidays,
+        "event_days": event_days,
+        "event_spans": event_spans,
+        "event_ids": event_ids,
+        "names": names,
+    }
+
+
+def source_text(text: str) -> str:
+    r"""Render a string as a Python source literal.
+
+    Args:
+        text: The string value.
+
+    Returns:
+        The literal, with quotes and backslashes escaped and every invisible character
+        written as a ``\N{...}`` escape.
+    """
+    pieces = ["'"]
+    for char in text:
+        if char == "'":
+            pieces.append("\\'")
+        elif char == "\\":
+            pieces.append("\\\\")
+        elif char == "\n":
+            pieces.append("\\n")
+        elif char == "\r":
+            pieces.append("\\r")
+        elif char == "\t":
+            pieces.append("\\t")
+        elif char == "\u2013":
+            pieces.append("\\N{EN DASH}")
+        elif unicodedata.category(char) in ("Cf", "Cc"):
+            name = unicodedata.name(char, "")
+            pieces.append(f"\\N{{{name}}}" if name else f"\\u{ord(char):04x}")
+        else:
+            pieces.append(char)
+    pieces.append("'")
+    return "".join(pieces)
+
+
+def _pair_lines(pair: tuple[str, str]) -> list[str]:
+    """Render one ``(np, en)`` pair, wrapped when it would pass the column limit.
+
+    Args:
+        pair: The two strings.
+
+    Returns:
+        The source lines for the tuple entry.
+
+    Raises:
+        ValueError: One string alone is too long to render under the limit.
+    """
+    left = source_text(pair[0])
+    right = source_text(pair[1])
+    line = f"{INDENT}({left}, {right}),"
+    if len(line) <= LINE_LIMIT:
+        return [line]
+    if len(left) > LINE_LIMIT - len(INDENT) * 2 or len(right) > LINE_LIMIT - len(INDENT) * 2:
+        raise ValueError(f"generated string is too long: {pair[0][:20]!r}")
+    return [
+        f"{INDENT}(",
+        f"{INDENT}{INDENT}{left},",
+        f"{INDENT}{INDENT}{right},",
+        f"{INDENT}),",
+    ]
+
+
+def _pairs_table(name: str, pairs: tuple[tuple[str, str], ...]) -> list[str]:
+    """Render a tuple of string pairs.
+
+    Args:
+        name: The assignment target.
+        pairs: The pairs to render.
+
+    Returns:
+        The source lines for the assignment.
+    """
+    lines = [f"{name} = ("]
+    for pair in pairs:
+        lines.extend(_pair_lines(pair))
+    lines.append(")")
+    return lines
+
+
+def _bytes_table(name: str, values: bytes, per_line: int) -> list[str]:
+    """Render a ``bytes((...))`` table.
+
+    Args:
+        name: The assignment target.
+        values: The bytes.
+        per_line: How many values per line.
+
+    Returns:
+        The source lines for the assignment.
+    """
+    lines = [f"{name} = bytes(("]
+    for block in _chunks(list(values), per_line):
+        lines.append(_line(block))
+    lines.append("))")
+    return lines
+
+
+def _spans_table(name: str, spans: tuple[tuple[int, int], ...]) -> list[str]:
+    """Render a tuple of ``(start, end)`` spans.
+
+    Args:
+        name: The assignment target.
+        spans: The spans.
+
+    Returns:
+        The source lines for the assignment.
+
+    Raises:
+        ValueError: A line would pass the column limit.
+    """
+    lines = [f"{name} = ("]
+    for start, end in spans:
+        line = f"{INDENT}({start}, {end}),"
+        if len(line) > LINE_LIMIT:
+            raise ValueError(f"generated span line is {len(line)} columns")
+        lines.append(line)
+    lines.append(")")
+    return lines
+
+
+def generate_patro_py(tables: dict[str, Any]) -> str:
+    """Render the generated ``_tables.py`` source.
+
+    Args:
+        tables: The output of :func:`build_patro_tables`.
+
+    Returns:
+        The module source with Unix line endings.
+    """
+    lines = [
+        HEADER,
+        f"COVERAGE_FIRST = {tables['coverage_first']}",
+        f"COVERAGE_LAST = {tables['coverage_last']}",
+        f"TITHI_FIRST = {tables['tithi_first']}",
+        "",
+    ]
+    lines.extend(_bytes_table("TITHI_INDEX", tables["tithi_index"], 20))
+    lines.append("")
+    lines.extend(_pairs_table("TITHI_NAMES", tables["tithi_names"]))
+    lines.append("")
+    lines.extend(_int_table("HOLIDAYS", list(tables["holidays"]), 10))
+    lines.append("")
+    lines.extend(_int_table("EVENT_DAYS", list(tables["event_days"]), 10))
+    lines.append("")
+    lines.extend(_spans_table("EVENT_SPANS", tables["event_spans"]))
+    lines.append("")
+    lines.extend(_int_table("EVENT_IDS", list(tables["event_ids"]), 15))
+    lines.append("")
+    lines.extend(_pairs_table("NAMES", tables["names"]))
+    return "\n".join(lines) + "\n"
+
+
+def generated_files(
+    data: dict[str, Any], patro_days: dict[str, dict[str, Any]]
+) -> dict[Path, bytes]:
     """Map every generated file path to the bytes it should hold.
 
     Args:
         data: The validated calendar JSON.
+        patro_days: The loaded patro day map.
 
     Returns:
         Paths keyed to their generated content.
+
+    Raises:
+        ValueError: The patro tables cannot be built.
     """
+    tables = build_patro_tables(patro_days, data)
     return {
         CALENDAR_PY: generate_calendar_py(data).encode("utf-8"),
+        PATRO_TABLES_PY: generate_patro_py(tables).encode("utf-8"),
         PATRO_LICENSE: ROOT_LICENSE.read_bytes(),
         PATRO_NOTICE: ROOT_NOTICE.read_bytes(),
     }
@@ -347,11 +772,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         data = load_calendar()
         validate_calendar(data)
+        patro_days = load_patro()
+        files = generated_files(data, patro_days)
     except (OSError, ValueError) as exc:
         print(f"codegen: {exc}", file=sys.stderr)
         return 1
 
-    files = generated_files(data)
     if args.check:
         drifted = [path for path, content in files.items() if _drifted(path, content)]
         for path in drifted:
