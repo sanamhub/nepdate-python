@@ -18,6 +18,7 @@ from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
 from ._format import format_default, format_iso, format_long, format_short
 from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
+from ._parse import parse_strict
 from ._pattern import format_pattern
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
@@ -154,6 +155,21 @@ class NepaliDate:
         if k < 0 or k >= _TOTAL_DAYS:
             raise NepDateError(ErrorKind.OUT_OF_RANGE, f"ordinal {n} is outside the range")
         return _from_serial(n)
+
+    @classmethod
+    def parse(cls, s: str) -> NepaliDate:
+        """Parse a date from the strict form of PARSING §1.
+
+        Args:
+            s: The text, year then month then day, in ASCII or Devanagari digits.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: The text is malformed or names an invalid date.
+        """
+        return parse_strict(s, cls)
 
     def add_days(self, n: int) -> NepaliDate:
         """The date ``n`` days from this one, by ordinal addition.
