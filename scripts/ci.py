@@ -145,6 +145,7 @@ def gate_pytest() -> None:
             "--import-mode=importlib",
             "--doctest-modules",
             "src/nepdate/_date.py",
+            "src/nepdate/_range.py",
             "packages/nepdate-patro/src/nepdate_patro/__init__.py",
             f"--cov={CORE_MODULE}",
             f"--cov={PATRO_MODULE}",

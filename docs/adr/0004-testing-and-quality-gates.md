@@ -13,7 +13,8 @@
    Google docstring convention) over the whole repository.
 2. `mypy --strict src packages/nepdate-patro/src scripts`.
 3. `pytest tests packages/nepdate-patro/tests scripts/tests` and the README doctests, with the
-   docstring examples in `_date.py` and `nepdate_patro/__init__.py`, and coverage (`pytest-cov`):
+   docstring examples in `_date.py`, `_range.py` and `nepdate_patro/__init__.py`, and coverage
+   (`pytest-cov`):
    ≥ 90 % for `nepdate` and ≥ 90 % for `nepdate_patro`, each measured on its own (org target 80 %).
 4. `python scripts/codegen.py --check`.
 5. `python -X importtime -c "import nepdate"`: the cumulative time of the `nepdate` entry is under 5 ms
