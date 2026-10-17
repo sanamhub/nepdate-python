@@ -32,6 +32,18 @@ module-name = "nepdate"
 members = ["packages/nepdate-patro"]
 
 [dependency-groups]
+bench = [
+    "bikram==2.1.4",
+    "bikram-sambat==0.2.0",
+    "nepali==1.2.0",
+    "nepali-calendar-utils==3.1.0",
+    "nepali-datetime==1.0.8.5",
+    "nepkit==0.4.1 ; python_full_version >= '3.12'",
+    "npdatetime==0.2.10",
+    "psutil==7.2.2",
+    "pybsdate==0.3.2",
+    "pyperf==2.10.0",
+]
 dev = [
     "ruff>=0.8.0",
     "mypy>=1.13.0",

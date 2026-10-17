@@ -1,0 +1,98 @@
+{
+  "nepali-datetime": {
+    "b1": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    }
+  },
+  "npdatetime": {
+    "b1": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    }
+  },
+  "nepali": {
+    "b1": {
+      "supported": 64,
+      "matches": 61,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 63,
+      "matches": 60,
+      "agrees": false
+    }
+  },
+  "bikram-sambat": {
+    "b1": {
+      "supported": 64,
+      "matches": 61,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 61,
+      "agrees": false
+    }
+  },
+  "bikram": {
+    "b1": {
+      "supported": 63,
+      "matches": 62,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 62,
+      "matches": 62,
+      "agrees": false
+    }
+  },
+  "pyBSDate": {
+    "b1": {
+      "supported": 64,
+      "matches": 60,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    }
+  },
+  "nepali-calendar-utils": {
+    "b1": {
+      "supported": 64,
+      "matches": 61,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 61,
+      "agrees": false
+    }
+  },
+  "nepkit": {
+    "b1": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    },
+    "b2": {
+      "supported": 64,
+      "matches": 62,
+      "agrees": false
+    }
+  }
+}
