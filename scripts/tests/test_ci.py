@@ -69,6 +69,31 @@ def test_same_minor_range(ci: Any) -> None:
     assert ci._same_minor_range("0.1.0") == f"{ci.CORE_DIST}>=0.1,<0.2"
 
 
+def test_same_minor_specifiers(ci: Any) -> None:
+    """The expected specifier set is exactly the two bounds."""
+    assert ci._same_minor_specifiers("0.0.0") == {">=0.0", "<0.1"}
+    assert ci._same_minor_specifiers("1.4.2") == {">=1.4", "<1.5"}
+
+
+def test_requirement_specifiers_ignores_order(ci: Any) -> None:
+    """The two specifiers compare as a set, so their order in METADATA does not matter."""
+    first = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.1\n"
+    second = f"Requires-Dist: {ci.CORE_DIST}<0.1,>=0.0\n"
+    assert ci._requirement_specifiers(first, ci.CORE_DIST) == {">=0.0", "<0.1"}
+    assert ci._requirement_specifiers(second, ci.CORE_DIST) == {">=0.0", "<0.1"}
+
+
+def test_requirement_specifiers_negative_control(ci: Any) -> None:
+    """A wrong bound, an extra bound or no requirement does not match the expected set."""
+    expected = ci._same_minor_specifiers("0.0.0")
+    wrong = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.2\n"
+    extra = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.1,!=0.0.1\n"
+    missing = "Requires-Dist: other>=0.0\n"
+    assert ci._requirement_specifiers(wrong, ci.CORE_DIST) != expected
+    assert ci._requirement_specifiers(extra, ci.CORE_DIST) != expected
+    assert ci._requirement_specifiers(missing, ci.CORE_DIST) == set()
+
+
 def test_parse_importtime(ci: Any) -> None:
     """Import-time output maps module names to cumulative microseconds."""
     output = (
@@ -90,3 +115,15 @@ def test_outside_flags_only_foreign_modules(ci: Any) -> None:
     """The package's own modules and the allowlist pass; anything else is reported."""
     modules = {"nepdate", "nepdate._date", "enum", "json", "nepdatex"}
     assert ci._outside(modules, "nepdate", frozenset({"enum"})) == ["json", "nepdatex"]
+
+
+def test_outside_flags_the_patro_module_for_the_core(ci: Any) -> None:
+    """A core import that loads ``nepdate_patro`` is a gate failure.
+
+    This is the permanent negative control for the core/patro import check.
+    """
+    modules = {"nepdate", "nepdate._date", "nepdate_patro", "nepdate_patro._tables"}
+    assert ci._outside(modules, "nepdate", ci.CORE_IMPORT_ALLOWED) == [
+        "nepdate_patro",
+        "nepdate_patro._tables",
+    ]

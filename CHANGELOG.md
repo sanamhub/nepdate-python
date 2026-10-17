@@ -19,3 +19,7 @@ share this file and a version number (ADR-0005). The format follows
   `DateOrder` and `Separator` enums, the month and weekday labels, and `to_nepali_digits`.
 - Parsing: `NepaliDate.parse` for the strict form and `NepaliDate.parse_lenient` for
   human-written dates with month names, era markers or Devanagari digits.
+- `NepaliDate.today(tz=None)`, which reads the clock in Nepal time by default.
+- The `nepdate-patro` distribution (BS 2077 to 2084): `Tithi`, `Event` and `CalendarInfo`,
+  `info` for one day, `coverage` for the data range, and `public_holidays` for the 294
+  gazetted dates.

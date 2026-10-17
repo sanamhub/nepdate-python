@@ -57,8 +57,10 @@ convention = "google"
 exclude = ["src/nepdate/_calendar.py", "packages/nepdate-patro/src/nepdate_patro/_tables.py"]
 
 [tool.ruff.lint.per-file-ignores]
-# Catalogue test function names are derived from the C# ids and cannot be shortened.
+# Catalogue test function names are derived from the C# ids and cannot be shortened; the bodies
+# assert the exact literal counts of the C# catalogue.
 "tests/test_csharp_catalog.py" = ["E501"]
+"packages/nepdate-patro/tests/test_csharp_catalog_patro.py" = ["E501", "PLR2004"]
 
 [tool.mypy]
 strict = true

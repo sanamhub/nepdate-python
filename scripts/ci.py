@@ -402,13 +402,13 @@ def gate_patro_alone() -> None:
     if _metadata_version(patro_metadata) != version:
         raise GateError("core and patro wheels have different versions")
 
-    expected_dep = _same_minor_range(version)
-    found = False
-    for line in patro_metadata.splitlines():
-        if line.startswith("Requires-Dist:") and expected_dep in line:
-            found = True
-    if not found:
-        raise GateError(f"patro wheel lacks Requires-Dist {expected_dep}")
+    specifiers = _requirement_specifiers(patro_metadata, CORE_DIST)
+    expected = _same_minor_specifiers(version)
+    if specifiers != expected:
+        raise GateError(
+            f"patro wheel requires {CORE_DIST} with {sorted(specifiers)}, "
+            f"expected {sorted(expected)}"
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         venv = Path(tmp) / "venv"
@@ -442,6 +442,47 @@ def _same_minor_range(version: str) -> str:
     """
     major, minor, _ = version.split(".")
     return f"{CORE_DIST}>={major}.{minor},<{major}.{int(minor) + 1}"
+
+
+def _same_minor_specifiers(version: str) -> set[str]:
+    """Build the exact specifier set a patro release must put on the core.
+
+    Args:
+        version: A ``major.minor.patch`` version.
+
+    Returns:
+        ``{">=major.minor", "<major.(minor+1)"}``.
+    """
+    major, minor, _ = version.split(".")
+    return {f">={major}.{minor}", f"<{major}.{int(minor) + 1}"}
+
+
+def _requirement_specifiers(metadata: str, distribution: str) -> set[str]:
+    """Return the version specifiers of a wheel's first requirement on ``distribution``.
+
+    The set comparison is deliberate: ``Requires-Dist`` may list the specifiers in any order.
+
+    Args:
+        metadata: The wheel ``METADATA`` contents.
+        distribution: The distribution name to find.
+
+    Returns:
+        The specifier strings, or an empty set when no requirement names the distribution.
+    """
+    for line in metadata.splitlines():
+        if not line.startswith("Requires-Dist:"):
+            continue
+        requirement = line.split(":", 1)[1].strip()
+        if not requirement.startswith(distribution):
+            continue
+        boundary = requirement[len(distribution) : len(distribution) + 1]
+        if boundary and boundary not in "<>=!~[ (":
+            continue
+        rest = requirement[len(distribution) :].split(";", 1)[0].strip()
+        if rest.startswith("(") and rest.endswith(")"):
+            rest = rest[1:-1]
+        return {part.strip() for part in rest.split(",") if part.strip()}
+    return set()
 
 
 GATES: tuple[tuple[str, Callable[[], None]], ...] = (

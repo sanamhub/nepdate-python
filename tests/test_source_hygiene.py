@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import ast
+import unicodedata
 from pathlib import Path
 
 import nepdate
 
 _FORBIDDEN_CALLS = frozenset({"strftime", "strptime"})
 _FORBIDDEN_MODULES = frozenset(
-    {"dataclasses", "functools", "locale", "re", "typing", "unicodedata"}
+    {"dataclasses", "functools", "locale", "nepdate_patro", "re", "typing", "unicodedata"}
 )
 _FAST_PATH = "_fast_parse"
+_PATRO_ANCHOR = "World Day Against Human Trafficking"
 
 
 def _package_sources() -> dict[str, str]:
@@ -72,6 +74,17 @@ def _int_functions(source: str) -> list[str]:
     return sorted(found)
 
 
+def _invisible(source: str) -> list[str]:
+    """Return the code points of raw invisible characters in ``source``."""
+    return sorted(
+        {
+            f"U+{ord(char):04X}"
+            for char in source
+            if unicodedata.category(char) in ("Cf", "Cc") and char not in "\n\r\t"
+        }
+    )
+
+
 def test_no_forbidden_imports_or_time_formatting() -> None:
     """The core imports no forbidden module and calls neither strftime nor strptime."""
     for name, source in _package_sources().items():
@@ -102,9 +115,21 @@ def test_forbidden_check_negative_control() -> None:
     assert _forbidden("import typing\n") == ["typing"]
     assert _forbidden("import unicodedata\n") == ["unicodedata"]
     assert _forbidden("import locale\n") == ["locale"]
+    assert _forbidden("import nepdate_patro\n") == ["nepdate_patro"]
     assert _forbidden("d.strftime('%Y')\n") == ["strftime"]
     assert _forbidden("d.strptime('x', '%Y')\n") == ["strptime"]
     assert _forbidden("import datetime\nd = datetime.date.today()\n") == []
+
+
+def test_core_contains_no_patro_anchor() -> None:
+    """No core source file contains the patro event string."""
+    for name, source in _package_sources().items():
+        assert _PATRO_ANCHOR not in source, name
+
+
+def test_patro_anchor_check_negative_control() -> None:
+    """The anchor check finds the string when it is present."""
+    assert _PATRO_ANCHOR in f"MARKER = '{_PATRO_ANCHOR}'\n"
 
 
 def test_isdigit_check_negative_control() -> None:
@@ -117,3 +142,15 @@ def test_int_check_negative_control() -> None:
     """The int check flags a call in any function."""
     assert _int_functions("def f(x):\n    return int(x)\n") == ["f"]
     assert _int_functions("def f(x):\n    return format(x, 'd')\n") == []
+
+
+def test_no_raw_invisible_characters() -> None:
+    """Core source files use escapes, not raw format or control characters."""
+    for name, source in _package_sources().items():
+        assert not _invisible(source), name
+
+
+def test_invisible_check_negative_control() -> None:
+    """The invisible check names a raw joiner."""
+    assert _invisible("a\u200cb") == ["U+200C"]
+    assert not _invisible("plain text\n")
