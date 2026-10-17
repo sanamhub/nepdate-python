@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 from nepdate import NepaliDate
 from nepdate._errors import ErrorKind, NepDateError
 
-_PARSE_ROWS = 67  # P3-04 says 57; shared/spec/vectors/parse.tsv has 67 data rows.
+_PARSE_ROWS = 69  # shared/spec/vectors/parse.tsv data rows (the plan's 57 is stale).
 _ERROR_KINDS = {
     "InvalidCharacter": ErrorKind.INVALID_CHARACTER,
     "WrongGroupCount": ErrorKind.WRONG_GROUP_COUNT,
@@ -87,10 +87,12 @@ def test_era_markers_and_keywords() -> None:
         assert NepaliDate.parse_lenient(text) == expected, text
 
 
-def test_joiners_are_stripped() -> None:
-    """U+200C and U+200D are removed before the month name is matched."""
-    assert NepaliDate.parse_lenient("15 श्रा\u200cवण 2080") == NepaliDate(2080, 4, 15)
-    assert NepaliDate.parse_lenient("15 श्रा\u200dवण 2080") == NepaliDate(2080, 4, 15)
+def test_joiners_are_not_removed() -> None:
+    """A month name with U+200C or U+200D inside is not a month name (PARSING §2)."""
+    for joiner in ("\N{ZERO WIDTH NON-JOINER}", "\N{ZERO WIDTH JOINER}"):
+        with pytest.raises(NepDateError) as caught:
+            NepaliDate.parse_lenient(f"15 श्रा{joiner}वण 2080")
+        assert caught.value.kind is ErrorKind.UNRECOGNIZED
 
 
 def test_case_folding_is_exactly_python_lower_for_ascii() -> None:

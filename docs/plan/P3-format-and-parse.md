@@ -44,7 +44,8 @@ as the scanner alone (the test calls the private scanner directly).
 D-05 and D-06 change (PARSING, intro).
 
 ### P3-05 `parse_lenient` (PARSING §2)
-NFC-normalise, strip U+200C/U+200D, then the closed month-name list from the spec.
+no Unicode normalisation and no joiner removal (PARSING §2), then the closed month-name list
+from the spec.
 AC: the `lenient` column of every row of `shared/spec/vectors/parse.tsv`; hypothesis: arbitrary text
 raises only `NepDateError`.
 

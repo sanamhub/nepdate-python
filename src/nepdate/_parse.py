@@ -222,9 +222,8 @@ _MAX_DAY_DIGITS = 2
 def parse_lenient(s: str, date_type: type[NepaliDate]) -> NepaliDate:
     """Parse the lenient form of PARSING §2.
 
-    The plan's NFC step is omitted: PARSING §2 does not require it, ``unicodedata`` is outside
-    ``CORE_IMPORT_ALLOWED``, and the Go port does not normalise either. U+200C and U+200D are
-    still stripped.
+    Input is matched as given, with no NFC step and no joiner removal (PARSING §2), so every
+    port accepts and rejects the same text.
 
     Args:
         s: Human-written text, for example ``"15 Shrawan 2080"``.
@@ -243,7 +242,7 @@ def parse_lenient(s: str, date_type: type[NepaliDate]) -> NepaliDate:
     if strict is not None:
         return strict
 
-    normalized = s.translate(_DEVA_DIGITS).replace("\u200c", "").replace("\u200d", "")
+    normalized = s.translate(_DEVA_DIGITS)
     numbers, digit_counts, months, unknown = _lenient_tokens(normalized)
     if unknown:
         raise NepDateError(ErrorKind.UNRECOGNIZED, "unknown word")
@@ -260,7 +259,7 @@ def _lenient_tokens(s: str) -> tuple[list[int], list[int], list[int], bool]:
     """Split normalised text into number and month tokens (PARSING §2 step 2).
 
     Args:
-        s: The text after the Devanagari digit mapping and joiner stripping.
+        s: The text after the Devanagari digit mapping.
 
     Returns:
         The numbers, their digit counts, the month numbers and whether an unknown word appeared.
