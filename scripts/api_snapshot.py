@@ -2,8 +2,10 @@
 
 The snapshot is generated with ``inspect`` from ``nepdate.__all__`` and
 ``nepdate_patro.__all__``. It records names, signatures, enum members, class attributes and
-exception bases. A removed or changed item fails. An addition passes only when ``docs/API.md``
-declares it with a signature, an annotation or an enum value.
+exception bases. The check fails on any difference between the snapshot and the live surface:
+a removed, changed or added item. An addition is recorded with ``--write`` after it is declared.
+Separately, every public item except dunder methods must be declared in ``docs/API.md`` with its
+signature, annotation or enum value; dunder methods are pinned by the snapshot alone.
 """
 
 from __future__ import annotations
@@ -374,58 +376,64 @@ def _local_key(key: str, kind: str) -> str:
     return parts[-1]
 
 
-def _check_addition(  # noqa: PLR0911, PLR0912 - one return per API kind
+def _is_dunder(key: str) -> bool:
+    """Return True for a dunder method key, which the docs need not declare."""
+    name = key.rsplit(".", 1)[-1]
+    return name.startswith("__") and name.endswith("__")
+
+
+def _check_documented(  # noqa: PLR0911, PLR0912 - one return per API kind
     key: str, item: dict[str, Any], declarations: dict[str, tuple[str, str]]
 ) -> str | None:
-    """Return why an added item is not documented, or None when it is."""
+    """Return why a public item is not declared in the docs, or None when it is."""
     kind = item.get("kind")
     if not isinstance(kind, str):
-        return f"addition has no kind: {key}"
+        return f"item has no kind: {key}"
     declaration = declarations.get(_local_key(key, kind))
     if declaration is None:
-        return f"undocumented addition: {key}"
+        return f"docs: {key} is not declared"
     doc_kind, doc_value = declaration
     if kind in {"class", "enum", "exception", "function"}:
         if kind == "function":
             if doc_kind != "def":
-                return f"addition is not declared with def: {key}"
+                return f"docs: {key} is not declared with def"
             if _signature_key(str(item.get("signature", ""))) != doc_value:
-                return f"addition signature differs from docs: {key}"
+                return f"docs: {key} signature differs from the declaration"
             return None
         if doc_kind != "class":
-            return f"addition is not declared with class: {key}"
+            return f"docs: {key} is not declared with class"
         return None
     if kind == "method":
         if doc_kind != "def":
-            return f"addition is not declared with def: {key}"
+            return f"docs: {key} is not declared with def"
         if _signature_key(str(item.get("signature", ""))) != doc_value:
-            return f"addition signature differs from docs: {key}"
+            return f"docs: {key} signature differs from the declaration"
         return None
     if kind in {"property", "attribute"}:
         annotation = _annotation_key(str(item.get("annotation", "")))
         if doc_kind == "attribute":
-            return None if annotation == doc_value else f"addition annotation differs: {key}"
+            return None if annotation == doc_value else f"docs: {key} annotation differs"
         if doc_kind == "def":
             expected = _signature_key(f"(self) -> {annotation}")
-            return None if expected == doc_value else f"addition signature differs: {key}"
-        return f"addition is not declared with an annotation: {key}"
+            return None if expected == doc_value else f"docs: {key} signature differs"
+        return f"docs: {key} is not declared with an annotation"
     if kind == "constant":
         if doc_kind != "attribute":
-            return f"addition is not declared with an annotation: {key}"
+            return f"docs: {key} is not declared with an annotation"
         return (
             None
             if _annotation_key(str(item.get("type", ""))) == doc_value
-            else (f"addition type differs from docs: {key}")
+            else (f"docs: {key} type differs from the declaration")
         )
     if kind == "enum_member":
         if doc_kind != "enum_member":
-            return f"addition is not declared with a value: {key}"
+            return f"docs: {key} is not declared with a value"
         return (
             None
             if str(item.get("value", "")) == doc_value
-            else (f"addition value differs from docs: {key}")
+            else (f"docs: {key} value differs from the declaration")
         )
-    return f"addition has an unknown kind: {key}"
+    return f"docs: {key} has an unknown kind"
 
 
 def compare(old: dict[str, Any], new: dict[str, Any], docs_text: str) -> list[str]:
@@ -437,19 +445,26 @@ def compare(old: dict[str, Any], new: dict[str, Any], docs_text: str) -> list[st
         docs_text: The contents of ``docs/API.md``.
 
     Returns:
-        One message per removed, changed or undocumented addition.
+        One message per removed, changed or added item, then one per public item that
+        ``docs/API.md`` does not declare.
     """
     old_items = _items(old)
     new_items = _items(new)
     declarations = _declarations(docs_text)
     found: list[str] = []
+    if old.get("all") != new.get("all"):
+        found.append("changed: __all__")
     for key in sorted(set(old_items) - set(new_items)):
         found.append(f"removed: {key}")
     for key in sorted(set(old_items) & set(new_items)):
         if _canonical(old_items[key]) != _canonical(new_items[key]):
             found.append(f"changed: {key}")
     for key in sorted(set(new_items) - set(old_items)):
-        message = _check_addition(key, new_items[key], declarations)
+        found.append(f"added, not in snapshot (run scripts/api_snapshot.py --write): {key}")
+    for key in sorted(new_items):
+        if _is_dunder(key):
+            continue
+        message = _check_documented(key, new_items[key], declarations)
         if message is not None:
             found.append(message)
     return found

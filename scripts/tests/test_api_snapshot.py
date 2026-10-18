@@ -23,55 +23,93 @@ def _docs(body: str) -> str:
     return _DOC_HEADER + body + _DOC_FOOTER
 
 
+_FORMAT = "(self, pattern: str) -> str"
+_FORMAT_DOC = "    def format(self, pattern: str) -> str: ...\n"
+_RENDER_DOC = "    def render(self, pattern: str) -> str: ...\n"
+
+
+def test_unchanged_documented_surface_passes(api_snapshot: Any) -> None:
+    """An identical, fully declared surface has no problems."""
+    snap = _snapshot(**{"nepdate.NepaliDate.format": _method(_FORMAT)})
+    assert api_snapshot.compare(snap, snap, _docs(_FORMAT_DOC)) == []
+
+
 def test_rename_fails(api_snapshot: Any) -> None:
     """A removed method is reported even when its replacement is documented."""
-    old = _snapshot(**{"nepdate.NepaliDate.format": _method("(self, pattern: str) -> str")})
-    new = _snapshot(**{"nepdate.NepaliDate.render": _method("(self, pattern: str) -> str")})
-    docs = _docs("    def render(self, pattern: str) -> str: ...\n")
-    problems = api_snapshot.compare(old, new, docs)
-    assert any("removed: nepdate.NepaliDate.format" in problem for problem in problems)
+    old = _snapshot(**{"nepdate.NepaliDate.format": _method(_FORMAT)})
+    new = _snapshot(**{"nepdate.NepaliDate.render": _method(_FORMAT)})
+    problems = api_snapshot.compare(old, new, _docs(_RENDER_DOC))
+    assert "removed: nepdate.NepaliDate.format" in problems
 
 
 def test_signature_change_fails(api_snapshot: Any) -> None:
     """A changed signature is reported as a changed item."""
-    old = _snapshot(**{"nepdate.NepaliDate.format": _method("(self, pattern: str) -> str")})
+    old = _snapshot(**{"nepdate.NepaliDate.format": _method(_FORMAT)})
     new = _snapshot(**{"nepdate.NepaliDate.format": _method("(self, pattern: bytes) -> str")})
-    problems = api_snapshot.compare(old, new, "")
-    assert problems == ["changed: nepdate.NepaliDate.format"]
+    docs = _docs("    def format(self, pattern: bytes) -> str: ...\n")
+    assert api_snapshot.compare(old, new, docs) == ["changed: nepdate.NepaliDate.format"]
 
 
 def test_undocumented_addition_fails(api_snapshot: Any) -> None:
-    """An added method with no declaration in docs/API.md is reported."""
+    """An added method with no declaration fails twice: not in snapshot and not declared."""
     old = _snapshot()
     new = _snapshot(**{"nepdate.NepaliDate.render": _method("(self) -> str")})
     problems = api_snapshot.compare(old, new, _docs(""))
-    assert any(
-        "undocumented addition: nepdate.NepaliDate.render" in problem for problem in problems
-    )
+    assert any("not in snapshot" in problem for problem in problems)
+    assert "docs: nepdate.NepaliDate.render is not declared" in problems
 
 
 def test_name_in_prose_only_fails(api_snapshot: Any) -> None:
     """A name mentioned in prose is not a declaration."""
-    old = _snapshot()
-    new = _snapshot(**{"nepdate.NepaliDate.render": _method("(self) -> str")})
-    problems = api_snapshot.compare(old, new, "The method render is described here.\n")
-    assert any("undocumented addition" in problem for problem in problems)
+    snap = _snapshot(**{"nepdate.NepaliDate.render": _method("(self) -> str")})
+    problems = api_snapshot.compare(snap, snap, "The method render is described here.\n")
+    assert problems == ["docs: nepdate.NepaliDate.render is not declared"]
 
 
-def test_documented_addition_passes(api_snapshot: Any) -> None:
-    """An added method with an exact declaration is accepted."""
+def test_documented_addition_without_rewrite_fails(api_snapshot: Any) -> None:
+    """A declared addition still fails until the snapshot is rewritten."""
     old = _snapshot()
-    new = _snapshot(**{"nepdate.NepaliDate.render": _method("(self, pattern: str) -> str")})
-    docs = _docs("    def render(self, pattern: str) -> str: ...\n")
-    assert api_snapshot.compare(old, new, docs) == []
+    new = _snapshot(**{"nepdate.NepaliDate.render": _method(_FORMAT)})
+    problems = api_snapshot.compare(old, new, _docs(_RENDER_DOC))
+    assert problems == [
+        "added, not in snapshot (run scripts/api_snapshot.py --write): nepdate.NepaliDate.render"
+    ]
+
+
+def test_documented_addition_after_rewrite_passes(api_snapshot: Any) -> None:
+    """Once the snapshot records a declared addition, the check passes."""
+    snap = _snapshot(**{"nepdate.NepaliDate.render": _method(_FORMAT)})
+    assert api_snapshot.compare(snap, snap, _docs(_RENDER_DOC)) == []
+
+
+def test_stale_declaration_fails(api_snapshot: Any) -> None:
+    """A declaration whose signature no longer matches the surface fails."""
+    snap = _snapshot(**{"nepdate.NepaliDate.format": _method(_FORMAT)})
+    docs = _docs("    def format(self, pattern: bytes) -> str: ...\n")
+    assert api_snapshot.compare(snap, snap, docs) == [
+        "docs: nepdate.NepaliDate.format signature differs from the declaration"
+    ]
+
+
+def test_dunder_needs_no_declaration(api_snapshot: Any) -> None:
+    """Dunder methods are pinned by the snapshot only."""
+    snap = _snapshot(**{"nepdate.NepaliDate.__eq__": _method("(self, other: object) -> bool")})
+    assert api_snapshot.compare(snap, snap, _docs("")) == []
+
+
+def test_all_change_fails(api_snapshot: Any) -> None:
+    """A change to a module __all__ is reported."""
+    old = {"schema": 1, "all": {"nepdate": ["A"]}, "items": {}}
+    new = {"schema": 1, "all": {"nepdate": ["A", "B"]}, "items": {}}
+    assert api_snapshot.compare(old, new, "") == ["changed: __all__"]
 
 
 def test_changed_exception_base_fails(api_snapshot: Any) -> None:
     """A change to an exception base is a changed item."""
     old = _snapshot(**{"nepdate.NepDateError": {"kind": "exception", "bases": ["ValueError"]}})
     new = _snapshot(**{"nepdate.NepDateError": {"kind": "exception", "bases": ["Exception"]}})
-    problems = api_snapshot.compare(old, new, "")
-    assert problems == ["changed: nepdate.NepDateError"]
+    docs = "```python\nclass NepDateError(Exception): ...\n```\n"
+    assert api_snapshot.compare(old, new, docs) == ["changed: nepdate.NepDateError"]
 
 
 def test_committed_snapshot_matches(api_snapshot: Any) -> None:

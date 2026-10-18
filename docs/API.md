@@ -62,21 +62,27 @@ class NepaliDate:
     def __format__(self, spec: str) -> str: ...                        # f"{d:dd MMMM yyyy}"; "" = str(d)
 
 class Lang(enum.Enum):     EN = "en"; NE = "ne"
-class Month(enum.IntEnum): BAISHAKH = 1; JESTHA = 2; ...; CHAITRA = 12
+class Month(enum.IntEnum):
+    BAISHAKH = 1; JESTHA = 2; ASHAD = 3; SHRAWAN = 4; BHADRA = 5; ASHOJ = 6
+    KARTIK = 7; MANGSIR = 8; POUSH = 9; MAGH = 10; FALGUN = 11; CHAITRA = 12
     def label(self, lang: Lang = Lang.EN) -> str: ...
     def short_label(self, lang: Lang = Lang.EN) -> str: ...            # D-04: Asa / Aso
-class Weekday(enum.IntEnum): SUNDAY = 0; ...; SATURDAY = 6
+class Weekday(enum.IntEnum):
+    SUNDAY = 0; MONDAY = 1; TUESDAY = 2; WEDNESDAY = 3; THURSDAY = 4; FRIDAY = 5; SATURDAY = 6
     def label(self, lang: Lang = Lang.EN) -> str: ...
     def short_label(self, lang: Lang = Lang.EN) -> str: ...
 class Overflow(enum.Enum): CLAMP = "clamp"; SPILL = "spill"           # ALGORITHM §8
-class DateOrder(enum.Enum): YMD, YDM, MYD, MDY, DYM, DMY
+class DateOrder(enum.Enum):
+    YMD = "YMD"; YDM = "YDM"; MYD = "MYD"; MDY = "MDY"; DYM = "DYM"; DMY = "DMY"
 class Separator(enum.Enum): SLASH = "/"; BACKSLASH = "\\"; DOT = "."; UNDERSCORE = "_"; DASH = "-"; SPACE = " "
 
 def to_nepali_digits(n: int, min_width: int = 0) -> str: ...
 
 class ErrorKind(enum.Enum):
-    OUT_OF_RANGE; INVALID_MONTH; INVALID_DAY; INVALID_GREGORIAN
-    INVALID_CHARACTER; WRONG_GROUP_COUNT; NUMBER_TOO_LONG; AMBIGUOUS; UNRECOGNIZED
+    OUT_OF_RANGE = "out_of_range"; INVALID_MONTH = "invalid_month"; INVALID_DAY = "invalid_day"
+    INVALID_GREGORIAN = "invalid_gregorian"; INVALID_CHARACTER = "invalid_character"
+    WRONG_GROUP_COUNT = "wrong_group_count"; NUMBER_TOO_LONG = "number_too_long"
+    AMBIGUOUS = "ambiguous"; UNRECOGNIZED = "unrecognized"
 class NepDateError(ValueError):
     kind: ErrorKind
 

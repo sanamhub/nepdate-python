@@ -23,16 +23,21 @@ make the difference between private and public changes visible before a release.
    The JSON has sorted keys and a fixed schema. The 2026-10-18 baseline has 173 items and 19,845
    bytes.
 2. `--write` regenerates the snapshot. `--check` compares the installed surface with the
-   committed file. A removed or changed item fails. An added item fails unless `docs/API.md`
-   shows its declaration: a `def` line with the same signature (ignoring whitespace and quotes),
-   a `name: type` line for a property, attribute or constant, an enum member line with its value,
-   or a `class` line. A name in prose is not a declaration.
-3. Gate 10 of `scripts/ci.py` runs `--check`. The last line becomes `ci: 10/10 gates passed`.
+   committed file and fails on any difference: a removed, changed or added item, or a changed
+   `__all__`. A documented addition still fails until `--write` records it, so the snapshot is
+   always the exact surface.
+3. Separately, `--check` requires every public item except dunder methods to be declared in
+   `docs/API.md`: a `def` line with the same signature (ignoring whitespace and quotes), a
+   `name: type` line for a property, attribute or constant, an enum member line with its value,
+   or a `class` line. A name in prose is not a declaration, and a declaration that no longer
+   matches the surface fails. Dunder methods (`__eq__`, `__hash__`, `__init__` and the like) are
+   pinned by the snapshot alone; the docs describe them in prose.
+4. Gate 10 of `scripts/ci.py` runs `--check`. The last line becomes `ci: 10/10 gates passed`.
    The gate runs on every supported Python version in the existing CI matrix, so a
    Python-version-dependent signature is caught.
-4. A public change is a deliberate edit to the snapshot and `docs/API.md` in the same pull
+5. A public change is a deliberate edit to the snapshot and `docs/API.md` in the same pull
    request. Private names are outside the snapshot, so their removal does not need a docs change.
-5. ADR-0004 and the other accepted ADRs are not edited. This ADR records the tenth gate and the
+6. ADR-0004 and the other accepted ADRs are not edited. This ADR records the tenth gate and the
    rule.
 
 ## Consequences
