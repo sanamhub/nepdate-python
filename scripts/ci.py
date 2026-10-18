@@ -692,8 +692,8 @@ GATES: tuple[tuple[str, Callable[[], None]], ...] = (
     ("core alone", gate_core_alone),
     ("patro alone", gate_patro_alone),
     ("docs", gate_docs),
-    ("api", gate_api),
     ("consumer", gate_consumer),
+    ("api", gate_api),
 )
 
 
