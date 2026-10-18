@@ -311,6 +311,8 @@ def run_matrix(
                 print(f"[{result.version}] failed")
                 if result.log is not None:
                     print(_tail(result.log))
+            elif result.status == "skipped":
+                print(f"[{result.version}] skip: {result.detail}")
             else:
                 print(f"[{result.version}] {result.detail}")
     results.sort(key=lambda result: versions.index(result.version))
