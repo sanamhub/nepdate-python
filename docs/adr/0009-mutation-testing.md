@@ -35,8 +35,9 @@ mutants with the two generated tables excluded, so a full run is minutes, not ho
    tool output and a `summary.json` that records the wall time and the worker count.
 4. Every survivor is killed by a named test or listed in `docs/mutation/equivalent.md` with the
    mutant id, the diff and a one-line proof. "Hard to test" is not equivalence.
-5. The score floor is **91.00 %** of killed over killed plus survived, rounded down from the
-   measured 91.87 %. It is written in `scripts/mutation_check.py`. A release below it is blocked;
+5. The score floor is **95.00 %** of killed over killed plus survived, rounded down from the
+   measured 95.12 %. Timed-out and no-test mutants are outside both counts, as in mutmut's own
+   efficacy figure; the summary also records killed over all mutants (93.78 %). It is written in `scripts/mutation_check.py`. A release below it is blocked;
    the weekly run reports drift. There is no per-pull-request mutation gate, so `scripts/ci.py`
    stays at 9 gates.
 6. The local Windows run uses WSL Ubuntu 26.04 because mutmut 3 needs `fork`. GitHub Actions uses
@@ -44,15 +45,25 @@ mutants with the two generated tables excluded, so a full run is minutes, not ho
    `mutants/src` first on `sys.path`, and the editable install would otherwise keep the tests on
    the unmutated source. The patro source is copied to `src/nepdate_patro` for the run so the
    mutant names match the imports.
-7. The disposition table is `docs/mutation/equivalent.md`. It has two sections: true equivalents
-   and mutants whose behaviour is covered by a named test but which mutmut does not attribute to
-   that test. The second section is not called equivalent.
+7. The disposition table is `docs/mutation/equivalent.md`, with one section: equivalents, each
+   with a proof. A survivor that a test could detect gets the test. `scripts/mutation_check.py`
+   rejects any other section. Error wording is not API (callers match on `kind`), so a mutant
+   that only rewords a message is equivalent; a blank message is not.
+8. Module-level code runs once at import, before mutmut activates a mutant, so a mutant in a
+   function called only at import (the patro table builder) is killed only by a test that calls
+   the function itself against an independent oracle (the shared JSON).
 
 ## Results
 
 The first full run on 2026-10-18 with 2 children: 1350 mutants, 1220 killed, 108 survived,
 21 timed out, 1 had no tests, 4.85 mutations per second, 313 s. Test efficacy 91.87 %. The
 raw files and `summary.json` are in `docs/mutation/2026-10-18/`.
+
+After the P8 review, with 4 children: 1350 mutants, 1266 killed, 65 survived, 18 timed out,
+1 had no tests, 8.88 mutations per second. Test efficacy 95.12 %. A second run of the same tree
+took 152 s (1263 killed, 21 timed out: three mutants move between killed and timeout with machine
+load; the survivors are the same 65). The review files replace the first run's in
+`docs/mutation/2026-10-18/`; `summary.json` keeps the first run's counts.
 
 ## Consequences
 

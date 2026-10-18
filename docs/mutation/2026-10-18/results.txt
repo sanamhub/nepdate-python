@@ -19,7 +19,7 @@
     nepdate_patro.xǁTithiǁ__eq____mutmut_1: killed
     nepdate_patro.xǁTithiǁ__eq____mutmut_2: killed
     nepdate_patro.xǁTithiǁ__hash____mutmut_1: survived
-    nepdate_patro.xǁTithiǁ__delattr____mutmut_1: survived
+    nepdate_patro.xǁTithiǁ__delattr____mutmut_1: killed
     nepdate_patro.xǁEventǁ__init____mutmut_1: killed
     nepdate_patro.xǁEventǁ__init____mutmut_2: killed
     nepdate_patro.xǁEventǁ__init____mutmut_3: killed
@@ -41,7 +41,7 @@
     nepdate_patro.xǁEventǁ__eq____mutmut_1: killed
     nepdate_patro.xǁEventǁ__eq____mutmut_2: killed
     nepdate_patro.xǁEventǁ__hash____mutmut_1: survived
-    nepdate_patro.xǁEventǁ__delattr____mutmut_1: survived
+    nepdate_patro.xǁEventǁ__delattr____mutmut_1: killed
     nepdate_patro.xǁCalendarInfoǁ__init____mutmut_1: killed
     nepdate_patro.xǁCalendarInfoǁ__init____mutmut_2: killed
     nepdate_patro.xǁCalendarInfoǁ__init____mutmut_3: killed
@@ -71,7 +71,7 @@
     nepdate_patro.xǁCalendarInfoǁ__eq____mutmut_1: killed
     nepdate_patro.xǁCalendarInfoǁ__eq____mutmut_2: killed
     nepdate_patro.xǁCalendarInfoǁ__hash____mutmut_1: survived
-    nepdate_patro.xǁCalendarInfoǁ__delattr____mutmut_1: survived
+    nepdate_patro.xǁCalendarInfoǁ__delattr____mutmut_1: killed
     nepdate_patro.x__build_day_info__mutmut_1: killed
     nepdate_patro.x__build_day_info__mutmut_2: killed
     nepdate_patro.x__build_day_info__mutmut_3: killed
@@ -104,7 +104,7 @@
     nepdate_patro.x__build_day_info__mutmut_30: killed
     nepdate_patro.x__build_day_info__mutmut_31: killed
     nepdate_patro.x__build_day_info__mutmut_32: killed
-    nepdate_patro.x__build_day_info__mutmut_33: survived
+    nepdate_patro.x__build_day_info__mutmut_33: killed
     nepdate_patro.x__build_day_info__mutmut_34: killed
     nepdate_patro.x__build_day_info__mutmut_35: killed
     nepdate_patro.x__build_day_info__mutmut_36: killed
@@ -165,12 +165,12 @@
     nepdate._diff.xǁDateDiffǁ__eq____mutmut_1: killed
     nepdate._diff.xǁDateDiffǁ__eq____mutmut_2: killed
     nepdate._diff.xǁDateDiffǁ__hash____mutmut_1: survived
-    nepdate._diff.xǁDateDiffǁ__delattr____mutmut_1: survived
-    nepdate._errors.xǁNepDateErrorǁ__init____mutmut_1: survived
+    nepdate._diff.xǁDateDiffǁ__delattr____mutmut_1: killed
+    nepdate._errors.xǁNepDateErrorǁ__init____mutmut_1: killed
     nepdate._errors.xǁNepDateErrorǁ__init____mutmut_2: killed
     nepdate._range.xǁDateRangeǁ__init____mutmut_1: killed
     nepdate._range.xǁDateRangeǁ__init____mutmut_2: killed
-    nepdate._range.xǁDateRangeǁ__init____mutmut_3: survived
+    nepdate._range.xǁDateRangeǁ__init____mutmut_3: killed
     nepdate._range.xǁDateRangeǁ__init____mutmut_4: killed
     nepdate._range.xǁDateRangeǁ__init____mutmut_5: killed
     nepdate._range.xǁDateRangeǁ__init____mutmut_6: survived
@@ -260,7 +260,7 @@
     nepdate._format.x_format_short__mutmut_22: killed
     nepdate._format.x_format_short__mutmut_23: killed
     nepdate._format.x_format_short__mutmut_24: killed
-    nepdate._format.x_format_short__mutmut_25: survived
+    nepdate._format.x_format_short__mutmut_25: killed
     nepdate._format.x_format_long__mutmut_1: killed
     nepdate._format.x_format_long__mutmut_2: killed
     nepdate._format.x_format_long__mutmut_3: killed
@@ -322,7 +322,7 @@
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_2: killed
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_3: killed
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_4: killed
-    nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_5: survived
+    nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_5: killed
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_6: killed
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_7: killed
     nepdate._fiscal.xǁFiscalYearǁ__init____mutmut_8: killed
@@ -337,7 +337,7 @@
     nepdate._fiscal.xǁFiscalYearǁcontaining__mutmut_6: killed
     nepdate._fiscal.xǁFiscalYearǁstart__mutmut_1: killed
     nepdate._fiscal.xǁFiscalYearǁstart__mutmut_2: killed
-    nepdate._fiscal.xǁFiscalYearǁstart__mutmut_3: survived
+    nepdate._fiscal.xǁFiscalYearǁstart__mutmut_3: killed
     nepdate._fiscal.xǁFiscalYearǁstart__mutmut_4: killed
     nepdate._fiscal.xǁFiscalYearǁstart__mutmut_5: killed
     nepdate._fiscal.xǁFiscalYearǁstart__mutmut_6: survived
@@ -363,7 +363,7 @@
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_3: killed
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_4: killed
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_5: killed
-    nepdate._fiscal.xǁFiscalYearǁend__mutmut_6: survived
+    nepdate._fiscal.xǁFiscalYearǁend__mutmut_6: killed
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_7: killed
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_8: killed
     nepdate._fiscal.xǁFiscalYearǁend__mutmut_9: survived
@@ -409,7 +409,7 @@
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_16: killed
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_17: killed
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_18: killed
-    nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_19: survived
+    nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_19: killed
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_20: killed
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_21: killed
     nepdate._fiscal.xǁFiscalYearǁquarter_range__mutmut_22: survived
@@ -487,14 +487,14 @@
     nepdate._lenient.x_parse_lenient__mutmut_10: killed
     nepdate._lenient.x_parse_lenient__mutmut_11: killed
     nepdate._lenient.x_parse_lenient__mutmut_12: killed
-    nepdate._lenient.x_parse_lenient__mutmut_13: survived
+    nepdate._lenient.x_parse_lenient__mutmut_13: killed
     nepdate._lenient.x_parse_lenient__mutmut_14: killed
     nepdate._lenient.x_parse_lenient__mutmut_15: killed
     nepdate._lenient.x_parse_lenient__mutmut_16: survived
     nepdate._lenient.x_parse_lenient__mutmut_17: survived
     nepdate._lenient.x_parse_lenient__mutmut_18: survived
     nepdate._lenient.x_parse_lenient__mutmut_19: killed
-    nepdate._lenient.x_parse_lenient__mutmut_20: survived
+    nepdate._lenient.x_parse_lenient__mutmut_20: killed
     nepdate._lenient.x_parse_lenient__mutmut_21: killed
     nepdate._lenient.x_parse_lenient__mutmut_22: killed
     nepdate._lenient.x_parse_lenient__mutmut_23: survived
@@ -522,7 +522,7 @@
     nepdate._lenient.x_parse_lenient__mutmut_45: killed
     nepdate._lenient.x_parse_lenient__mutmut_46: killed
     nepdate._lenient.x_parse_lenient__mutmut_47: killed
-    nepdate._lenient.x_parse_lenient__mutmut_48: survived
+    nepdate._lenient.x_parse_lenient__mutmut_48: killed
     nepdate._lenient.x_parse_lenient__mutmut_49: killed
     nepdate._lenient.x_parse_lenient__mutmut_50: killed
     nepdate._lenient.x_parse_lenient__mutmut_51: survived
@@ -546,7 +546,7 @@
     nepdate._lenient.x__lenient_tokens__mutmut_17: killed
     nepdate._lenient.x__lenient_tokens__mutmut_18: timeout
     nepdate._lenient.x__lenient_tokens__mutmut_19: timeout
-    nepdate._lenient.x__lenient_tokens__mutmut_20: timeout
+    nepdate._lenient.x__lenient_tokens__mutmut_20: killed
     nepdate._lenient.x__lenient_tokens__mutmut_21: killed
     nepdate._lenient.x__lenient_tokens__mutmut_22: killed
     nepdate._lenient.x__lenient_tokens__mutmut_23: killed
@@ -563,7 +563,7 @@
     nepdate._lenient.x__lenient_tokens__mutmut_34: killed
     nepdate._lenient.x__lenient_tokens__mutmut_35: killed
     nepdate._lenient.x__lenient_tokens__mutmut_36: killed
-    nepdate._lenient.x__lenient_tokens__mutmut_37: survived
+    nepdate._lenient.x__lenient_tokens__mutmut_37: killed
     nepdate._lenient.x__lenient_tokens__mutmut_38: killed
     nepdate._lenient.x__lenient_tokens__mutmut_39: killed
     nepdate._lenient.x__lenient_tokens__mutmut_40: survived
@@ -607,7 +607,7 @@
     nepdate._lenient.x__month_form__mutmut_4: killed
     nepdate._lenient.x__month_form__mutmut_5: killed
     nepdate._lenient.x__month_form__mutmut_6: killed
-    nepdate._lenient.x__month_form__mutmut_7: survived
+    nepdate._lenient.x__month_form__mutmut_7: killed
     nepdate._lenient.x__month_form__mutmut_8: killed
     nepdate._lenient.x__month_form__mutmut_9: killed
     nepdate._lenient.x__month_form__mutmut_10: survived
@@ -619,7 +619,7 @@
     nepdate._lenient.x__month_form__mutmut_16: killed
     nepdate._lenient.x__month_form__mutmut_17: killed
     nepdate._lenient.x__month_form__mutmut_18: killed
-    nepdate._lenient.x__month_form__mutmut_19: survived
+    nepdate._lenient.x__month_form__mutmut_19: killed
     nepdate._lenient.x__month_form__mutmut_20: killed
     nepdate._lenient.x__month_form__mutmut_21: killed
     nepdate._lenient.x__month_form__mutmut_22: survived
@@ -637,7 +637,7 @@
     nepdate._lenient.x__numeric_form__mutmut_5: killed
     nepdate._lenient.x__numeric_form__mutmut_6: killed
     nepdate._lenient.x__numeric_form__mutmut_7: killed
-    nepdate._lenient.x__numeric_form__mutmut_8: survived
+    nepdate._lenient.x__numeric_form__mutmut_8: killed
     nepdate._lenient.x__numeric_form__mutmut_9: killed
     nepdate._lenient.x__numeric_form__mutmut_10: killed
     nepdate._lenient.x__numeric_form__mutmut_11: survived
@@ -699,7 +699,7 @@
     nepdate._pattern.x_format_pattern__mutmut_49: killed
     nepdate._pattern.x_format_pattern__mutmut_50: killed
     nepdate._pattern.x_format_pattern__mutmut_51: killed
-    nepdate._pattern.x_format_pattern__mutmut_52: survived
+    nepdate._pattern.x_format_pattern__mutmut_52: killed
     nepdate._pattern.x_format_pattern__mutmut_53: killed
     nepdate._pattern.x_format_pattern__mutmut_54: killed
     nepdate._pattern.x_format_pattern__mutmut_55: killed
@@ -742,7 +742,7 @@
     nepdate._pattern.x_format_pattern__mutmut_92: killed
     nepdate._pattern.x_format_pattern__mutmut_93: killed
     nepdate._pattern.x_format_pattern__mutmut_94: killed
-    nepdate._pattern.x_format_pattern__mutmut_95: survived
+    nepdate._pattern.x_format_pattern__mutmut_95: killed
     nepdate._pattern.x_format_pattern__mutmut_96: survived
     nepdate._pattern.x_format_pattern__mutmut_97: survived
     nepdate._pattern.x_format_pattern__mutmut_98: killed
@@ -761,14 +761,14 @@
     nepdate._pattern.x_format_pattern__mutmut_111: killed
     nepdate._pattern.x_format_pattern__mutmut_112: killed
     nepdate._pattern.x_format_pattern__mutmut_113: timeout
-    nepdate._pattern.x_format_pattern__mutmut_114: survived
+    nepdate._pattern.x_format_pattern__mutmut_114: killed
     nepdate._pattern.x_format_pattern__mutmut_115: killed
     nepdate._pattern.x_format_pattern__mutmut_116: killed
     nepdate._pattern.x_format_pattern__mutmut_117: killed
     nepdate._pattern.x_format_pattern__mutmut_118: killed
     nepdate._pattern.x_format_pattern__mutmut_119: killed
     nepdate._pattern.x_format_pattern__mutmut_120: timeout
-    nepdate._pattern.x_format_pattern__mutmut_121: timeout
+    nepdate._pattern.x_format_pattern__mutmut_121: killed
     nepdate._pattern.x_format_pattern__mutmut_122: killed
     nepdate._pattern.x_format_pattern__mutmut_123: killed
     nepdate._pattern.x_format_pattern__mutmut_124: killed
@@ -789,7 +789,7 @@
     nepdate._pattern.x_format_pattern__mutmut_139: killed
     nepdate._pattern.x_format_pattern__mutmut_140: killed
     nepdate._pattern.x_format_pattern__mutmut_141: timeout
-    nepdate._pattern.x_format_pattern__mutmut_142: timeout
+    nepdate._pattern.x_format_pattern__mutmut_142: killed
     nepdate._pattern.x_format_pattern__mutmut_143: killed
     nepdate._pattern.x_format_pattern__mutmut_144: killed
     nepdate._pattern.x_format_pattern__mutmut_145: killed
@@ -849,7 +849,7 @@
     nepdate._parse.x__fast_parse__mutmut_8: killed
     nepdate._parse.x__fast_parse__mutmut_9: killed
     nepdate._parse.x__fast_parse__mutmut_10: killed
-    nepdate._parse.x__fast_parse__mutmut_11: survived
+    nepdate._parse.x__fast_parse__mutmut_11: killed
     nepdate._parse.x__fast_parse__mutmut_12: killed
     nepdate._parse.x__fast_parse__mutmut_13: killed
     nepdate._parse.x__fast_parse__mutmut_14: killed
@@ -892,7 +892,7 @@
     nepdate._parse.x__scan_strict__mutmut_15: killed
     nepdate._parse.x__scan_strict__mutmut_16: killed
     nepdate._parse.x__scan_strict__mutmut_17: killed
-    nepdate._parse.x__scan_strict__mutmut_18: survived
+    nepdate._parse.x__scan_strict__mutmut_18: killed
     nepdate._parse.x__scan_strict__mutmut_19: killed
     nepdate._parse.x__scan_strict__mutmut_20: killed
     nepdate._parse.x__scan_strict__mutmut_21: survived
@@ -909,7 +909,7 @@
     nepdate._parse.x__scan_strict__mutmut_32: killed
     nepdate._parse.x__scan_strict__mutmut_33: killed
     nepdate._parse.x__scan_strict__mutmut_34: killed
-    nepdate._parse.x__scan_strict__mutmut_35: survived
+    nepdate._parse.x__scan_strict__mutmut_35: killed
     nepdate._parse.x__scan_strict__mutmut_36: killed
     nepdate._parse.x__scan_strict__mutmut_37: killed
     nepdate._parse.x__scan_strict__mutmut_38: survived
@@ -926,12 +926,12 @@
     nepdate._parse.x__scan_strict__mutmut_49: survived
     nepdate._parse.x__scan_strict__mutmut_50: killed
     nepdate._parse.x__scan_strict__mutmut_51: killed
-    nepdate._parse.x__scan_strict__mutmut_52: survived
+    nepdate._parse.x__scan_strict__mutmut_52: killed
     nepdate._parse.x__scan_strict__mutmut_53: killed
     nepdate._parse.x__scan_strict__mutmut_54: killed
     nepdate._parse.x__scan_strict__mutmut_55: killed
     nepdate._parse.x__scan_strict__mutmut_56: killed
-    nepdate._parse.x__scan_strict__mutmut_57: survived
+    nepdate._parse.x__scan_strict__mutmut_57: killed
     nepdate._parse.x__scan_strict__mutmut_58: killed
     nepdate._parse.x__scan_strict__mutmut_59: killed
     nepdate._parse.x__scan_strict__mutmut_60: survived
@@ -954,13 +954,13 @@
     nepdate._date.xǁNepaliDateǁ__init____mutmut_3: survived
     nepdate._date.xǁNepaliDateǁ__init____mutmut_4: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_5: survived
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_6: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_6: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_7: survived
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_8: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_8: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_9: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_10: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_11: killed
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_12: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_12: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_13: survived
     nepdate._date.xǁNepaliDateǁ__init____mutmut_14: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_15: killed
@@ -975,14 +975,14 @@
     nepdate._date.xǁNepaliDateǁ__init____mutmut_24: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_25: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_26: killed
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_27: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_27: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_28: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_29: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_30: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_31: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_32: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_33: killed
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_34: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_34: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_35: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_36: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_37: killed
@@ -997,7 +997,7 @@
     nepdate._date.xǁNepaliDateǁ__init____mutmut_46: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_47: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_48: killed
-    nepdate._date.xǁNepaliDateǁ__init____mutmut_49: survived
+    nepdate._date.xǁNepaliDateǁ__init____mutmut_49: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_50: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_51: killed
     nepdate._date.xǁNepaliDateǁ__init____mutmut_52: killed
@@ -1046,7 +1046,7 @@
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_6: killed
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_7: killed
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_8: killed
-    nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_9: survived
+    nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_9: killed
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_10: killed
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_11: killed
     nepdate._date.xǁNepaliDateǁfrom_ordinal__mutmut_12: killed
@@ -1080,7 +1080,7 @@
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_11: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_12: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_13: killed
-    nepdate._date.xǁNepaliDateǁadd_months__mutmut_14: survived
+    nepdate._date.xǁNepaliDateǁadd_months__mutmut_14: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_15: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_16: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_17: killed
@@ -1125,10 +1125,10 @@
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_56: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_57: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_58: killed
-    nepdate._date.xǁNepaliDateǁadd_months__mutmut_59: survived
-    nepdate._date.xǁNepaliDateǁadd_months__mutmut_60: survived
-    nepdate._date.xǁNepaliDateǁadd_months__mutmut_61: survived
-    nepdate._date.xǁNepaliDateǁadd_months__mutmut_62: survived
+    nepdate._date.xǁNepaliDateǁadd_months__mutmut_59: killed
+    nepdate._date.xǁNepaliDateǁadd_months__mutmut_60: killed
+    nepdate._date.xǁNepaliDateǁadd_months__mutmut_61: killed
+    nepdate._date.xǁNepaliDateǁadd_months__mutmut_62: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_63: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_64: killed
     nepdate._date.xǁNepaliDateǁadd_months__mutmut_65: killed
@@ -1283,7 +1283,7 @@
     nepdate._date.xǁNepaliDateǁ__add____mutmut_1: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_2: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_3: killed
-    nepdate._date.xǁNepaliDateǁ__add____mutmut_4: survived
+    nepdate._date.xǁNepaliDateǁ__add____mutmut_4: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_5: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_6: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_7: survived
@@ -1297,11 +1297,11 @@
     nepdate._date.xǁNepaliDateǁ__eq____mutmut_2: killed
     nepdate._date.xǁNepaliDateǁ__lt____mutmut_1: killed
     nepdate._date.xǁNepaliDateǁ__lt____mutmut_2: killed
-    nepdate._date.xǁNepaliDateǁ__le____mutmut_1: survived
+    nepdate._date.xǁNepaliDateǁ__le____mutmut_1: killed
     nepdate._date.xǁNepaliDateǁ__le____mutmut_2: killed
-    nepdate._date.xǁNepaliDateǁ__gt____mutmut_1: survived
+    nepdate._date.xǁNepaliDateǁ__gt____mutmut_1: killed
     nepdate._date.xǁNepaliDateǁ__gt____mutmut_2: killed
-    nepdate._date.xǁNepaliDateǁ__ge____mutmut_1: survived
+    nepdate._date.xǁNepaliDateǁ__ge____mutmut_1: killed
     nepdate._date.xǁNepaliDateǁ__ge____mutmut_2: killed
     nepdate._date.xǁNepaliDateǁ__hash____mutmut_1: survived
     nepdate._date.x__from_serial__mutmut_1: killed

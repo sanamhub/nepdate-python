@@ -45,7 +45,7 @@ def test_check_passes(ci: Any, mutation_check: Any, tmp_path: Path) -> None:
 
 
 def test_below_floor_is_a_failure(mutation_check: Any, tmp_path: Path) -> None:
-    """The negative control: 80 % is below the 91 % floor."""
+    """The negative control: 80 % is below the 95 % floor."""
     stats, results, equivalents = _files(
         tmp_path, stats={"killed": 80, "survived": 20, "total": 100}
     )
@@ -93,3 +93,22 @@ def test_malformed_stats_is_a_failure(mutation_check: Any, tmp_path: Path) -> No
     stats, results, equivalents = _files(tmp_path, stats={"killed": 1})
     problems = mutation_check.check(stats, results, equivalents)
     assert any("no non-negative integer" in problem for problem in problems)
+
+
+def test_non_equivalent_section_is_a_failure(mutation_check: Any, tmp_path: Path) -> None:
+    """A survivor may only be disposed of as equivalent, not as covered by some test."""
+    stats, results, equivalents = _files(tmp_path, names=["nepdate._date.x__f__mutmut_1"])
+    equivalents.write_text(
+        "## Test-covered (1)\n\n" + equivalents.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    problems = mutation_check.check(stats, results, equivalents)
+    assert any("not allowed" in problem for problem in problems)
+
+
+def test_equivalent_section_with_a_count_passes(mutation_check: Any, tmp_path: Path) -> None:
+    """The real table's ``## Equivalent (n)`` heading is accepted."""
+    stats, results, equivalents = _files(tmp_path)
+    equivalents.write_text(
+        "## Equivalent (5)\n\n" + equivalents.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    assert mutation_check.check(stats, results, equivalents) == []

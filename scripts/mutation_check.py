@@ -9,8 +9,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FLOOR = 91.0
+FLOOR = 95.0
 SURVIVOR_ID = re.compile(r"`((?:nepdate|nepdate_patro)[^`]*__mutmut_[0-9]+)`")
+SECTION = re.compile(r"^## (.+?)(?: \(\d+\))?$", re.MULTILINE)
+ALLOWED_SECTION = "Equivalent"
 REQUIRED_FIELDS = ("killed", "survived", "total")
 
 
@@ -55,12 +57,16 @@ def _dispositions(path: Path) -> set[str]:
         The mutant ids.
 
     Raises:
-        CheckError: The file is missing or an id appears twice.
+        CheckError: The file is missing, has a section other than ``Equivalent``, or an id
+            appears twice.
     """
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
         raise CheckError(f"cannot read {path}: {exc}") from exc
+    for section in SECTION.findall(text):
+        if section != ALLOWED_SECTION:
+            raise CheckError(f"disposition section {section!r} is not allowed; only equivalents")
     ids = SURVIVOR_ID.findall(text)
     duplicates = {name for name in ids if ids.count(name) > 1}
     if duplicates:
