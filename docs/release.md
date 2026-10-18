@@ -22,24 +22,24 @@ uv run python scripts/data_status.py
 uv run python scripts/ci.py release-check 0.1.0
 ```
 
-`data_status` reads `shared/data/patro/*.json` directly. Public holidays must have at least 183 days
-left on the release date; tithi and events print a warning. Use `--today YYYY-MM-DD` to check
-another date. A failure is fixed by updating the hub data and merging the `shared-sync` pull
+`data_status` reads `shared/data/patro/*.json` directly and counts from today's UTC date, as every
+port does. Public holidays must have at least 183 days left on the release date; tithi and events
+print a warning. Use `--today YYYY-MM-DD` to check another date. A failure is fixed by updating the hub data and merging the `shared-sync` pull
 request, not by lowering the threshold.
 
 `release-check` checks both `pyproject.toml` versions, the patro dependency range, the dated
-changelog section, the data freshness rule and the release rehearsal. It prints a tithi warning
-when one applies. Pass `--today YYYY-MM-DD` after the version to use another data date.
+changelog section and the data freshness rule. It builds nothing. It prints a tithi warning when
+one applies. Pass `--today YYYY-MM-DD` after the version to use another data date.
 
 ## Rehearsal
 
-The rehearsal builds four artifacts in a temporary directory and uploads nothing:
+Locally, the rehearsal builds four artifacts in a temporary directory and uploads nothing:
 
 ```console
 uv run python scripts/ci.py release-rehearsal
 ```
 
-It builds both sdists and both wheels, runs `twine check` from the pinned `release` group, and
+It builds both sdists and both wheels with a plain `uv build --all-packages`, runs `twine check` from the pinned `release` group, and
 checks:
 
 - no wheel contains a `tests`, `fuzz` or `docs` path, or a `test_*.py` file;
@@ -49,16 +49,18 @@ checks:
   `_tables.py`;
 - the two wheel versions, the installed package metadata and the changelog agree.
 
-The release build stages the patro source data next to the package before `uv build`, so the sdist
-and the rehearsal use the same inputs:
+The patro sdist gets its JSON from hatchling's `force-include` of `../../shared/data/patro`
+(ADR-0011), so a direct `uv build` and the release build give the same files, and a build without
+that folder fails. The release workflow builds once and checks the files it will publish:
 
 ```console
 uv run python scripts/ci.py build-release
+uv run python scripts/ci.py release-rehearsal 0.1.0 --dist dist
 uv run python scripts/ci.py sort-dist
 ```
 
-`build-release` writes the four files to `dist/`; `sort-dist` moves them to `dist/core/` and
-`dist/patro/`. Do not upload them by hand.
+`build-release` writes the four files to `dist/`; `release-rehearsal --dist` checks them without
+building; `sort-dist` moves them to `dist/core/` and `dist/patro/`. Do not upload them by hand.
 
 ## The tag
 
