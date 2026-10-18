@@ -9,7 +9,14 @@ from ._errors import ErrorKind, NepDateError
 
 
 class DateRange:
-    """An inclusive range of Bikram Sambat dates."""
+    """An inclusive range of Bikram Sambat dates.
+
+    Examples:
+        >>> len(DateRange.month(2080, 5))
+        31
+        >>> DateRange.month(2080, 5).start
+        NepaliDate(2080, 5, 1)
+    """
 
     __slots__ = ("_end", "_start")
 

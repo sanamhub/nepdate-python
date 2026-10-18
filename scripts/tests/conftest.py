@@ -46,3 +46,15 @@ def codegen() -> Any:
 def ci() -> Any:
     """Load ``scripts/ci.py`` as a module."""
     return _load("ci_script", "ci.py")
+
+
+@pytest.fixture(scope="session")
+def docs_check() -> Any:
+    """Load ``scripts/docs_check.py`` as a module."""
+    return _load("docs_check_script", "docs_check.py")
+
+
+@pytest.fixture(scope="session")
+def benchmark_inputs() -> Any:
+    """Load ``benchmarks/inputs.py`` as a module."""
+    return _load("benchmark_inputs_script", "../benchmarks/inputs.py")

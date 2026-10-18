@@ -38,6 +38,12 @@ class NepaliDate:
     (``_o``), so dates order chronologically. The private slots are read-only by
     convention only: code that reaches into ``_y`` can overwrite them, accepted for
     speed (ADR-0002 §2).
+
+    Examples:
+        >>> NepaliDate(2080, 5, 15).to_date()
+        datetime.date(2023, 9, 1)
+        >>> NepaliDate(2080, 5, 15).month_enum.label()
+        'Bhadra'
     """
 
     __slots__ = ("_d", "_m", "_o", "_y")

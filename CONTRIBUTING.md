@@ -21,7 +21,7 @@ Thanks for helping. This repository holds the Python `nepdate` and `nepdate-patr
 4. Add a changelog line for anything a user would notice.
 5. Write an ADR in `docs/adr/` for a significant decision.
 6. Use [Conventional Commits](https://www.conventionalcommits.org/), for example
-   `feat(nepdate): P1-03 serial conversion`.
+   `feat(nepdate): add serial conversion`.
 7. Follow the writing rules in `.claude/skills/writing-style/SKILL.md` for docs, comments and
    commit messages.
 

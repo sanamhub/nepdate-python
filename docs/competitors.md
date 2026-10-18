@@ -2,7 +2,8 @@
 
 Checked 2026-09-25 against PyPI metadata, pepy.tech / pypistats, GitHub and the sources (no package
 installed); versions, licences, dependencies and wheels rechecked against the PyPI JSON API on
-2026-10-08 (no changes except the `npdatetime` and `nepkit` notes below). Used by task P5-02 (benchmarks). Every package is pure Python with a lookup table,
+2026-10-08 (no changes except the `npdatetime` and `nepkit` notes below). Used by the benchmark
+suite. Every package is pure Python with a lookup table,
 except `npdatetime` (Rust/PyO3). Only `bikram-sambat` covers 1901–2199 (its data came from
 NepDate).
 
@@ -50,7 +51,7 @@ wraps nepali-datetime), `adbs` (2016, locale-dependent names), `datetime-nepali`
 
 The design prototype's numbers on the reference machine are in ADR-0002 ("Measurements"): on
 CPython 3.13, B1 492.6 ns and B2 388.2 ns over the 64 BENCHMARK dates. No competitor has been timed
-yet; P5-02 does that in the same harness. A PyO3 call would still pay 60 to 150 ns for argument
+yet; the benchmark suite does that in the same harness. A PyO3 call would still pay 60 to 150 ns for argument
 parsing and object creation, so a native build would be about 1.5 to 3 times faster per call, not
 100 times (ADR-0002).
 
@@ -67,10 +68,10 @@ every year. So the port is needed.
 Checked 2026-10-06 and again 2026-10-08: `nepdate` on PyPI is taken by "Gets today's nepali date" (Samir Maharjan,
 versions 0.0.2 to 0.0.4, all uploaded on 2021-09-22, no repository link). Free: `nepdate-bs`,
 `pynepdate`. `nepdate` is free on npm and crates.io. The patro distribution name `nepdate-patro`
-(ADR-0001) and `nepdate-bs` both returned 404 from the PyPI JSON API on 2026-10-08 (free); P0-06
+(ADR-0001) and `nepdate-bs` both returned 404 from the PyPI JSON API on 2026-10-08 (free); the first release
 registers `nepdate-patro`, and `nepdate-bs` if the human picks option 2 below, as pending publishers.
 
-Options (human decision, P0-06):
+Options (human decision before the first release):
 1. Ask the owner to transfer the name; if there is no answer, file a PEP 541 request on
    `pypi/support` (abandoned project). Slow: allow months.
 2. Publish as `nepdate-bs` (import `nepdate`) now, and move to `nepdate` later if the transfer
