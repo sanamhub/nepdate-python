@@ -32,7 +32,8 @@ The floor is **95.00 %** of killed over killed plus survived, rounded down from 
 95.54 %. The baseline has 1263 killed, 59 survived, 21 timed out and 1 with no tests; killed over
 all 1344 mutants is 93.97 %.
 `scripts/mutation_check.py` fails below the floor or when a survivor is missing from
-[`mutation/equivalent.md`](mutation/equivalent.md), or when a disposition is stale.
+[`mutation/equivalent.md`](mutation/equivalent.md), or when a disposition is stale. ADR-0009
+records the P8 run; the current run is the one in `mutation/2026-10-18/`.
 
 `equivalent.md` has one section, **Equivalent**: the mutant cannot change observable behaviour,
 and each row has a proof. An example is `hash(None)` for a value type: collisions are allowed and
