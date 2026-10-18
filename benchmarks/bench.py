@@ -8,6 +8,7 @@ they accept; the ``probe`` function returns those counts and whether the results
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import sys
@@ -31,6 +32,8 @@ from nepdate import DateRange, Lang, NepaliDate
 from nepdate_patro import info
 
 INPUT_COUNT = 64
+QUESTIONABLE_FIRST = 2087
+QUESTIONABLE_LAST = 2090
 PACKAGES = (
     "nepali-datetime",
     "npdatetime",
@@ -180,30 +183,72 @@ def _supported(package: str, op: str) -> tuple[int, ...]:
 _SUPPORTED = {(package, op): _supported(package, op) for package in PACKAGES for op in ("b1", "b2")}
 
 
-def probe() -> dict[str, dict[str, dict[str, int | bool]]]:
-    """Return how many dates each competitor handles and whether all results agree.
+def _as_list(value: tuple[int, int, int] | datetime.date) -> list[int]:
+    """Return a date or date tuple as a JSON list.
+
+    Args:
+        value: A ``datetime.date`` or a ``(year, month, day)`` tuple.
 
     Returns:
-        ``{package: {"b1": {"supported": n, "matches": m, "agrees": bool}, ...}}``.
+        The three integers as a list.
+    """
+    if isinstance(value, datetime.date):
+        return [value.year, value.month, value.day]
+    return [value[0], value[1], value[2]]
+
+
+def probe() -> dict[str, dict[str, dict[str, object]]]:
+    """Return every rejected or differing date for each competitor and direction.
+
+    Returns:
+        ``{package: {"b1": {"supported": n, "matches": m, "agrees": bool,
+        "misses": [{"input", "theirs", "ours", "bs_year", "questionable"}, ...]}, ...}}``.
+        ``theirs`` is None when the package rejected the input.
     """
     expected = {
         "b1": tuple((ad.year, ad.month, ad.day) for ad in DATES_AD),
         "b2": DATES_BS,
     }
-    report: dict[str, dict[str, dict[str, int | bool]]] = {}
+    report: dict[str, dict[str, dict[str, object]]] = {}
     for package in PACKAGES:
         report[package] = {}
         for op in ("b1", "b2"):
             func = _CALL[(package, op)]
-            supported = _SUPPORTED[(package, op)]
-            matches = 0
-            for index in supported:
-                if func(index) == expected[op][index]:
-                    matches += 1
+            misses: list[dict[str, object]] = []
+            rejected = 0
+            for index in range(INPUT_COUNT):
+                expected_value = expected[op][index]
+                bs_year = DATES_BS[index][0] if op == "b1" else expected_value[0]
+                try:
+                    value = func(index)
+                except Exception:
+                    rejected += 1
+                    misses.append(
+                        {
+                            "input": _as_list(DATES_BS[index] if op == "b1" else DATES_AD[index]),
+                            "theirs": None,
+                            "ours": _as_list(expected_value),
+                            "bs_year": bs_year,
+                            "questionable": QUESTIONABLE_FIRST <= bs_year <= QUESTIONABLE_LAST,
+                        }
+                    )
+                    continue
+                if value != expected_value:
+                    misses.append(
+                        {
+                            "input": _as_list(DATES_BS[index] if op == "b1" else DATES_AD[index]),
+                            "theirs": _as_list(value),
+                            "ours": _as_list(expected_value),
+                            "bs_year": bs_year,
+                            "questionable": QUESTIONABLE_FIRST <= bs_year <= QUESTIONABLE_LAST,
+                        }
+                    )
+            supported = INPUT_COUNT - rejected
             report[package][op] = {
-                "supported": len(supported),
-                "matches": matches,
-                "agrees": len(supported) == INPUT_COUNT and matches == INPUT_COUNT,
+                "supported": supported,
+                "matches": INPUT_COUNT - len(misses),
+                "agrees": not misses,
+                "misses": misses,
             }
     return report
 

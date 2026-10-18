@@ -74,8 +74,9 @@ dates, so it is 64 month grids per iteration.
 ## Competitors: B1, BS to AD
 
 `n/64` is the number of BENCHMARK dates the package accepted. `matches` is how many of those
-results equal the committed `shared/data` table (raw counts in
-`benchmarks/results/2026-10-18/probe.json`). A package below 64 on either count is never ranked.
+results equal the committed `shared/data` table (counts and every rejected or differing date are in
+`benchmarks/results/2026-10-18/probe.json`; the dates are tabulated in
+[`competitors.md`](competitors.md)). A package below 64 on either count is never ranked.
 
 | Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
 |---|---:|---:|---:|---|

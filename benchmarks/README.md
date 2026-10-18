@@ -51,4 +51,6 @@ competitor columns are `n/a`. B7 and B8 are patro operations and only this port 
 
 `bench.py --probe` calls every competitor on all 64 dates in both directions and compares the
 result with the committed data. `agrees` is true only when all 64 B1 results and all 64 B2 results
-match. A package that is fast but wrong is listed, never ranked.
+match. Each direction also lists every rejected or differing date with the input, the competitor's
+result and ours; `docs/competitors.md` tabulates them. A package that is fast but wrong is listed,
+never ranked.
