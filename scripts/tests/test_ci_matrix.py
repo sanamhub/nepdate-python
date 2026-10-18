@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 from typing import Any
 
 import pytest
-
-from conftest import _load
 
 WORKFLOW = """\
 name: ci
@@ -97,10 +96,21 @@ def test_ci_builds_into_the_folder_the_matrix_gives(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """scripts/ci.py reads NEPDATE_CI_DIST, so parallel runs never share dist/."""
+    path = Path(__file__).resolve().parent.parent / "ci.py"
+
+    def load() -> Any:
+        """Load a fresh copy of scripts/ci.py, which reads the variable at import."""
+        spec = importlib.util.spec_from_file_location("ci_dist_probe", path)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
     monkeypatch.setenv("NEPDATE_CI_DIST", str(tmp_path / "dist-3.11"))
-    assert tmp_path / "dist-3.11" == _load("ci_dist_probe", "ci.py").DIST
+    assert tmp_path / "dist-3.11" == load().DIST
     monkeypatch.delenv("NEPDATE_CI_DIST")
-    module = _load("ci_dist_probe", "ci.py")
+    module = load()
     assert module.DIST == module.ROOT / "dist"
 
 
