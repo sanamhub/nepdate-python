@@ -5,6 +5,13 @@ share this file and a version number (ADR-0005). The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The core distribution is published as `nepdate-core`; the import name is still `nepdate` and
+  `nepdate-patro` now depends on `nepdate-core` (ADR-0007).
+
 ## [0.1.0] - 2026-10-18
 
 ### Added

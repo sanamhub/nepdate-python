@@ -105,8 +105,9 @@ def test_parse_importtime(ci: Any) -> None:
 
 
 def test_archive_prefix_follows_the_normalized_name(ci: Any) -> None:
-    """A renamed core (for example ``nepdate-bs``) still finds its wheel and sdist."""
-    assert ci._archive_prefix("nepdate") == "nepdate-"
+    """A renamed core still finds its wheel and sdist."""
+    expected = ci.CORE_DIST.lower().replace("-", "_").replace(".", "_") + "-"
+    assert ci._archive_prefix(ci.CORE_DIST) == expected
     assert ci._archive_prefix("nepdate-bs") == "nepdate_bs-"
     assert ci._archive_prefix("nepdate-patro") == "nepdate_patro-"
 

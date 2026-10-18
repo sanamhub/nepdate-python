@@ -23,7 +23,7 @@ machine report, not a quiet-machine target run, and nothing was tuned for it.
 | CPython | 3.13.14 (64-bit) |
 | uv | 0.12.1 |
 | pyperf | 2.10.0 |
-| `nepdate` | 0.1.0 |
+| `nepdate-core` | 0.1.0 |
 | `nepdate-patro` | 0.1.0 |
 | `nepali-datetime` | 1.0.8.5 |
 | `npdatetime` | 0.2.10 |
@@ -79,7 +79,7 @@ results equal the committed `shared/data` table (raw counts in
 
 | Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
 |---|---:|---:|---:|---|
-| `nepdate` | 724.4 | 64/64 | 64 | 31.5 (8.5 to 100.0) |
+| `nepdate-core` | 724.4 | 64/64 | 64 | 31.5 (8.5 to 100.0) |
 | `bikram-sambat` | 1244.8 | 64/64 | 61 | 37.5 (10.7 to 80.2) |
 | `nepkit` | 2106.4 | 64/64 | 62 | 33.8 (8.0 to 81.2) |
 | `nepali-datetime` | 2618.4 | 64/64 | 62 | 40.6 (11.4 to 97.4) |
@@ -93,7 +93,7 @@ results equal the committed `shared/data` table (raw counts in
 
 | Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
 |---|---:|---:|---:|---|
-| `nepdate` | 821.6 | 64/64 | 64 | 66.1 (23.2 to 100.0) |
+| `nepdate-core` | 821.6 | 64/64 | 64 | 66.1 (23.2 to 100.0) |
 | `bikram-sambat` | 1103.2 | 64/64 | 61 | 92.6 (39.8 to 100.0) |
 | `nepkit` | 2089.4 | 64/64 | 62 | 52.7 (17.3 to 98.6) |
 | `npdatetime` | 3953.0 | 64/64 | 62 | 41.3 (17.7 to 83.9) |

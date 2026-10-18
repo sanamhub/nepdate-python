@@ -68,16 +68,19 @@ every year. So the port is needed.
 Checked 2026-10-06 and again 2026-10-08: `nepdate` on PyPI is taken by "Gets today's nepali date" (Samir Maharjan,
 versions 0.0.2 to 0.0.4, all uploaded on 2021-09-22, no repository link). Free: `nepdate-bs`,
 `pynepdate`. `nepdate` is free on npm and crates.io. The patro distribution name `nepdate-patro`
-(ADR-0001) and `nepdate-bs` both returned 404 from the PyPI JSON API on 2026-10-08 (free); the first release
-registers `nepdate-patro`, and `nepdate-bs` if the human picks option 2 below, as pending publishers.
+(ADR-0001) and `nepdate-bs` both returned 404 from the PyPI JSON API on 2026-10-08 (free); the chosen
+core name is `nepdate-core` (ADR-0007).
 
-Options (human decision before the first release):
+Options (considered before the first release):
 1. Ask the owner to transfer the name; if there is no answer, file a PEP 541 request on
    `pypi/support` (abandoned project). Slow: allow months.
 2. Publish as `nepdate-bs` (import `nepdate`) now, and move to `nepdate` later if the transfer
    succeeds, leaving `nepdate-bs` as a thin package that depends on it.
    `nepdate-patro` then changes its dependency from `nepdate-bs` to `nepdate` in the same
    release.
+
+On 2026-10-18 the owner chose neither: the core is published as `nepdate-core` and the import name
+stays `nepdate` (ADR-0007). The options above are kept as history.
 
 The import name stays `nepdate` either way. Installing both this and the old package would clash
 on that import name; the old one has no users worth counting, so this is accepted.

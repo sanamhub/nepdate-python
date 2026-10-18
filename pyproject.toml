@@ -1,5 +1,5 @@
 [project]
-name = "nepdate"
+name = "nepdate-core"
 version = "0.1.0"
 description = "Bikram Sambat (Nepali calendar) for Python, dependency-free and typed"
 readme = "README.md"

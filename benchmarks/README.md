@@ -31,7 +31,7 @@ competitor that rejects some dates is timed only on the ones it accepts and show
 
 | Package | B1 BS to AD | B2 AD to BS |
 |---|---|---|
-| `nepdate` | `NepaliDate(y, m, d).to_date()` | `NepaliDate.from_date(ad)` |
+| `nepdate-core` | `NepaliDate(y, m, d).to_date()` | `NepaliDate.from_date(ad)` |
 | `nepali-datetime` | `nepali_datetime.date(y, m, d).to_datetime_date()` | `nepali_datetime.date.from_datetime_date(ad)` |
 | `npdatetime` | `npdatetime.NepaliDate(y, m, d).to_gregorian()` | `npdatetime.NepaliDate.from_gregorian(y, m, d)` |
 | `nepali` | `converter.nepali_to_english(y, m, d)` | `converter.english_to_nepali(y, m, d)` |

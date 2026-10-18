@@ -1,11 +1,12 @@
 # Runbook: release the core and `nepdate-patro` (Python)
 
-Decided in ADR-0005. Owner: maintainer. Approver: a second person. One tag releases both
-distributions with the same version. `<core-name>` is the core distribution name from P0-06.
+Decided in ADR-0005 and ADR-0007. Owner: maintainer. Approver: a second person. One tag releases
+both distributions with the same version. The core distribution is `nepdate-core`, chosen in
+P0-06; its import name is `nepdate`.
 
 ## One-time setup (before the first release)
 
-1. On PyPI and on TestPyPI, add a **pending publisher** for each project: `<core-name>` and
+1. On PyPI and on TestPyPI, add a **pending publisher** for each project: `nepdate-core` and
    `nepdate-patro`. Owner `sanamhub`, repository `nepdate-python`, workflow `release.yml`,
    environment `production` on PyPI and `testpypi` on TestPyPI. Four entries in total.
 2. In the GitHub repository, create the environments `production` (required reviewer) and
@@ -15,7 +16,7 @@ distributions with the same version. `<core-name>` is the core distribution name
 
 1. `main` is green. `uv run python scripts/ci.py` passes locally.
 2. Both `pyproject.toml` files (root and `packages/nepdate-patro/`) have version `X.Y.Z`; the patro
-   dependency is `<core-name>>=X.Y,<X.(Y+1)`; `CHANGELOG.md` has `## [X.Y.Z] - YYYY-MM-DD`.
+   dependency is `nepdate-core>=X.Y,<X.(Y+1)`; `CHANGELOG.md` has `## [X.Y.Z] - YYYY-MM-DD`.
 3. `uv run python scripts/ci.py release-check X.Y.Z` passes. It checks both `pyproject.toml`
    versions, the patro range and the dated `## [X.Y.Z] - YYYY-MM-DD` changelog heading.
 4. Optional: run `release.yml` by hand with the `version` input and `dry-run: true` to publish to
@@ -32,7 +33,7 @@ git push origin vX.Y.Z
 
 `release.yml` runs preflight, CI and the build, waits for the `production` approval, publishes the
 core and then `nepdate-patro` to PyPI by trusted publishing (with attestations), creates the
-GitHub Release from the changelog section, then installs `<core-name>==X.Y.Z` and
+GitHub Release from the changelog section, then installs `nepdate-core==X.Y.Z` and
 `nepdate-patro==X.Y.Z` from PyPI and runs the README example.
 
 ## After releasing
