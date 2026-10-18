@@ -73,42 +73,44 @@ dates, so it is 64 month grids per iteration.
 
 ## Competitors: B1, BS to AD
 
-`n/64` is the number of BENCHMARK dates the package accepted. `agrees` means all 64 B1 and all
-64 B2 results match the committed data. A package that is not `64/64` is never ranked.
+`n/64` is the number of BENCHMARK dates the package accepted. `matches` is how many of those
+results equal the committed `shared/data` table (raw counts in
+`benchmarks/results/2026-10-18/probe.json`). A package below 64 on either count is never ranked.
 
-| Package | ns/op | n/64 | agrees | Load, CPU % mean (min to max) |
-|---|---:|---:|---|---|
-| `nepdate` | 724.4 | 64/64 | yes | 31.5 (8.5 to 100.0) |
-| `bikram-sambat` | 1244.8 | 64/64 | no | 37.5 (10.7 to 80.2) |
-| `nepkit` | 2106.4 | 64/64 | no | 33.8 (8.0 to 81.2) |
-| `nepali-datetime` | 2618.4 | 64/64 | no | 40.6 (11.4 to 97.4) |
-| `npdatetime` | 6104.7 | 64/64 | no | 63.6 (16.4 to 99.8) |
-| `pyBSDate` | 7886.7 | 64/64 | no | 66.7 (22.5 to 100.0) |
-| `nepali` | 15477.7 | 64/64 | no | 57.9 (13.4 to 100.0) |
-| `bikram` | 18192.4 | 63/64 | no | 73.0 (9.1 to 100.0) |
-| `nepali-calendar-utils` | 76786.6 | 64/64 | no | 48.2 (18.8 to 89.2) |
+| Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
+|---|---:|---:|---:|---|
+| `nepdate` | 724.4 | 64/64 | 64 | 31.5 (8.5 to 100.0) |
+| `bikram-sambat` | 1244.8 | 64/64 | 61 | 37.5 (10.7 to 80.2) |
+| `nepkit` | 2106.4 | 64/64 | 62 | 33.8 (8.0 to 81.2) |
+| `nepali-datetime` | 2618.4 | 64/64 | 62 | 40.6 (11.4 to 97.4) |
+| `npdatetime` | 6104.7 | 64/64 | 62 | 63.6 (16.4 to 99.8) |
+| `pyBSDate` | 7886.7 | 64/64 | 60 | 66.7 (22.5 to 100.0) |
+| `nepali` | 15477.7 | 64/64 | 61 | 57.9 (13.4 to 100.0) |
+| `bikram` | 18192.4 | 63/64 | 62 | 73.0 (9.1 to 100.0) |
+| `nepali-calendar-utils` | 76786.6 | 64/64 | 61 | 48.2 (18.8 to 89.2) |
 
 ## Competitors: B2, AD to BS
 
-| Package | ns/op | n/64 | agrees | Load, CPU % mean (min to max) |
-|---|---:|---:|---|---|
-| `nepdate` | 821.6 | 64/64 | yes | 66.1 (23.2 to 100.0) |
-| `bikram-sambat` | 1103.2 | 64/64 | no | 92.6 (39.8 to 100.0) |
-| `nepkit` | 2089.4 | 64/64 | no | 52.7 (17.3 to 98.6) |
-| `npdatetime` | 3953.0 | 64/64 | no | 41.3 (17.7 to 83.9) |
-| `nepali` | 7366.0 | 63/64 | no | 58.9 (10.4 to 100.0) |
-| `nepali-datetime` | 8496.8 | 64/64 | no | 50.9 (8.8 to 88.8) |
-| `pyBSDate` | 10671.7 | 64/64 | no | 83.8 (25.4 to 100.0) |
-| `nepali-calendar-utils` | 52465.1 | 64/64 | no | 27.4 (13.8 to 59.7) |
-| `bikram` | 72847.3 | 62/64 | no | 66.2 (8.4 to 100.0) |
+| Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
+|---|---:|---:|---:|---|
+| `nepdate` | 821.6 | 64/64 | 64 | 66.1 (23.2 to 100.0) |
+| `bikram-sambat` | 1103.2 | 64/64 | 61 | 92.6 (39.8 to 100.0) |
+| `nepkit` | 2089.4 | 64/64 | 62 | 52.7 (17.3 to 98.6) |
+| `npdatetime` | 3953.0 | 64/64 | 62 | 41.3 (17.7 to 83.9) |
+| `nepali` | 7366.0 | 63/64 | 60 | 58.9 (10.4 to 100.0) |
+| `nepali-datetime` | 8496.8 | 64/64 | 62 | 50.9 (8.8 to 88.8) |
+| `pyBSDate` | 10671.7 | 64/64 | 62 | 83.8 (25.4 to 100.0) |
+| `nepali-calendar-utils` | 52465.1 | 64/64 | 61 | 27.4 (13.8 to 59.7) |
+| `bikram` | 72847.3 | 62/64 | 62 | 66.2 (8.4 to 100.0) |
 
 `npdatetime` is a Rust/PyO3 extension, not pure Python. The other seven are pure Python. B3 to B8
 have no call with the same signature and overflow rules in these packages, so they are `n/a`.
 
-No competitor agrees with `shared/data` on all 64 dates in both directions, so no competitor can
-be ranked against this port for the BENCHMARK §6 target. This port is the only measured package
-that agrees, so the target is met by default; that is not a speed claim against packages that
-return a wrong date. The numbers above still show where each package would land.
+Every competitor rejects or differs from `shared/data` on 2 to 4 of the 64 dates, so none can be ranked
+against this port for the BENCHMARK §6 target, and the target is met by default. A difference is a
+disagreement with the committed table, not proof that the other package is wrong: years 2087 to
+2090 are questionable in NepDate's own data too (`docs/competitors.md`). This is not a speed
+claim. The numbers above still show where each package would land.
 
 ## Import time
 

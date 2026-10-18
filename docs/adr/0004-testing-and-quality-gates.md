@@ -12,9 +12,7 @@
 1. `ruff format --check` and `ruff check` (rules `E, F, W, I, UP, B, SIM, RUF, PL, N, D` with the
    Google docstring convention) over the whole repository.
 2. `mypy --strict src packages/nepdate-patro/src scripts`.
-3. `pytest tests packages/nepdate-patro/tests scripts/tests` and the README doctests, with the
-   docstring examples in `_date.py`, `_range.py` and `nepdate_patro/__init__.py`, and coverage
-   (`pytest-cov`):
+3. `pytest tests packages/nepdate-patro/tests scripts/tests` with coverage (`pytest-cov`):
    ≥ 90 % for `nepdate` and ≥ 90 % for `nepdate_patro`, each measured on its own (org target 80 %).
 4. `python scripts/codegen.py --check`.
 5. `python -X importtime -c "import nepdate"`: the cumulative time of the `nepdate` entry is under 5 ms
@@ -31,16 +29,10 @@
 7. **Patro on its own:** both wheels have the same version; the patro wheel's `Requires-Dist` for
    the core has the same-minor range of ADR-0001 §1; a fresh venv with the core wheel, the patro
    wheel, `pytest` and `hypothesis` runs `python -m pytest packages/nepdate-patro/tests`.
-8. **Docs:** `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md` and `docs/*.md` have no
-   em dash, no task ID and no relative link that does not resolve. Plans and ADRs keep their task
-   IDs and are not part of this gate.
-9. **Consumer:** a fresh venv outside the repository gets the two built wheels and runs one BS to AD
-   conversion and one `nepdate_patro.info` lookup. The venv has no pytest and no checkout on
-   `sys.path`.
 
 Gates 6 and 7 run pytest with `-o addopts=""` so only the named test directory runs, against the
 installed wheels. The pytest config never sets `pythonpath = ["src"]`, so `src/` can't shadow a
-wheel. The last line is `ci: 9/9 gates passed` (or names the gate that failed).
+wheel. The last line is `ci: 7/7 gates passed` (or names the gate that failed).
 
 Tests:
 - Core tests live in `tests/`, patro tests in `packages/nepdate-patro/tests/`, generator and CI

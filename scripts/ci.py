@@ -78,7 +78,7 @@ CORE_PREFIX = _archive_prefix(CORE_DIST)
 PATRO_PREFIX = _archive_prefix(PATRO_DIST)
 EVENT_ANCHOR = "World Day Against Human Trafficking"
 # Coarse ceilings that catch a gross regression on a loaded CI runner. The ADR-0002 §7 budget
-# (5 ms) is measured by the P5 benchmark on a quiet machine, not here.
+# (5 ms) is measured by the benchmark suite on a quiet machine, not here (ADR-0006).
 CORE_IMPORT_LIMIT_US = 50_000
 PATRO_IMPORT_LIMIT_US = 50_000
 # The only modules outside our own packages that `import nepdate` may add to a bare interpreter.
