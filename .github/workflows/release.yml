@@ -213,6 +213,59 @@ jobs:
             dist/core/*
             dist/patro/*
 
+  verify:
+    name: verify from PyPI
+    needs: [preflight, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      INDEX_URL: https://pypi.org/simple/
+    steps:
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Install the released versions with retries
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          set -euo pipefail
+          VENV="$RUNNER_TEMP/verify"
+          uv venv "$VENV"
+          deadline=$((SECONDS + 600))
+          while true; do
+            if uv pip install --python "$VENV/bin/python" --no-cache \
+              --index-url "$INDEX_URL" \
+              "nepdate-core==$VERSION" "nepdate-patro==$VERSION"; then
+              break
+            fi
+            now=$SECONDS
+            if [ "$now" -ge "$deadline" ]; then
+              echo "verify: install failed after 10 minutes" >&2
+              exit 1
+            fi
+            pause=$((deadline - now))
+            if [ "$pause" -gt 30 ]; then pause=30; fi
+            echo "verify: install failed, retrying in ${pause}s" >&2
+            sleep "$pause"
+          done
+      - name: Run the README quick start and one patro lookup
+        run: |
+          "$RUNNER_TEMP/verify/bin/python" - <<'PY'
+          from nepdate import Lang, NepaliDate
+          from nepdate_patro import info
+
+          d = NepaliDate(2080, 5, 15)
+          assert str(d) == "2080/05/15"
+          assert d.to_date().isoformat() == "2023-09-01"
+          assert d.long(weekday=True, lang=Lang.NE) == "शुक्रवार, भदौ १५, २०८०"
+          assert NepaliDate.parse("2080/05/15") == d
+
+          day = info(d)
+          assert day.tithi is not None
+          assert day.tithi.label(Lang.EN) == "Dwitiya"
+          print("verify: README quick start and one patro lookup passed")
+          PY
+
   publish-testpypi:
     name: publish to TestPyPI
     if: github.event_name == 'workflow_dispatch' && inputs.dry-run
@@ -240,3 +293,56 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/patro/
           skip-existing: true
+
+  verify-testpypi:
+    name: verify from TestPyPI
+    needs: [preflight, publish-testpypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      INDEX_URL: https://test.pypi.org/simple/
+    steps:
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Install the released versions with retries
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          set -euo pipefail
+          VENV="$RUNNER_TEMP/verify"
+          uv venv "$VENV"
+          deadline=$((SECONDS + 600))
+          while true; do
+            if uv pip install --python "$VENV/bin/python" --no-cache \
+              --index-url "$INDEX_URL" \
+              "nepdate-core==$VERSION" "nepdate-patro==$VERSION"; then
+              break
+            fi
+            now=$SECONDS
+            if [ "$now" -ge "$deadline" ]; then
+              echo "verify: install failed after 10 minutes" >&2
+              exit 1
+            fi
+            pause=$((deadline - now))
+            if [ "$pause" -gt 30 ]; then pause=30; fi
+            echo "verify: install failed, retrying in ${pause}s" >&2
+            sleep "$pause"
+          done
+      - name: Run the README quick start and one patro lookup
+        run: |
+          "$RUNNER_TEMP/verify/bin/python" - <<'PY'
+          from nepdate import Lang, NepaliDate
+          from nepdate_patro import info
+
+          d = NepaliDate(2080, 5, 15)
+          assert str(d) == "2080/05/15"
+          assert d.to_date().isoformat() == "2023-09-01"
+          assert d.long(weekday=True, lang=Lang.NE) == "शुक्रवार, भदौ १५, २०८०"
+          assert NepaliDate.parse("2080/05/15") == d
+
+          day = info(d)
+          assert day.tithi is not None
+          assert day.tithi.label(Lang.EN) == "Dwitiya"
+          print("verify: README quick start and one patro lookup passed")
+          PY
