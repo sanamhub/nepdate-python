@@ -94,6 +94,13 @@ def test_skip_is_not_a_pass(ci_matrix: Any) -> None:
     assert "2 passed" not in line
 
 
+def test_a_missing_version_is_skipped(ci_matrix: Any, tmp_path: Path) -> None:
+    """A version uv cannot provide is skipped and never counted as passed."""
+    result = ci_matrix.run_version("9.99", tmp_path)
+    assert result.status == "skipped"
+    assert "9.99" in result.detail
+
+
 def test_more_than_four_jobs_is_rejected(ci_matrix: Any) -> None:
     """The task limit is enforced by the argument parser."""
     with pytest.raises(SystemExit):
