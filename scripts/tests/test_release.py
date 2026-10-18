@@ -100,6 +100,33 @@ def test_mismatched_dependency_name_fails(ci: Any, tmp_path: Path) -> None:
     assert any("patro requires" in error for error in errors)
 
 
+def test_release_check_passes_with_empty_unreleased(ci: Any, tmp_path: Path) -> None:
+    """An empty [Unreleased] section is ready for a release."""
+    _release(
+        ci,
+        tmp_path,
+        changelog=(
+            "# Changelog\n\n## [Unreleased]\n\n## [0.1.0] - 2026-10-18\n\n"
+            "### Added\n\n- The release.\n"
+        ),
+    )
+    assert ci.release_check("0.1.0", tmp_path, data=False) == []
+
+
+def test_release_check_rejects_unreleased_entries(ci: Any, tmp_path: Path) -> None:
+    """A release fails while [Unreleased] still holds an entry."""
+    _release(
+        ci,
+        tmp_path,
+        changelog=(
+            "# Changelog\n\n## [Unreleased]\n\n### Changed\n\n- The rename.\n\n"
+            "## [0.1.0] - 2026-10-18\n\n### Added\n\n- The release.\n"
+        ),
+    )
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
+    assert any("[Unreleased]" in error for error in errors)
+
+
 def test_missing_changelog_section_fails(ci: Any, tmp_path: Path) -> None:
     """A release without its dated changelog section fails."""
     _release(ci, tmp_path, changelog="# Changelog\n\n## [Unreleased]\n")
