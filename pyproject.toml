@@ -28,6 +28,13 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "nepdate"
 
+[tool.mutmut]
+source_paths = ["src/nepdate", "packages/nepdate-patro/src/nepdate_patro"]
+also_copy = ["shared", "packages/nepdate-patro/tests"]
+do_not_mutate = ["*_calendar.py", "*_tables.py"]
+pytest_add_cli_args = ["-x", "-q", "--no-header", "-p", "no:cacheprovider", "--ignore=tests/test_source_hygiene.py"]
+pytest_add_cli_args_test_selection = ["tests", "packages/nepdate-patro/tests"]
+
 [tool.uv.workspace]
 members = ["packages/nepdate-patro"]
 
@@ -50,6 +57,11 @@ dev = [
     "pytest>=8.3.0",
     "pytest-cov>=5.0.0",
     "hypothesis>=6.120.0",
+]
+mutation = [
+    "hypothesis==6.170.1",
+    "mutmut==3.8.0",
+    "pytest-cov==7.1.0",
 ]
 
 [tool.ruff]

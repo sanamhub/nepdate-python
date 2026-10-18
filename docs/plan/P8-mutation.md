@@ -31,11 +31,14 @@ AC:
 
 ### P8-01 Tool and scope
 Add `[dependency-groups] mutation = ["mutmut==3.8.0", "pytest-cov==7.1.0", "hypothesis==6.170.1"]`,
-pin the same versions in `uv.lock`, and add `mutation/core.toml` and `mutation/patro.toml` with:
+pin the same versions in `uv.lock`, and add one `[tool.mutmut]` section with:
 - `source_paths`: `src/nepdate` and `packages/nepdate-patro/src/nepdate_patro`;
 - `do_not_mutate`: `*_calendar.py` and `*_tables.py`;
-- `pytest_add_cli_args_test_selection`: the core or patro test directory;
-- `workers = 4` (mutmut's `--max-children`).
+- `pytest_add_cli_args_test_selection`: `tests` and `packages/nepdate-patro/tests`;
+- `also_copy`: `shared` and `packages/nepdate-patro/tests`;
+- `pytest_add_cli_args`: `-x -q --no-header -p no:cacheprovider --ignore=tests/test_source_hygiene.py`.
+  That test parses the installed source and cannot run against mutmut's generated trampolines.
+- 4 children on the command line: `mutmut run --max-children 4`.
 ADR-0009 records the tool, the scope, the floor rule and the jobs. Status stays Proposed until the
 floor is known.
 AC:

@@ -1,0 +1,52 @@
+# ADR-0009: Mutation testing with mutmut
+
+- Status: Proposed
+- Date: 2026-10-18
+- Deciders: Sanam Pakuwal
+- Amends: ADR-0004 (a quality gate outside `scripts/ci.py`)
+
+## Context
+
+The Go port runs Gremlins on the hand-written core and patro files: 4 workers, a survivor baseline
+per package, and a test-efficacy floor of 99.5 % (`docs/plan/G8-mutation-testing.md` and
+`G9-mutation-scope.md`). The Python suite has 712 tests, 98 % line coverage and a fast path that
+must stay fast, so line coverage alone does not show whether the tests check behaviour.
+
+For Python there are two practical tools. **mutmut 3.8.0** selects only the tests that cover a
+mutated function, so a mutant in a helper does not rerun the full suite. It needs `fork`, so it
+runs on WSL locally and on the Ubuntu CI runner. **cosmic-ray 8.7.0** runs the configured
+`test-command` for every mutant. A dry `cosmic-ray init` over the core with `_calendar.py` excluded
+produced 3295 mutants, so the full-suite-per-mutant cost is too high for this shared machine.
+
+A mutmut smoke run over `nepdate._date` with 4 children produced 399 checked mutants in about 41 s
+(9.63 mutations per second); 350 were killed and 49 survived. The full generated set was 1350
+mutants with the two generated tables excluded, so a full run is minutes, not hours.
+
+## Decision
+
+1. The tool is **mutmut 3.8.0**, pinned in the `mutation` dependency group, not in the runtime or
+   dev dependencies. `pytest-cov 7.1.0` and `hypothesis 6.170.1` are pinned there too, because the
+   mutation run uses the real test suite.
+2. The scope is `src/nepdate` and `packages/nepdate-patro/src/nepdate_patro`. The generated
+   `_calendar.py` and `_tables.py` are excluded. The source-hygiene test is excluded from the
+   mutation runs because it parses the installed source and the mutmut trampolines are not that
+   source; every other test stays.
+3. The run uses at most **4 children**. Results are saved under `docs/mutation/<date>/` with the
+   tool output and a `summary.json` that records the wall time and the worker count.
+4. Every survivor is killed by a named test or listed in `docs/mutation/equivalent.md` with the
+   mutant id, the diff and a one-line proof. "Hard to test" is not equivalence.
+5. The score floor is set from the measured score after triage, rounded down, and written here and
+   in the checker. A release below it is blocked; the weekly run reports drift. There is no
+   per-pull-request mutation gate, so `scripts/ci.py` stays at 9 gates.
+6. The local Windows run uses WSL Ubuntu 26.04 because mutmut 3 needs `fork`. GitHub Actions uses
+   `ubuntu-latest`.
+
+## Consequences
+
+- A full run costs minutes, not a per-PR check. The release job and the weekly job are the
+  enforcement points.
+- The floor is a measured number, not a guess, and it is not set until P8-03.
+- Mutant ids and diffs are tool output. A tool upgrade that changes ids is a deliberate baseline
+  update, not a silent pass.
+- Local runs need a WSL copy of the repository. The copy, virtualenv and pip cache are kept off the
+  C: drive.
