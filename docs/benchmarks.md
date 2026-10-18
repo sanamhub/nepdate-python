@@ -114,16 +114,40 @@ claim. The numbers above still show where each package would land.
 
 ## Import time
 
-Best of five `-X importtime` runs, with the load sampled before each run. This is the ADR-0002
-§7 measurement.
+Best of five `-X importtime` runs, with the load sampled before each run. The first table is the
+P5 measurement against the old 5 ms target.
 
 | Import | Best us | Samples, us | Load, CPU % mean (min to max) |
 |---|---:|---|---|
 | `import nepdate` | 15086 | 46715, 25968, 27548, 15086, 23354 | 69.8 (56.9 to 91.1) |
 | `import nepdate` then `import nepdate_patro` | 8253 | 8745, 11410, 8253, 8890, 11649 | 64.4 (40.6 to 76.1) |
 
-`import nepdate_patro` is under its 10 ms budget. `import nepdate` is over its 5 ms budget on this
-loaded machine, as in every earlier phase; the gate's coarse ceiling still passes.
+P6 deferred the formatting, lenient parser and fiscal label tables. The before and after runs below
+alternate between a copy of `main` at `31a994f` on `PYTHONPATH` and this branch, seven fresh
+processes each, so load drift affects both sides.
+
+| Tree | Best us | Median us | Mean us | Load, CPU % mean (min to max) |
+|---|---:|---:|---:|---|
+| Before | 14294 | 22154 | 21372 | 74.2 (41.9 to 90.8) |
+| After | 13883 | 19485 | 18406 | 79.4 (55.9 to 91.6) |
+
+At about 90 % load the pairs were 24454 to 17849 us and 29785 to 20749 us. The package's own module
+self time in the first pair fell from 11808 to 9284 us: `_format` (1160 us) and `_pattern` (630 us)
+are no longer imported by `import nepdate`, and `_parse` (886 to 530 us) and `_fiscal` (999 to
+656 us) build less.
+
+The floor is the bare interpreter, measured in the same loaded window:
+
+| Import | Best us | Load, CPU % |
+|---|---:|---:|
+| `datetime` | 1510 | 59.0 |
+| `enum` | 3418 | 65.9 |
+| both | 4530 | 68.8 |
+
+ADR-0008 proposes a load-aware budget of 15 ms for the core and 20 ms for the patro, best of five
+at up to 80 % CPU, while the quiet-machine targets stay 5 ms and 10 ms. Until ADR-0008 is accepted,
+the 5 ms number in ADR-0002 §7 is still the published target, and the loaded numbers above miss it.
+The gate's 50 ms ceiling passes (ADR-0006).
 
 ## Targets
 

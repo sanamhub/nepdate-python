@@ -5,15 +5,11 @@ from __future__ import annotations
 from ._calendar import MAX_YEAR, MIN_YEAR, MONTH_LENGTHS, MONTH_START_ORD
 from ._date import NepaliDate, _from_parts
 from ._errors import ErrorKind, NepDateError
-from ._names import Lang, Month, Quarter
+from ._names import Lang, Month, Quarter, to_nepali_digits
 from ._range import DateRange
 
 _MIN_FY = MIN_YEAR - 1
 _MAX_FY = MAX_YEAR
-
-_NEPALI_DIGITS = str.maketrans("0123456789", "०१२३४५६७८९")
-_YEARS_NE = tuple(str(year).translate(_NEPALI_DIGITS) for year in range(_MIN_FY, _MAX_FY + 1))
-_TWO_DIGIT_NE = tuple(f"{n:02d}".translate(_NEPALI_DIGITS) for n in range(100))
 
 
 class FiscalYear:
@@ -121,8 +117,8 @@ class FiscalYear:
         """
         if lang is Lang.NE:
             return (
-                _YEARS_NE[self._start_year - _MIN_FY]
+                to_nepali_digits(self._start_year)
                 + "/"
-                + _TWO_DIGIT_NE[(self._start_year + 1) % 100]
+                + to_nepali_digits((self._start_year + 1) % 100, 2)
             )
         return f"{self._start_year}/{(self._start_year + 1) % 100:02d}"

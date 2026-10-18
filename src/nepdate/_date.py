@@ -16,10 +16,8 @@ from ._calendar import (
 )
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
-from ._format import format_default, format_iso, format_long, format_short
 from ._names import DateOrder, Lang, Month, Overflow, Quarter, Separator, Weekday
 from ._parse import parse_lenient, parse_strict
-from ._pattern import format_pattern
 
 # `typing` would add three modules to `import nepdate` (the import gate); type checkers treat a
 # module-level TYPE_CHECKING constant the same as typing.TYPE_CHECKING.
@@ -333,6 +331,8 @@ class NepaliDate:
 
     def __str__(self) -> str:
         """The default display, ``YYYY/MM/DD`` with ASCII digits."""
+        from ._format import format_default  # noqa: PLC0415 - keeps the tables out of import
+
         return format_default(self._y, self._m, self._d, Lang.EN)
 
     def __repr__(self) -> str:
@@ -341,6 +341,8 @@ class NepaliDate:
 
     def isoformat(self) -> str:
         """The sortable ``YYYY-MM-DD`` form (D-11)."""
+        from ._format import format_iso  # noqa: PLC0415 - keeps the tables out of import
+
         return format_iso(self._y, self._m, self._d, Lang.EN)
 
     def short(
@@ -361,6 +363,8 @@ class NepaliDate:
         Returns:
             The short form, for example ``"2080-05-15"`` or ``"१५-५-२०८०"``.
         """
+        from ._format import format_short  # noqa: PLC0415 - keeps the tables out of import
+
         return format_short(self._y, self._m, self._d, order, sep, pad, lang)
 
     def long(
@@ -382,6 +386,8 @@ class NepaliDate:
         Returns:
             The long form, for example ``"Tuesday, Shrawan 15, 2081"``.
         """
+        from ._format import format_long  # noqa: PLC0415 - keeps the tables out of import
+
         return format_long(
             self._y,
             self._m,
@@ -404,6 +410,8 @@ class NepaliDate:
         Returns:
             The formatted date; literal characters are never localised.
         """
+        from ._pattern import format_pattern  # noqa: PLC0415 - keeps the tables out of import
+
         return format_pattern(pattern, self._y, self._m, self._d, self._o % 7, lang)
 
     def __format__(self, spec: str) -> str:

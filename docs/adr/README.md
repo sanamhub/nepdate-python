@@ -13,3 +13,4 @@ ADR.
 | [0005](0005-releases.md) | Releases | Accepted |
 | [0006](0006-docs-consumer-gates-and-import-ceiling.md) | Docs and consumer gates, and the import-time ceiling | Accepted |
 | [0007](0007-core-distribution-name.md) | The core distribution name | Accepted |
+| [0008](0008-import-budget.md) | The import budget on a loaded machine | Proposed |
