@@ -155,6 +155,14 @@ at up to 80 % CPU, while the quiet-machine targets stay 5 ms and 10 ms. Until AD
 the 5 ms number in ADR-0002 §7 is still the published target, and the loaded numbers above miss it.
 The gate's 50 ms ceiling passes (ADR-0006).
 
+## P7 quiet window
+
+P7 checked the load before measuring anything: 19 `run.py --check-load` samples between 10:09 and
+10:28 on 2026-10-18. The all-CPU load ranged from 21.1 to 95.4 % (mean 68.0 %) and was never under
+the 15 % limit; logical CPU 2 reached 100 %. No quiet batch was possible. Every import and B1 to B8
+target stays pending, no loaded number is used as a verdict, and ADR-0008 stays Proposed. The
+attempts are in `benchmarks/results/2026-10-18-p7/quiet.json`.
+
 ## Targets
 
 The ADR-0002 §8 targets are B1 under 550 ns, B2 under 450, B3 under 400, B4 under 350, B5 under

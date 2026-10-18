@@ -23,6 +23,12 @@ uv run --group bench python benchmarks/run.py --date YYYY-MM-DD
 per-benchmark JSON files come from pyperf; `summary.json` has the times, the load and the
 competitor counts. `benchmarks/bench.py --only b7` runs one benchmark by hand.
 
+`run.py --check-load` samples the all-CPU and logical-CPU-2 load without importing a competitor,
+appends the sample to `quiet.json` and exits 1 when the all-CPU load is 15 % or more. A normal run
+stops with exit 3 above 15 % unless `--allow-loaded` is given. Every row records `load_before`,
+`loaded` and the load range while the process ran; a row with `loaded: true` is not a target
+verdict (P7).
+
 Each benchmark function walks all its inputs and returns the result list; pyperf divides by
 `inner_loops`, the number of accepted inputs, so the reported value is per single operation. A
 competitor that rejects some dates is timed only on the ones it accepts and shown as `n/64`.
