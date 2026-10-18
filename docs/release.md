@@ -28,8 +28,9 @@ print a warning. Use `--today YYYY-MM-DD` to check another date. A failure is fi
 request, not by lowering the threshold.
 
 `release-check` checks both `pyproject.toml` versions, the patro dependency range, the dated
-changelog section and the data freshness rule. It builds nothing. It prints a tithi warning when
-one applies. Pass `--today YYYY-MM-DD` after the version to use another data date.
+changelog section and that `[Unreleased]` has no entries. It also checks the data freshness rule.
+It builds nothing. It prints a tithi warning when one applies. Pass `--today YYYY-MM-DD` after the
+version to use another data date.
 
 ## Rehearsal
 
@@ -70,5 +71,18 @@ publish job checks that the tagged commit is on `origin/main` and uses trusted p
 no API token in the repository.
 
 If the core upload succeeds and the patro upload fails, rerun the job: the core step has
-`skip-existing: true`, and the patro step does not. To undo a release, yank both files and publish
-the next patch version (ADR-0005).
+`skip-existing: true`, and the patro step does not.
+
+## After the publish
+
+A tag run publishes to PyPI, then the `verify` job installs `nepdate-core==X.Y.Z` and
+`nepdate-patro==X.Y.Z` from PyPI in a clean virtualenv. A dispatch dry run publishes to TestPyPI,
+then `verify-testpypi` does the same against `https://test.pypi.org/simple/`. Both jobs wait up to
+10 minutes for the files to appear, retrying every 30 seconds while time remains. They run the
+README quick start and one `nepdate_patro.info` call. Both are read-only: `contents: read`, no
+`id-token`, and no upload.
+
+If a verify job fails, the release is not done. Do not upload the same files again and do not
+publish a different build under the same version. Yank both distributions for that version, fix
+the cause, and publish the next patch version of both (ADR-0005). A TestPyPI failure is a failed
+rehearsal: yank both TestPyPI files and use the next patch version for the next run.
