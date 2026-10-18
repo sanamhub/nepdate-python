@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
+
+from nepdate import NepaliDate
 
 
 def _write(root: Path, name: str, text: str) -> None:
@@ -61,27 +65,27 @@ def _release(  # noqa: PLR0913 - fixtures mirror the three files release_check r
 def test_release_check_passes(ci: Any, tmp_path: Path) -> None:
     """Matching versions, the same-minor range and a dated section pass."""
     _release(ci, tmp_path)
-    assert ci.release_check("0.1.0", tmp_path) == []
+    assert ci.release_check("0.1.0", tmp_path, data=False) == []
 
 
 def test_core_version_mismatch_fails(ci: Any, tmp_path: Path) -> None:
     """The negative control for the core version."""
     _release(ci, tmp_path, core_version="0.0.9")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("core pyproject version" in error for error in errors)
 
 
 def test_patro_version_mismatch_fails(ci: Any, tmp_path: Path) -> None:
     """The negative control for the patro version."""
     _release(ci, tmp_path, patro_version="0.0.9")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro pyproject version" in error for error in errors)
 
 
 def test_wrong_patro_range_fails(ci: Any, tmp_path: Path) -> None:
     """A dependency range outside the released minor fails."""
     _release(ci, tmp_path, dependency=f"{ci.CORE_DIST}>=0.1,<0.3")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro requires" in error for error in errors)
 
 
@@ -92,29 +96,29 @@ def test_mismatched_dependency_name_fails(ci: Any, tmp_path: Path) -> None:
     ``nepdate`` while the core is built as ``nepdate-core``.
     """
     _release(ci, tmp_path, dependency=f"{ci.CORE_MODULE}>=0.1,<0.2")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro requires" in error for error in errors)
 
 
 def test_missing_changelog_section_fails(ci: Any, tmp_path: Path) -> None:
     """A release without its dated changelog section fails."""
     _release(ci, tmp_path, changelog="# Changelog\n\n## [Unreleased]\n")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("no '## [0.1.0]" in error for error in errors)
 
 
 def test_invalid_changelog_date_fails(ci: Any, tmp_path: Path) -> None:
     """The date must be a real ISO date, not a shaped string."""
     _release(ci, tmp_path, changelog="# Changelog\n\n## [0.1.0] - 2026-13-01\n")
-    errors = ci.release_check("0.1.0", tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("invalid date" in error for error in errors)
 
 
 def test_bad_semver_fails(ci: Any, tmp_path: Path) -> None:
     """The version check rejects leading zeros and missing parts."""
     _release(ci, tmp_path)
-    assert ci.release_check("0.01.0", tmp_path) != []
-    assert ci.release_check("1.0", tmp_path) != []
+    assert ci.release_check("0.01.0", tmp_path, data=False) != []
+    assert ci.release_check("1.0", tmp_path, data=False) != []
 
 
 def test_release_notes_extract_one_section(ci: Any, tmp_path: Path) -> None:
@@ -166,3 +170,26 @@ def test_sort_dist_rejects_an_unknown_artifact(ci: Any, tmp_path: Path) -> None:
     (dist / "other-0.1.0.whl").write_text("x", encoding="utf-8")
     with pytest.raises(ci.GateError):
         ci.sort_dist(tmp_path)
+
+
+def test_release_check_fails_when_holidays_end_in_182_days(ci: Any, tmp_path: Path) -> None:
+    """The data freshness gate is part of the release command, not a separate note."""
+    _release(ci, tmp_path)
+    folder = tmp_path / "shared" / "data" / "patro"
+    folder.mkdir(parents=True)
+    last = NepaliDate(2081, 1, 1).to_date()
+    (folder / "2081.json").write_text(
+        json.dumps({"days": {"2081-01-01": {"holiday": True}}}), encoding="utf-8"
+    )
+    at_182 = last - timedelta(days=182)
+    errors = ci.release_check("0.1.0", tmp_path, today=at_182)
+    assert any("public holiday" in error for error in errors)
+    at_183 = last - timedelta(days=183)
+    assert ci.release_check("0.1.0", tmp_path, today=at_183) == []
+
+
+def test_release_check_fails_without_patro_data(ci: Any, tmp_path: Path) -> None:
+    """A tree with no patro folder fails the freshness check instead of skipping it."""
+    _release(ci, tmp_path)
+    errors = ci.release_check("0.1.0", tmp_path)
+    assert any("no patro JSON" in error for error in errors)

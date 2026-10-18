@@ -58,7 +58,7 @@ def _job(lines: list[str], name: str) -> list[str]:
     return []
 
 
-def problems(text: str) -> list[str]:  # noqa: PLR0912 - one pass, one message per rule
+def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one message per rule
     """Check the workflow rules that a review keeps missing.
 
     Args:
@@ -94,6 +94,11 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912 - one pass, one message p
         match = re.search(r"\buses:\s*(\S+)", line)
         if match and not match.group(1).startswith("./") and not SHA.search(match.group(1)):
             found.append(f"line {index + 1}: action is not pinned by SHA")
+    build = "\n".join(_job(lines, "build"))
+    if "scripts/ci.py build-release" not in build:
+        found.append("the build job must build with scripts/ci.py build-release")
+    if 'release-rehearsal "$VERSION" --dist dist' not in build:
+        found.append("the build job must check the built files it uploads")
     publish = "\n".join(_job(lines, "publish"))
     if "environment: production" not in publish:
         found.append("publish must use the production environment")
@@ -153,3 +158,5 @@ jobs:
     assert any("expression inside run" in message for message in found)
     assert any("tag push" in message for message in found)
     assert any("verify the tag is on origin/main" in message for message in found)
+    assert any("build-release" in message for message in found)
+    assert any("check the built files" in message for message in found)

@@ -22,11 +22,21 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.9.0,<0.13"]
-build-backend = "uv_build"
+# hatchling, not uv_build: the sdist must carry the patro JSON that _tables.py is generated from,
+# and that data lives in the workspace root, outside this project. uv_build cannot include files
+# outside the project; hatchling's force-include can, and fails the build when the folder is
+# missing (ADR-0011).
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
 
-[tool.uv.build-backend]
-module-name = "nepdate_patro"
+[tool.hatch.build.targets.wheel]
+packages = ["src/nepdate_patro"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src", "LICENSE", "NOTICE", "README.md"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"../../shared/data/patro" = "shared/data/patro"
 
 [tool.uv.sources]
 nepdate-core = { workspace = true }
