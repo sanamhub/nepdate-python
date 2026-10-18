@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import subprocess
 import tarfile
+import tomllib
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -157,29 +158,46 @@ def test_twine_failure_is_reported(rehearsal: Any, tmp_path: Path) -> None:
     assert "invalid wheel metadata" in errors[0]
 
 
-def test_stage_adds_the_patro_source_data(rehearsal: Any, tmp_path: Path) -> None:
-    """The staged build carries the patro JSON beside the package, not only the generated table."""
-    root = tmp_path / "repo"
-    (root / "src" / "nepdate").mkdir(parents=True)
-    (root / "src" / "nepdate" / "__init__.py").write_text("", encoding="utf-8")
-    patro = root / "packages" / "nepdate-patro"
-    (patro / "src" / "nepdate_patro").mkdir(parents=True)
-    (patro / "src" / "nepdate_patro" / "__init__.py").write_text("", encoding="utf-8")
-    (patro / "pyproject.toml").write_text(
-        '[tool.uv.build-backend]\nmodule-name = "nepdate_patro"\n', encoding="utf-8"
-    )
-    for name in ("pyproject.toml", "uv.lock", "README.md", "LICENSE", "CHANGELOG.md"):
-        (root / name).write_text("", encoding="utf-8")
-    data = root / "shared" / "data" / "patro"
-    data.mkdir(parents=True)
-    (data / "2081.json").write_text("{}", encoding="utf-8")
-    (root / "shared" / "data" / "calendar").mkdir()
-    stage = tmp_path / "stage"
-    stage.mkdir()
-    rehearsal._stage_text(root, stage)
-    staged = stage / "packages" / "nepdate-patro" / "shared" / "data" / "patro" / "2081.json"
-    assert staged.read_text(encoding="utf-8") == "{}"
-    pyproject = (stage / "packages" / "nepdate-patro" / "pyproject.toml").read_text(
-        encoding="utf-8"
-    )
-    assert 'source-include = ["shared/data/patro/**"]' in pyproject
+def test_patro_sdist_force_includes_the_workspace_data(rehearsal: Any) -> None:
+    """A plain uv build puts the patro JSON in the sdist; the path points at the real folder."""
+    patro = rehearsal.ROOT / "packages" / "nepdate-patro"
+    with (patro / "pyproject.toml").open("rb") as handle:
+        config = tomllib.load(handle)
+    assert config["build-system"]["build-backend"] == "hatchling.build"
+    forced = config["tool"]["hatch"]["build"]["targets"]["sdist"]["force-include"]
+    assert forced == {"../../shared/data/patro": "shared/data/patro"}
+    assert (patro / "../../shared/data/patro").resolve() == (
+        rehearsal.ROOT / "shared" / "data" / "patro"
+    ).resolve()
+
+
+def test_patro_sdist_needs_every_json_file(rehearsal: Any, tmp_path: Path) -> None:
+    """Every source JSON is required, so an sdist missing one year fails."""
+    folder = tmp_path / "shared" / "data" / "patro"
+    folder.mkdir(parents=True)
+    for year in ("2081", "2082"):
+        (folder / f"{year}.json").write_text("{}", encoding="utf-8")
+    required = rehearsal.patro_sdist_paths(tmp_path)
+    assert required[-2:] == ("shared/data/patro/2081.json", "shared/data/patro/2082.json")
+    sdist = tmp_path / "nepdate_patro-0.1.0.tar.gz"
+    present = [f"nepdate_patro-0.1.0/{path}" for path in required if not path.endswith("2082.json")]
+    _sdist(sdist, tuple(present))
+    assert rehearsal.check_sdist(sdist, required) == [
+        "nepdate_patro-0.1.0.tar.gz: missing shared/data/patro/2082.json"
+    ]
+
+
+def test_patro_sdist_paths_fail_without_data(rehearsal: Any, tmp_path: Path) -> None:
+    """No patro JSON is an error, not an empty requirement list."""
+    with pytest.raises(rehearsal.RehearsalError):
+        rehearsal.patro_sdist_paths(tmp_path)
+
+
+def test_dist_directory_must_hold_four_files(rehearsal: Any, tmp_path: Path) -> None:
+    """Checking built files never rebuilds; a short dist directory is a failure."""
+    _release(tmp_path)
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "nepdate_core-0.1.0-py3-none-any.whl").write_bytes(b"")
+    errors = rehearsal.rehearse("0.1.0", tmp_path, dist=dist)
+    assert errors == [f"expected 4 artifacts, found 1 in {dist}"]

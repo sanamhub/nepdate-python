@@ -1,16 +1,17 @@
 """Build and check the four release artifacts without uploading anything.
 
-The release build stages the patro source data next to the patro package, so the sdist carries the
-JSON the generated table comes from. The wheels are checked to contain only their package and
-dist-info, the sdists are checked for the licence and source data, and ``twine check`` reads the
-metadata of all four files.
+The build is a plain ``uv build --all-packages``: the patro project force-includes the workspace's
+patro JSON into its sdist (ADR-0011), so no staging step is needed and a direct build gives the same
+files. The checks run on built files, so the release workflow checks exactly the artifacts it
+publishes. The wheels are checked to contain only their package and dist-info, the sdists are
+checked for the licence and source data, and ``twine check`` reads the metadata of all four files.
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tarfile
@@ -33,9 +34,9 @@ CORE_SDIST = (
 PATRO_SDIST = (
     "LICENSE",
     "NOTICE",
-    "shared/data/patro/2077.json",
     "src/nepdate_patro/_tables.py",
 )
+PATRO_DATA = Path("shared") / "data" / "patro"
 TWINE_GROUP = "release"
 ARTIFACT_COUNT = 4
 
@@ -333,44 +334,26 @@ def twine_check(
     return [f"twine check failed ({result.returncode}): {_tail(output)}"]
 
 
-def _stage_text(root: Path, stage: Path) -> None:
-    """Copy the files a release build needs and stage the patro source data.
+def patro_sdist_paths(root: Path = ROOT) -> tuple[str, ...]:
+    """Return every path the patro sdist must contain, one per source JSON file.
 
     Args:
         root: The repository root.
-        stage: The empty staging directory.
+
+    Returns:
+        The licence files, the generated table and each ``shared/data/patro/*.json`` file.
 
     Raises:
-        RehearsalError: A required file or directory is missing.
+        RehearsalError: The repository has no patro JSON.
     """
-    copies = ("pyproject.toml", "uv.lock", "README.md", "LICENSE", "CHANGELOG.md")
-    for name in copies:
-        source = root / name
-        if not source.is_file():
-            raise RehearsalError(f"missing {source}")
-        shutil.copy2(source, stage / name)
-    for relative in ("src", "packages/nepdate-patro", "shared/data"):
-        source = root / relative
-        if not source.is_dir():
-            raise RehearsalError(f"missing {source}")
-        shutil.copytree(
-            source,
-            stage / relative,
-            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".venv"),
-        )
-    patro_pyproject = stage / "packages" / "nepdate-patro" / "pyproject.toml"
-    text = patro_pyproject.read_text(encoding="utf-8")
-    marker = '[tool.uv.build-backend]\nmodule-name = "nepdate_patro"\n'
-    if marker not in text:
-        raise RehearsalError("patro pyproject has no build-backend block")
-    text = text.replace(marker, marker + 'source-include = ["shared/data/patro/**"]\n', 1)
-    patro_pyproject.write_text(text, encoding="utf-8", newline="\n")
-    target = stage / "packages" / "nepdate-patro" / "shared" / "data" / "patro"
-    shutil.copytree(stage / "shared" / "data" / "patro", target)
+    names = sorted(path.name for path in (root / PATRO_DATA).glob("*.json"))
+    if not names:
+        raise RehearsalError(f"no patro JSON under {root / PATRO_DATA}")
+    return PATRO_SDIST + tuple(f"{PATRO_DATA.as_posix()}/{name}" for name in names)
 
 
 def build_artifacts(root: Path, out_dir: Path) -> list[Path]:
-    """Build both sdists and both wheels into ``out_dir``.
+    """Build both sdists and both wheels into ``out_dir`` with a plain ``uv build``.
 
     Args:
         root: The repository root.
@@ -383,27 +366,38 @@ def build_artifacts(root: Path, out_dir: Path) -> list[Path]:
         RehearsalError: The build fails or does not produce four files.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="p10-build-") as tmp:
-        stage = Path(tmp) / "repo"
-        stage.mkdir()
-        _stage_text(root, stage)
-        result = subprocess.run(
-            [
-                "uv",
-                "build",
-                "--all-packages",
-                "--out-dir",
-                str(out_dir),
-                "--clear",
-                "--no-create-gitignore",
-            ],
-            cwd=stage,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+    result = subprocess.run(
+        [
+            "uv",
+            "build",
+            "--all-packages",
+            "--out-dir",
+            str(out_dir),
+            "--clear",
+            "--no-create-gitignore",
+        ],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if result.returncode != 0:
         raise RehearsalError(f"uv build failed: {_tail(result.stdout + result.stderr)}")
+    return find_artifacts(out_dir)
+
+
+def find_artifacts(out_dir: Path) -> list[Path]:
+    """Return the four built files in a directory.
+
+    Args:
+        out_dir: The build output directory.
+
+    Returns:
+        The four artifact paths, sorted.
+
+    Raises:
+        RehearsalError: The directory does not hold exactly four wheels and sdists.
+    """
     artifacts = sorted(path for path in out_dir.glob("*") if path.suffix in {".whl", ".gz"})
     if len(artifacts) != ARTIFACT_COUNT:
         raise RehearsalError(
@@ -495,12 +489,45 @@ def _version_errors(version: str) -> list[str]:
     return [] if VERSION.fullmatch(version) else [f"not a strict semver: {version}"]
 
 
-def rehearse(version: str, root: Path = ROOT) -> list[str]:
-    """Build and check the four release artifacts.
+def check_artifacts(artifacts: list[Path], version: str, root: Path = ROOT) -> list[str]:
+    """Check four built artifacts without building anything.
+
+    Args:
+        artifacts: The two wheels and two sdists.
+        version: The version being released.
+        root: The repository root.
+
+    Returns:
+        One message per failure; an empty list means the artifacts pass.
+    """
+    try:
+        core_prefix = _prefix(_distribution_name(root, "core"))
+        patro_prefix = _prefix(_distribution_name(root, "patro"))
+        core_wheel = _pick(artifacts, core_prefix, ".whl")
+        core_sdist = _pick(artifacts, core_prefix, ".tar.gz")
+        patro_wheel = _pick(artifacts, patro_prefix, ".whl")
+        patro_sdist = _pick(artifacts, patro_prefix, ".tar.gz")
+        patro_required = patro_sdist_paths(root)
+        errors = twine_check(artifacts, root)
+        errors.extend(check_wheel(core_wheel, "nepdate", version))
+        errors.extend(check_wheel(patro_wheel, "nepdate_patro", version))
+        errors.extend(check_sdist(core_sdist, CORE_SDIST))
+        errors.extend(check_sdist(patro_sdist, patro_required))
+    except RehearsalError as exc:
+        return [str(exc)]
+    errors.extend(install_versions(core_wheel, patro_wheel, version, root))
+    if not errors:
+        print(f"release: {ARTIFACT_COUNT} artifacts checked")
+    return errors
+
+
+def rehearse(version: str, root: Path = ROOT, dist: Path | None = None) -> list[str]:
+    """Check the versions, then build (unless ``dist`` is given) and check the four artifacts.
 
     Args:
         version: The version being released.
         root: The repository root.
+        dist: A directory of already built artifacts; a temporary build when None.
 
     Returns:
         One message per failure; an empty list means the rehearsal passed.
@@ -509,53 +536,45 @@ def rehearse(version: str, root: Path = ROOT) -> list[str]:
     errors.extend(check_versions(version, root))
     if errors:
         return errors
-    with tempfile.TemporaryDirectory(prefix="p10-rehearsal-") as tmp:
-        out_dir = Path(tmp) / "dist"
+    if dist is not None:
         try:
-            artifacts = build_artifacts(root, out_dir)
+            artifacts = find_artifacts(dist)
         except RehearsalError as exc:
             return [str(exc)]
-        core_prefix = _prefix(_distribution_name(root, "core"))
-        patro_prefix = _prefix(_distribution_name(root, "patro"))
+        return check_artifacts(artifacts, version, root)
+    with tempfile.TemporaryDirectory(prefix="p10-rehearsal-") as tmp:
         try:
-            core_wheel = _pick(artifacts, core_prefix, ".whl")
-            core_sdist = _pick(artifacts, core_prefix, ".tar.gz")
-            patro_wheel = _pick(artifacts, patro_prefix, ".whl")
-            patro_sdist = _pick(artifacts, patro_prefix, ".tar.gz")
+            artifacts = build_artifacts(root, Path(tmp) / "dist")
         except RehearsalError as exc:
             return [str(exc)]
         for artifact in artifacts:
             print(f"release: built {artifact.name}")
-        errors.extend(twine_check(artifacts, root))
-        errors.extend(check_wheel(core_wheel, "nepdate", version))
-        errors.extend(check_wheel(patro_wheel, "nepdate_patro", version))
-        errors.extend(check_sdist(core_sdist, CORE_SDIST))
-        errors.extend(check_sdist(patro_sdist, PATRO_SDIST))
-        errors.extend(install_versions(core_wheel, patro_wheel, version, root))
-    if not errors:
-        print(f"release: {ARTIFACT_COUNT} artifacts checked")
-    return errors
+        return check_artifacts(artifacts, version, root)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run the rehearsal for one version.
 
     Args:
-        argv: ``[VERSION]``; the pyproject version when omitted.
+        argv: ``[VERSION] [--dist DIR]``; the pyproject version when VERSION is omitted, and a
+            temporary build when ``--dist`` is omitted.
 
     Returns:
         0 when the rehearsal passes, 1 on a failure, 2 on bad arguments.
     """
-    args = list(argv if argv is not None else [])
-    if len(args) > 1:
-        print("release: rehearsal takes at most one version", file=sys.stderr)
-        return 2
+    parser = argparse.ArgumentParser(prog="release-rehearsal", description=__doc__.splitlines()[0])
+    parser.add_argument("version", nargs="?", default=None, help="X.Y.Z; the pyproject version")
+    parser.add_argument("--dist", type=Path, default=None, help="check built files, do not build")
     try:
-        version = args[0] if args else project_version()
+        args = parser.parse_args(argv if argv is not None else [])
+    except SystemExit as exc:
+        return 2 if exc.code else 0
+    try:
+        version = args.version or project_version()
     except RehearsalError as exc:
         print(f"release: {exc}", file=sys.stderr)
         return 1
-    errors = rehearse(version)
+    errors = rehearse(version, dist=args.dist)
     for error in errors:
         print(f"release: {error}", file=sys.stderr)
     return 0 if not errors else 1
