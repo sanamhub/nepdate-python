@@ -2,10 +2,42 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+from typing import Any
+
 import pytest
 
 from nepdate import NepaliDate
-from nepdate_patro import CalendarInfo, Event, Tithi, info
+from nepdate_patro import _EMPTY, CalendarInfo, Event, Tithi, _build_day_info, coverage, info
+
+_PATRO_JSON = Path(__file__).resolve().parents[3] / "shared" / "data" / "patro"
+
+
+def test_build_day_info_matches_the_shared_data() -> None:
+    """Rebuilding the table from the compact tables gives the JSON data of every covered day.
+
+    The table is built once at import, before mutmut activates a mutant, so only a direct call
+    exercises the builder. The JSON files are the independent oracle.
+    """
+    days: dict[str, dict[str, Any]] = {}
+    for path in sorted(_PATRO_JSON.glob("*.json")):
+        days.update(json.loads(path.read_text(encoding="utf-8"))["days"])
+    start = coverage().start.to_ordinal()
+    built = _build_day_info()
+    assert len(built) == coverage().end.to_ordinal() - start + 1
+    for offset, item in enumerate(built):
+        date = NepaliDate.from_ordinal(start + offset)
+        day = days.get(date.isoformat(), {})
+        tithi = day.get("tithi")
+        if not day.get("holiday") and not day.get("events") and tithi is None:
+            assert item is _EMPTY, date
+            continue
+        assert item.tithi == (None if tithi is None else Tithi(tithi["np"], tithi["en"])), date
+        assert item.is_public_holiday is bool(day.get("holiday")), date
+        assert item.events == tuple(
+            Event(event["np"], event["en"]) for event in day.get("events", [])
+        ), date
 
 
 def test_empty_days_inside_coverage_share_the_empty_info() -> None:
