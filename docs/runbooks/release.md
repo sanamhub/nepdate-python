@@ -19,11 +19,13 @@ P0-06; its import name is `nepdate`.
    dependency is `nepdate-core>=X.Y,<X.(Y+1)`; `CHANGELOG.md` has `## [X.Y.Z] - YYYY-MM-DD`.
 3. `uv run python scripts/ci.py release-check X.Y.Z` passes. It checks both `pyproject.toml`
    versions, the patro range and the dated `## [X.Y.Z] - YYYY-MM-DD` changelog heading.
+4. The release commit is on `origin/main`. The publish job fetches `origin/main` and runs
+   `git merge-base --is-ancestor` on the tagged commit; a tag on a side branch fails before any
+   upload.
 4. Optional: run `release.yml` by hand with the `version` input and `dry-run: true` to publish to
    TestPyPI first. A dispatch never publishes to PyPI; only a `v*` tag does. TestPyPI also refuses
    a version twice, so a second dry run of the same version needs `skip-existing` on that step or a
    new pre-release version.
-
 ## Releasing
 
 ```bash
@@ -47,6 +49,14 @@ The patro upload failed after the core upload. Fix the cause (for example a miss
 publisher for `nepdate-patro`), then use "Re-run failed jobs" on the same workflow run. The core
 step has `skip-existing: true`, so it skips the files already on PyPI and only the patro is uploaded
 (ADR-0005). Don't tag again.
+
+The core step needs `skip-existing` because it is not the last upload: a patro failure leaves a
+public core, and the same run must be restartable without a duplicate-file error. The patro step
+does not set it because it is the last upload. If the patro step fails after some of its files are
+already on PyPI, a re-run fails on those files instead of skipping them. That is deliberate: check
+the project page, and if the patro files are incomplete, publish `X.Y.(Z+1)` of both rather than
+assuming the release is complete. The TestPyPI dry run sets `skip-existing` on both steps because a
+second dry run of the same version is a normal retry.
 
 ## Rolling back
 

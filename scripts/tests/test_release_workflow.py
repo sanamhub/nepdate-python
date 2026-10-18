@@ -101,6 +101,18 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912 - one pass, one message p
         found.append("publish needs contents: write and id-token: write")
     if "github.event_name == 'push'" not in publish or "refs/tags/v" not in publish:
         found.append("publish must run only on a tag push")
+    if "fetch-depth: 0" not in publish:
+        found.append("publish checkout must fetch full history")
+    if "git fetch --no-tags origin main" not in publish:
+        found.append("publish must fetch origin/main")
+    check_at = publish.find("merge-base --is-ancestor")
+    if check_at < 0:
+        found.append("publish must verify the tag is on origin/main")
+    upload_at = publish.find("gh-action-pypi-publish")
+    if check_at >= 0 and upload_at >= 0 and check_at > upload_at:
+        found.append("publish must check main before uploading")
+    if "COMMIT_SHA: ${{ github.sha }}" not in publish:
+        found.append("publish must pass github.sha through env")
     testpypi = "\n".join(_job(lines, "publish-testpypi"))
     if "environment: testpypi" not in testpypi:
         found.append("TestPyPI must use the testpypi environment")
@@ -117,7 +129,7 @@ def test_release_workflow_rules() -> None:
 
 
 def test_workflow_rules_negative_control() -> None:
-    """A write default, an unpinned action and an expression in run are reported."""
+    """A write default, an unpinned action, an expression in run and no main check are reported."""
     bad = """\
 on:
   workflow_dispatch:
@@ -133,9 +145,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: echo "${{ inputs.version }}"
+      - uses: pypa/gh-action-pypi-publish@v1
 """
     found = problems(bad)
     assert any("default permissions" in message for message in found)
     assert any("not pinned" in message for message in found)
     assert any("expression inside run" in message for message in found)
     assert any("tag push" in message for message in found)
+    assert any("verify the tag is on origin/main" in message for message in found)
