@@ -1,0 +1,32 @@
+name: mutation
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Install the mutation group
+        run: uv sync --all-packages --group mutation
+      - name: Use the mutated source, not the editable install
+        run: |
+          uv pip uninstall nepdate-core nepdate-patro
+          cp -r packages/nepdate-patro/src/nepdate_patro src/nepdate_patro
+      - name: Run mutmut
+        run: .venv/bin/mutmut run --max-children 4
+      - name: Export and check the result
+        run: |
+          .venv/bin/mutmut export-cicd-stats
+          .venv/bin/mutmut results --all true > mutants/results.txt
+          .venv/bin/python scripts/mutation_check.py mutants/mutmut-cicd-stats.json --results mutants/results.txt
