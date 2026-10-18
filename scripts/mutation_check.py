@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FLOOR = 91.0
-SURVIVOR_ID = re.compile(r"`((?:nepdate|nepdate_patro)[^`]*)`")
+SURVIVOR_ID = re.compile(r"`((?:nepdate|nepdate_patro)[^`]*__mutmut_[0-9]+)`")
 REQUIRED_FIELDS = ("killed", "survived", "total")
 
 
