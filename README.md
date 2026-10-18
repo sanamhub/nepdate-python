@@ -81,6 +81,7 @@ data currently covers BS 2077-01-01 to 2084-08-20.
 | [API](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) | The complete public surface |
 | [Benchmarks](https://github.com/sanamhub/nepdate-python/blob/main/docs/benchmarks.md) | B1 to B8 against the other Python packages and C# NepDate |
 | [Competitors](https://github.com/sanamhub/nepdate-python/blob/main/docs/competitors.md) | The Python packages in the benchmark |
+| [Mutation testing](https://github.com/sanamhub/nepdate-python/blob/main/docs/mutation.md) | How the test suite is checked against mutmut |
 | [ADRs](https://github.com/sanamhub/nepdate-python/blob/main/docs/adr/README.md) | Why the design is what it is |
 | [Contributing](https://github.com/sanamhub/nepdate-python/blob/main/CONTRIBUTING.md) | Setup, tests and commits |
 | [Spec](https://github.com/sanamhub/nepdate/tree/main/spec) | Behaviour and vectors, in the hub |

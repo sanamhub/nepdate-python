@@ -55,6 +55,12 @@ def docs_check() -> Any:
 
 
 @pytest.fixture(scope="session")
+def mutation_check() -> Any:
+    """Load ``scripts/mutation_check.py`` as a module."""
+    return _load("mutation_check_script", "mutation_check.py")
+
+
+@pytest.fixture(scope="session")
 def benchmark_inputs() -> Any:
     """Load ``benchmarks/inputs.py`` as a module."""
     return _load("benchmark_inputs_script", "../benchmarks/inputs.py")
