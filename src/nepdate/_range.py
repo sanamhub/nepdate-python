@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-
 from ._date import NepaliDate, _from_serial
 from ._errors import ErrorKind, NepDateError
+
+# `collections.abc` is not loaded at startup on Python 3.11 and 3.12, so importing it here broke
+# the import gate there; the annotation needs it only for the type checker, as in `_date.py`.
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class DateRange:
