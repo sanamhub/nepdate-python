@@ -1,6 +1,6 @@
 # ADR-0009: Mutation testing with mutmut
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-18
 - Deciders: Sanam Pakuwal
 - Amends: ADR-0004 (a quality gate outside `scripts/ci.py`)
@@ -35,11 +35,24 @@ mutants with the two generated tables excluded, so a full run is minutes, not ho
    tool output and a `summary.json` that records the wall time and the worker count.
 4. Every survivor is killed by a named test or listed in `docs/mutation/equivalent.md` with the
    mutant id, the diff and a one-line proof. "Hard to test" is not equivalence.
-5. The score floor is set from the measured score after triage, rounded down, and written here and
-   in the checker. A release below it is blocked; the weekly run reports drift. There is no
-   per-pull-request mutation gate, so `scripts/ci.py` stays at 9 gates.
+5. The score floor is **91.00 %** of killed over killed plus survived, rounded down from the
+   measured 91.87 %. It is written in `scripts/mutation_check.py`. A release below it is blocked;
+   the weekly run reports drift. There is no per-pull-request mutation gate, so `scripts/ci.py`
+   stays at 9 gates.
 6. The local Windows run uses WSL Ubuntu 26.04 because mutmut 3 needs `fork`. GitHub Actions uses
-   `ubuntu-latest`.
+   `ubuntu-latest`. The package is not installed in the mutation environment: mutmut puts
+   `mutants/src` first on `sys.path`, and the editable install would otherwise keep the tests on
+   the unmutated source. The patro source is copied to `src/nepdate_patro` for the run so the
+   mutant names match the imports.
+7. The disposition table is `docs/mutation/equivalent.md`. It has two sections: true equivalents
+   and mutants whose behaviour is covered by a named test but which mutmut does not attribute to
+   that test. The second section is not called equivalent.
+
+## Results
+
+The first full run on 2026-10-18 with 2 children: 1350 mutants, 1220 killed, 108 survived,
+21 timed out, 1 had no tests, 4.85 mutations per second, 313 s. Test efficacy 91.87 %. The
+raw files and `summary.json` are in `docs/mutation/2026-10-18/`.
 
 ## Consequences
 
