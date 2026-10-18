@@ -7,12 +7,15 @@ import. The fixtures expose the loaded modules by name.
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 _SCRIPTS = Path(__file__).resolve().parent.parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
 
 
 def _load(name: str, filename: str) -> Any:
@@ -64,6 +67,24 @@ def mutation_check() -> Any:
 def api_snapshot() -> Any:
     """Load ``scripts/api_snapshot.py`` as a module."""
     return _load("api_snapshot_script", "api_snapshot.py")
+
+
+@pytest.fixture(scope="session")
+def ci_matrix() -> Any:
+    """Load ``scripts/ci_matrix.py`` as a module."""
+    return _load("ci_matrix_script", "ci_matrix.py")
+
+
+@pytest.fixture(scope="session")
+def data_status() -> Any:
+    """Load ``scripts/data_status.py`` as a module."""
+    return _load("data_status_script", "data_status.py")
+
+
+@pytest.fixture(scope="session")
+def rehearsal() -> Any:
+    """Load ``scripts/rehearsal.py`` as a module."""
+    return _load("rehearsal_script", "rehearsal.py")
 
 
 @pytest.fixture(scope="session")
