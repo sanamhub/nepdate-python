@@ -146,6 +146,8 @@ def test_dunder_format() -> None:
     assert f"{date:s}" == "2081-04-15"
     assert f"{date:D}" == "Shrawan 15, 2081"
     assert f"{date:yyyy-MM-dd}" == "2081-04-15"
+    assert f"{date:XXXX}" == "XXXX"
+    assert f"{date:yyyy'BS'}" == "2081BS"
     assert format(date, "") == str(date)
 
 

@@ -386,8 +386,7 @@ class NepaliDate:
             self._y,
             self._m,
             self._d,
-            self._o % 7,
-            with_weekday=weekday,
+            self._o % 7 if weekday else None,
             include_year=year,
             pad=pad,
             lang=lang,
@@ -404,7 +403,7 @@ class NepaliDate:
         Returns:
             The formatted date; literal characters are never localised.
         """
-        return format_pattern(pattern, self._y, self._m, self._d, self._o % 7, lang)
+        return format_pattern(pattern, self._y, self._m, self._d, lang)
 
     def __format__(self, spec: str) -> str:
         """Format for f-strings and ``str.format``; an empty spec is ``str``.

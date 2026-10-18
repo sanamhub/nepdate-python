@@ -1,9 +1,10 @@
 """Run every quality gate in order and stop at the first failure.
 
 The entry point is ``uv run --locked python scripts/ci.py``; ``--locked`` makes a stale
-``uv.lock`` fail instead of being rewritten. Each gate is defined in ADR-0004. Gates 6 and 7
-install the wheels built from this checkout into throwaway virtualenvs and test each
-distribution on its own, so a core-only install is proven to have no ``nepdate_patro``.
+``uv.lock`` fail instead of being rewritten. Gates 1 to 9 are defined in ADR-0004 and ADR-0006;
+gate 10 is the API snapshot from ADR-0010. Gates 6 and 7 install the wheels built from this
+checkout into throwaway virtualenvs and test each distribution on its own, so a core-only install
+is proven to have no ``nepdate_patro``.
 """
 
 from __future__ import annotations
@@ -272,7 +273,10 @@ def _outside(modules: set[str], package: str, allowed: frozenset[str]) -> list[s
 def gate_import_time() -> None:
     """Check what each import loads, that the core never loads the patro, and a coarse ceiling."""
     core_new = _new_modules("", f"import {CORE_MODULE}")
-    if extra := _outside(core_new, CORE_MODULE, CORE_IMPORT_ALLOWED):
+    # What the allowed stdlib modules load themselves differs by version (datetime pulls in
+    # math on 3.11), so it is measured on this interpreter instead of listed.
+    stdlib_deps = _new_modules("", "import " + ", ".join(sorted(CORE_IMPORT_ALLOWED)))
+    if extra := _outside(core_new, CORE_MODULE, CORE_IMPORT_ALLOWED | stdlib_deps):
         raise GateError(f"import {CORE_MODULE} loaded unexpected modules: {', '.join(extra)}")
     if PATRO_MODULE in core_new:
         raise GateError(f"import {CORE_MODULE} loaded {PATRO_MODULE}")
@@ -462,6 +466,11 @@ def gate_patro_alone() -> None:
 def gate_docs() -> None:
     """Check the README, changelog, community files and top-level docs pages."""
     _run(["uv", "run", "python", "scripts/docs_check.py"])
+
+
+def gate_api() -> None:
+    """Check the public surface against the committed API snapshot."""
+    _run(["uv", "run", "python", "scripts/api_snapshot.py", "--check"])
 
 
 def gate_consumer() -> None:
@@ -687,6 +696,7 @@ GATES: tuple[tuple[str, Callable[[], None]], ...] = (
     ("patro alone", gate_patro_alone),
     ("docs", gate_docs),
     ("consumer", gate_consumer),
+    ("api", gate_api),
 )
 
 

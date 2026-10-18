@@ -8,3 +8,4 @@ dist/
 .ruff_cache/
 .benchmarks/
 benchmarks/results/**/*.log
+fuzz-artifacts/

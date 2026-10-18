@@ -28,12 +28,11 @@ _PADDED_DAY_RUN = 2
 _STANDARD_DEFAULT = ("", "G", "g", "d")
 
 
-def format_pattern(  # noqa: PLR0912, PLR0913, PLR0915, PLR0917 - one-pass scanner by design
+def format_pattern(  # noqa: PLR0912, PLR0915 - one-pass scanner by design
     pattern: str,
     year: int,
     month: int,
     day: int,
-    weekday: int,
     lang: Lang,
 ) -> str:
     """Format a date with a standard or custom pattern (FORMATTING §5).
@@ -43,7 +42,6 @@ def format_pattern(  # noqa: PLR0912, PLR0913, PLR0915, PLR0917 - one-pass scann
         year: The BS year.
         month: The BS month.
         day: The BS day.
-        weekday: The weekday index, Sunday = 0.
         lang: The language of the names and digits.
 
     Returns:
@@ -56,8 +54,7 @@ def format_pattern(  # noqa: PLR0912, PLR0913, PLR0915, PLR0917 - one-pass scann
             year,
             month,
             day,
-            weekday,
-            with_weekday=False,
+            None,
             include_year=True,
             pad=True,
             lang=lang,
