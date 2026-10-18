@@ -74,6 +74,16 @@ NepaliDate(2077, 1, 1)
 `info` never raises: a date outside the coverage returns one shared empty `CalendarInfo`. The
 data currently covers BS 2077-01-01 to 2084-08-20.
 
+## API
+
+The complete signatures, defaults and exceptions are in the
+[API contract](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md).
+
+| Module | Exported names |
+|---|---|
+| `nepdate` | `MIN`, `MAX`, `NepaliDate`, `Lang`, `Month`, `Weekday`, `Overflow`, `DateOrder`, `Separator`, `DateDiff`, `FiscalYear`, `Quarter`, `DateRange`, `ErrorKind`, `NepDateError`, `to_nepali_digits` |
+| `nepdate_patro` | `Tithi`, `Event`, `CalendarInfo`, `info`, `coverage`, `public_holidays` |
+
 ## Documentation
 
 | Page | What it covers |
