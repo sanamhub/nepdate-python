@@ -286,6 +286,8 @@
     nepdate._format.x_format_long__mutmut_23: killed
     nepdate._format.x_format_long__mutmut_24: killed
     nepdate._format.x_format_long__mutmut_25: killed
+    nepdate._format.x_format_long__mutmut_26: killed
+    nepdate._format.x_format_long__mutmut_27: killed
     nepdate._names.x_to_nepali_digits__mutmut_1: survived
     nepdate._names.x_to_nepali_digits__mutmut_2: killed
     nepdate._names.xǁMonthǁlabel__mutmut_1: killed
@@ -546,7 +548,7 @@
     nepdate._lenient.x__lenient_tokens__mutmut_17: killed
     nepdate._lenient.x__lenient_tokens__mutmut_18: timeout
     nepdate._lenient.x__lenient_tokens__mutmut_19: timeout
-    nepdate._lenient.x__lenient_tokens__mutmut_20: killed
+    nepdate._lenient.x__lenient_tokens__mutmut_20: timeout
     nepdate._lenient.x__lenient_tokens__mutmut_21: killed
     nepdate._lenient.x__lenient_tokens__mutmut_22: killed
     nepdate._lenient.x__lenient_tokens__mutmut_23: killed
@@ -663,8 +665,8 @@
     nepdate._pattern.x_format_pattern__mutmut_13: killed
     nepdate._pattern.x_format_pattern__mutmut_14: killed
     nepdate._pattern.x_format_pattern__mutmut_15: killed
-    nepdate._pattern.x_format_pattern__mutmut_16: survived
-    nepdate._pattern.x_format_pattern__mutmut_17: survived
+    nepdate._pattern.x_format_pattern__mutmut_16: killed
+    nepdate._pattern.x_format_pattern__mutmut_17: killed
     nepdate._pattern.x_format_pattern__mutmut_18: killed
     nepdate._pattern.x_format_pattern__mutmut_19: killed
     nepdate._pattern.x_format_pattern__mutmut_20: killed
@@ -724,27 +726,27 @@
     nepdate._pattern.x_format_pattern__mutmut_74: killed
     nepdate._pattern.x_format_pattern__mutmut_75: killed
     nepdate._pattern.x_format_pattern__mutmut_76: killed
-    nepdate._pattern.x_format_pattern__mutmut_77: killed
-    nepdate._pattern.x_format_pattern__mutmut_78: killed
+    nepdate._pattern.x_format_pattern__mutmut_77: timeout
+    nepdate._pattern.x_format_pattern__mutmut_78: timeout
     nepdate._pattern.x_format_pattern__mutmut_79: killed
     nepdate._pattern.x_format_pattern__mutmut_80: killed
-    nepdate._pattern.x_format_pattern__mutmut_81: timeout
-    nepdate._pattern.x_format_pattern__mutmut_82: timeout
+    nepdate._pattern.x_format_pattern__mutmut_81: killed
+    nepdate._pattern.x_format_pattern__mutmut_82: killed
     nepdate._pattern.x_format_pattern__mutmut_83: killed
     nepdate._pattern.x_format_pattern__mutmut_84: killed
-    nepdate._pattern.x_format_pattern__mutmut_85: killed
+    nepdate._pattern.x_format_pattern__mutmut_85: timeout
     nepdate._pattern.x_format_pattern__mutmut_86: killed
-    nepdate._pattern.x_format_pattern__mutmut_87: killed
+    nepdate._pattern.x_format_pattern__mutmut_87: timeout
     nepdate._pattern.x_format_pattern__mutmut_88: killed
-    nepdate._pattern.x_format_pattern__mutmut_89: timeout
+    nepdate._pattern.x_format_pattern__mutmut_89: killed
     nepdate._pattern.x_format_pattern__mutmut_90: killed
-    nepdate._pattern.x_format_pattern__mutmut_91: timeout
-    nepdate._pattern.x_format_pattern__mutmut_92: killed
-    nepdate._pattern.x_format_pattern__mutmut_93: killed
+    nepdate._pattern.x_format_pattern__mutmut_91: killed
+    nepdate._pattern.x_format_pattern__mutmut_92: survived
+    nepdate._pattern.x_format_pattern__mutmut_93: survived
     nepdate._pattern.x_format_pattern__mutmut_94: killed
     nepdate._pattern.x_format_pattern__mutmut_95: killed
-    nepdate._pattern.x_format_pattern__mutmut_96: survived
-    nepdate._pattern.x_format_pattern__mutmut_97: survived
+    nepdate._pattern.x_format_pattern__mutmut_96: killed
+    nepdate._pattern.x_format_pattern__mutmut_97: killed
     nepdate._pattern.x_format_pattern__mutmut_98: killed
     nepdate._pattern.x_format_pattern__mutmut_99: killed
     nepdate._pattern.x_format_pattern__mutmut_100: killed
@@ -756,18 +758,18 @@
     nepdate._pattern.x_format_pattern__mutmut_106: killed
     nepdate._pattern.x_format_pattern__mutmut_107: killed
     nepdate._pattern.x_format_pattern__mutmut_108: killed
-    nepdate._pattern.x_format_pattern__mutmut_109: killed
+    nepdate._pattern.x_format_pattern__mutmut_109: timeout
     nepdate._pattern.x_format_pattern__mutmut_110: killed
     nepdate._pattern.x_format_pattern__mutmut_111: killed
     nepdate._pattern.x_format_pattern__mutmut_112: killed
-    nepdate._pattern.x_format_pattern__mutmut_113: timeout
+    nepdate._pattern.x_format_pattern__mutmut_113: killed
     nepdate._pattern.x_format_pattern__mutmut_114: killed
     nepdate._pattern.x_format_pattern__mutmut_115: killed
-    nepdate._pattern.x_format_pattern__mutmut_116: killed
-    nepdate._pattern.x_format_pattern__mutmut_117: killed
+    nepdate._pattern.x_format_pattern__mutmut_116: timeout
+    nepdate._pattern.x_format_pattern__mutmut_117: timeout
     nepdate._pattern.x_format_pattern__mutmut_118: killed
     nepdate._pattern.x_format_pattern__mutmut_119: killed
-    nepdate._pattern.x_format_pattern__mutmut_120: timeout
+    nepdate._pattern.x_format_pattern__mutmut_120: killed
     nepdate._pattern.x_format_pattern__mutmut_121: killed
     nepdate._pattern.x_format_pattern__mutmut_122: killed
     nepdate._pattern.x_format_pattern__mutmut_123: killed
@@ -777,18 +779,18 @@
     nepdate._pattern.x_format_pattern__mutmut_127: killed
     nepdate._pattern.x_format_pattern__mutmut_128: killed
     nepdate._pattern.x_format_pattern__mutmut_129: killed
-    nepdate._pattern.x_format_pattern__mutmut_130: killed
+    nepdate._pattern.x_format_pattern__mutmut_130: timeout
     nepdate._pattern.x_format_pattern__mutmut_131: killed
     nepdate._pattern.x_format_pattern__mutmut_132: killed
     nepdate._pattern.x_format_pattern__mutmut_133: killed
-    nepdate._pattern.x_format_pattern__mutmut_134: timeout
+    nepdate._pattern.x_format_pattern__mutmut_134: killed
     nepdate._pattern.x_format_pattern__mutmut_135: killed
     nepdate._pattern.x_format_pattern__mutmut_136: killed
-    nepdate._pattern.x_format_pattern__mutmut_137: killed
-    nepdate._pattern.x_format_pattern__mutmut_138: killed
+    nepdate._pattern.x_format_pattern__mutmut_137: timeout
+    nepdate._pattern.x_format_pattern__mutmut_138: timeout
     nepdate._pattern.x_format_pattern__mutmut_139: killed
     nepdate._pattern.x_format_pattern__mutmut_140: killed
-    nepdate._pattern.x_format_pattern__mutmut_141: timeout
+    nepdate._pattern.x_format_pattern__mutmut_141: killed
     nepdate._pattern.x_format_pattern__mutmut_142: killed
     nepdate._pattern.x_format_pattern__mutmut_143: killed
     nepdate._pattern.x_format_pattern__mutmut_144: killed
@@ -802,33 +804,29 @@
     nepdate._pattern.x_format_pattern__mutmut_152: killed
     nepdate._pattern.x_format_pattern__mutmut_153: killed
     nepdate._pattern.x_format_pattern__mutmut_154: killed
-    nepdate._pattern.x_format_pattern__mutmut_155: killed
+    nepdate._pattern.x_format_pattern__mutmut_155: timeout
     nepdate._pattern.x_format_pattern__mutmut_156: killed
     nepdate._pattern.x_format_pattern__mutmut_157: killed
     nepdate._pattern.x_format_pattern__mutmut_158: killed
-    nepdate._pattern.x_format_pattern__mutmut_159: timeout
+    nepdate._pattern.x_format_pattern__mutmut_159: killed
     nepdate._pattern.x_format_pattern__mutmut_160: killed
     nepdate._pattern.x_format_pattern__mutmut_161: killed
-    nepdate._pattern.x_format_pattern__mutmut_162: killed
-    nepdate._pattern.x_format_pattern__mutmut_163: killed
+    nepdate._pattern.x_format_pattern__mutmut_162: timeout
+    nepdate._pattern.x_format_pattern__mutmut_163: timeout
     nepdate._pattern.x_format_pattern__mutmut_164: killed
     nepdate._pattern.x_format_pattern__mutmut_165: killed
-    nepdate._pattern.x_format_pattern__mutmut_166: timeout
-    nepdate._pattern.x_format_pattern__mutmut_167: timeout
+    nepdate._pattern.x_format_pattern__mutmut_166: killed
+    nepdate._pattern.x_format_pattern__mutmut_167: killed
     nepdate._pattern.x_format_pattern__mutmut_168: killed
     nepdate._pattern.x_format_pattern__mutmut_169: killed
     nepdate._pattern.x_format_pattern__mutmut_170: killed
     nepdate._pattern.x_format_pattern__mutmut_171: killed
     nepdate._pattern.x_format_pattern__mutmut_172: killed
-    nepdate._pattern.x_format_pattern__mutmut_173: killed
-    nepdate._pattern.x_format_pattern__mutmut_174: killed
+    nepdate._pattern.x_format_pattern__mutmut_173: timeout
+    nepdate._pattern.x_format_pattern__mutmut_174: timeout
     nepdate._pattern.x_format_pattern__mutmut_175: killed
     nepdate._pattern.x_format_pattern__mutmut_176: killed
-    nepdate._pattern.x_format_pattern__mutmut_177: timeout
-    nepdate._pattern.x_format_pattern__mutmut_178: timeout
-    nepdate._pattern.x_format_pattern__mutmut_179: killed
-    nepdate._pattern.x_format_pattern__mutmut_180: killed
-    nepdate._pattern.x_format_pattern__mutmut_181: killed
+    nepdate._pattern.x_format_pattern__mutmut_177: killed
     nepdate._parse.x_parse_strict__mutmut_1: survived
     nepdate._parse.x_parse_strict__mutmut_2: killed
     nepdate._parse.x_parse_strict__mutmut_3: killed
@@ -1266,18 +1264,14 @@
     nepdate._date.xǁNepaliDateǁformat__mutmut_2: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_3: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_4: killed
-    nepdate._date.xǁNepaliDateǁformat__mutmut_5: survived
+    nepdate._date.xǁNepaliDateǁformat__mutmut_5: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_6: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_7: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_8: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_9: killed
     nepdate._date.xǁNepaliDateǁformat__mutmut_10: killed
-    nepdate._date.xǁNepaliDateǁformat__mutmut_11: killed
-    nepdate._date.xǁNepaliDateǁformat__mutmut_12: killed
-    nepdate._date.xǁNepaliDateǁformat__mutmut_13: survived
-    nepdate._date.xǁNepaliDateǁformat__mutmut_14: survived
     nepdate._date.xǁNepaliDateǁ__format____mutmut_1: killed
-    nepdate._date.xǁNepaliDateǁ__format____mutmut_2: survived
+    nepdate._date.xǁNepaliDateǁ__format____mutmut_2: killed
     nepdate._date.xǁNepaliDateǁ__format____mutmut_3: killed
     nepdate._date.xǁNepaliDateǁ__format____mutmut_4: killed
     nepdate._date.xǁNepaliDateǁ__add____mutmut_1: killed

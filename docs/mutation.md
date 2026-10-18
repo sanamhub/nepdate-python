@@ -22,15 +22,15 @@ The uninstall matters: mutmut puts `mutants/src` first on `sys.path`, but an edi
 otherwise keeps the tests on the unmutated package. The patro copy gives its mutants the
 `nepdate_patro` name that the tests import.
 
-At most 4 children. A full run took 152 s with 4 children on 2026-10-18 (the first run, with 2
-children, took 313 s). Three mutants move between killed and timeout when the machine is busy; the
-survivor set does not.
+At most 4 children. A full run took 193 s with 4 children on 2026-10-18, after the weekday
+refactor and the new property tests. The weekday rows from the P8 run are gone. The timeout count
+moves with machine load; the survivor set is stable.
 
 ## Floor and dispositions
 
 The floor is **95.00 %** of killed over killed plus survived, rounded down from the measured
-95.12 %. The baseline has 1266 killed, 65 survived, 18 timed out and 1 with no tests; killed over
-all 1350 mutants is 93.78 %.
+95.54 %. The baseline has 1263 killed, 59 survived, 21 timed out and 1 with no tests; killed over
+all 1344 mutants is 93.97 %.
 `scripts/mutation_check.py` fails below the floor or when a survivor is missing from
 [`mutation/equivalent.md`](mutation/equivalent.md), or when a disposition is stale.
 

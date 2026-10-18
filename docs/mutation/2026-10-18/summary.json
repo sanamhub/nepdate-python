@@ -12,32 +12,23 @@
     "*_tables.py"
   ],
   "workers": 4,
-  "wall_time_s": 152,
+  "wall_time_s": 193,
   "command": "mutmut run --max-children 4",
-  "tool_summary": "1350/1350  killed 1266, no tests 1, timeout 18, survived 65, suspicious 0, 8.88 mutations/second",
+  "tool_summary": "1344/1344  killed 1263, no tests 1, timeout 21, survived 59, suspicious 0, 8.03 mutations/second",
   "stats": {
-    "killed": 1266,
-    "survived": 65,
-    "total": 1350,
+    "killed": 1263,
+    "survived": 59,
+    "total": 1344,
     "no_tests": 1,
     "skipped": 0,
     "suspicious": 0,
-    "timeout": 18,
+    "timeout": 21,
     "check_was_interrupted_by_user": 0,
     "segfault": 0
   },
-  "efficacy_percent": 95.12,
-  "survivors": 65,
-  "equivalent": 65,
+  "efficacy_percent": 95.54,
+  "survivors": 59,
+  "equivalent": 59,
   "dispositions": "docs/mutation/equivalent.md",
-  "wall_time_note": "from a second run of the same tree (1263 killed, 65 survived, 21 timeout, 10.54 mutations/second); the recorded run's clock was lost. Three mutants move between killed and timeout with machine load; the survivor set is identical.",
-  "killed_over_total_percent": 93.78,
-  "first_run": {
-    "workers": 2,
-    "killed": 1220,
-    "survived": 108,
-    "timeout": 21,
-    "no_tests": 1,
-    "efficacy_percent": 91.87
-  }
+  "killed_over_total_percent": 93.97
 }
