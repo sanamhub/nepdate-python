@@ -27,6 +27,9 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "nepdate"
+# The sdist carries the calendar source the generated tables come from. source-include does not
+# affect the wheel, so the core wheel still has no shared data.
+source-include = ["shared/data/calendar/**"]
 
 [tool.mutmut]
 source_paths = ["src"]
@@ -65,6 +68,9 @@ mutation = [
 ]
 fuzz = [
     "atheris==3.1.0 ; sys_platform == 'linux'",
+]
+release = [
+    "twine==7.0.0",
 ]
 
 [tool.ruff]

@@ -85,7 +85,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - name: Build both distributions once
-        run: uv build --all-packages
+        run: uv run --locked python scripts/ci.py build-release
       - name: Sort the files by distribution
         run: uv run --locked python scripts/ci.py sort-dist
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

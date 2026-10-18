@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 import data_status
+import rehearsal
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
@@ -768,12 +769,12 @@ def _release_today(options: list[str]) -> datetime.date | None:
     return datetime.date.fromisoformat(options[1])
 
 
-def _run_command(argv: list[str]) -> int:  # noqa: PLR0911 - one branch per command
+def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch per command
     """Run a release helper command.
 
     Args:
         argv: ``release-check VERSION [--today DATE]``, ``release-notes VERSION``,
-            ``data-status`` or ``sort-dist``.
+            ``data-status``, ``release-rehearsal [VERSION]``, ``build-release`` or ``sort-dist``.
 
     Returns:
         0 on success, 1 on a release inconsistency, 2 on an unknown or bad command.
@@ -793,10 +794,26 @@ def _run_command(argv: list[str]) -> int:  # noqa: PLR0911 - one branch per comm
             print(f"release: {error}", file=sys.stderr)
         if errors:
             return 1
+        errors = rehearsal.rehearse(rest[0])
+        for error in errors:
+            print(f"release: {error}", file=sys.stderr)
+        if errors:
+            return 1
         print(f"release: {rest[0]} is consistent")
         return 0
     if command == "data-status":
         return data_status.main(rest)
+    if command == "release-rehearsal":
+        return rehearsal.main(rest)
+    if command == "build-release" and not rest:
+        try:
+            artifacts = rehearsal.build_artifacts(ROOT, DIST)
+        except rehearsal.RehearsalError as exc:
+            print(f"release: {exc}", file=sys.stderr)
+            return 1
+        for artifact in artifacts:
+            print(f"release: built {artifact.name}")
+        return 0
     if command == "release-notes" and len(rest) == 1:
         try:
             sys.stdout.write(release_notes(rest[0]))

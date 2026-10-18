@@ -90,10 +90,10 @@ temporary directory, with `uv build --all-packages --out-dir`, and checks:
    file. The core wheel has only `nepdate/` and the dist-info; the patro wheel only
    `nepdate_patro/` and the dist-info.
 3. The core sdist contains `LICENSE`, `shared/data/NOTICE` and the shared calendar source
-   `shared/data/calendar/bs-calendar.json`. The patro sdist contains `LICENSE`, `NOTICE` and the
-   generated `_tables.py` built from `shared/data/patro/`, which is the shared patro data in its
-   compiled form. `pyproject.toml` gains `source-include = ["shared/data/calendar/**"]` so the
-   core sdist carries the calendar data; the wheel is unchanged.
+   `shared/data/calendar/bs-calendar.json`. The patro sdist contains `LICENSE`, `NOTICE`,
+   `shared/data/patro/*.json` and the generated `_tables.py`. The root `pyproject.toml` gains
+   `source-include = ["shared/data/calendar/**"]`; the release build stages the patro JSON beside
+   the patro package and adds the same include there. The wheels are unchanged.
 4. Both `pyproject.toml` versions, the `CHANGELOG.md` top dated section, both wheel `METADATA`
    versions and the version `importlib.metadata.version` reports after installing each wheel all
    agree. The source `__init__.py` has no version literal; ADR-0005 keeps the version in
