@@ -15,8 +15,9 @@ on:
         default: true
         type: boolean
 
-# Read-only by default. Only the publish jobs get id-token: write; the PyPI job also gets
-# contents: write for the GitHub Release.
+# Read-only by default. Only the publish jobs get id-token: write. Only the github-release job
+# gets contents: write, and it runs after verify, so a release page never exists for files that
+# failed to install from PyPI.
 permissions:
   contents: read
 
@@ -166,14 +167,13 @@ jobs:
     timeout-minutes: 20
     environment: production
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
       - name: Check the tagged commit is on main
         env:
           COMMIT_SHA: ${{ github.sha }}
@@ -201,17 +201,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: dist/patro/
-      - name: Extract the changelog section
-        env:
-          VERSION: ${{ needs.preflight.outputs.version }}
-        run: uv run --locked python scripts/ci.py release-notes "$VERSION" > release-notes.md
-      - name: Create the GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
-        with:
-          body_path: release-notes.md
-          files: |
-            dist/core/*
-            dist/patro/*
 
   verify:
     name: verify from PyPI
@@ -265,6 +254,34 @@ jobs:
           assert day.tithi.label(Lang.EN) == "Dwitiya"
           print("verify: README quick start and one patro lookup passed")
           PY
+
+  github-release:
+    name: GitHub Release
+    needs: [preflight, verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist
+      - name: Extract the changelog section
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: uv run --locked python scripts/ci.py release-notes "$VERSION" > release-notes.md
+      - name: Create the GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          body_path: release-notes.md
+          files: |
+            dist/core/*
+            dist/patro/*
 
   publish-testpypi:
     name: publish to TestPyPI

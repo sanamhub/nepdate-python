@@ -80,7 +80,13 @@ A tag run publishes to PyPI, then the `verify` job installs `nepdate-core==X.Y.Z
 then `verify-testpypi` does the same against `https://test.pypi.org/simple/`. Both jobs wait up to
 10 minutes for the files to appear, retrying every 30 seconds while time remains. They run the
 README quick start and one `nepdate_patro.info` call. Both are read-only: `contents: read`, no
-`id-token`, and no upload.
+`id-token`, and no upload. Each installs from one index only. That works because on Linux the two
+distributions have no dependency outside themselves (`tzdata` is Windows only); a new runtime
+dependency needs this revisited, since TestPyPI does not mirror PyPI.
+
+The GitHub Release is created by the `github-release` job, which needs `verify`. It is the only
+job with `contents: write`. When verify fails there is no release page, only the PyPI files to
+yank.
 
 If a verify job fails, the release is not done. Do not upload the same files again and do not
 publish a different build under the same version. Yank both distributions for that version, fix
