@@ -1,6 +1,7 @@
 # Contributing
 
-Thanks for helping. This repository holds the Python `nepdate` and `nepdate-patro` libraries.
+Thanks for helping. This repository holds the Python `nepdate` library (distribution
+`nepdate-core`) and the `nepdate-patro` distribution.
 
 ## Before you start
 

@@ -1,7 +1,7 @@
 # nepdate-patro
 
 Tithi, public holidays and events for the Bikram Sambat calendar, as a separate distribution
-from the core [`nepdate`](https://pypi.org/project/nepdate/) package. It is part of the
+from the core [`nepdate-core`](https://pypi.org/project/nepdate-core/) package. It is part of the
 [NepDate](https://github.com/sanamhub/nepdate-python) family; the data comes from the hub
 [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate).
 
@@ -9,7 +9,7 @@ from the core [`nepdate`](https://pypi.org/project/nepdate/) package. It is part
 pip install nepdate-patro
 ```
 
-`nepdate-patro` depends on the core package, so `nepdate` arrives with it. The import name is
+`nepdate-patro` depends on the core package, so `nepdate-core` arrives with it. The import name is
 `nepdate_patro`.
 
 ```python
@@ -32,4 +32,4 @@ returns the same empty object, so it never raises. The data currently covers BS 
 2084-08-20.
 
 The full API is in [docs/API.md](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md),
-and the core package is in [nepdate](https://github.com/sanamhub/nepdate-python).
+and the core package is in [nepdate-core](https://github.com/sanamhub/nepdate-python).

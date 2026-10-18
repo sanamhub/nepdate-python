@@ -101,10 +101,13 @@ def test_only_the_fast_path_uses_isdigit() -> None:
 
 def test_int_is_only_used_where_ascii_digits_are_known() -> None:
     """``int()`` appears only where the input is known to be ASCII digits."""
+    expected = {
+        "_parse.py": [_FAST_PATH],
+        "_lenient.py": ["_lenient_tokens"],
+    }
     for name, source in _package_sources().items():
         found = _int_functions(source)
-        expected = [_FAST_PATH, "_lenient_tokens"] if name == "_parse.py" else []
-        assert found == expected, f"{name}: {found}"
+        assert found == expected.get(name, []), f"{name}: {found}"
 
 
 def test_forbidden_check_negative_control() -> None:

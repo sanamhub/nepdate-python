@@ -80,11 +80,12 @@ AC: CI green on the first PR (PORT-PLAN phase 0); `shared-check` passes.
 ### P0-06 Human tasks
 - Create `sanamhub/nepdate-python`; branch protection on `main`.
 - Settle the core PyPI distribution name (`docs/competitors.md`, "Name") and update both
-  `pyproject.toml` files and the README.
-- Register **pending** trusted publishers (no project exists yet) for `<core-name>` and for
+  `pyproject.toml` files and the README. Chosen on 2026-10-18: the core is `nepdate-core`, the
+  import name is `nepdate` (ADR-0007).
+- Register **pending** trusted publishers (no project exists yet) for `nepdate-core` and for
   `nepdate-patro`, on PyPI (environment `production`) and on TestPyPI (environment `testpypi`):
   four in total, each with owner `sanamhub`, repository `nepdate-python`, workflow `release.yml`
-  (ADR-0005).
+  (ADR-0005, ADR-0007).
 - Create the GitHub environments `production` (required reviewer) and `testpypi`.
 
 ## Checkpoint (stop here for review)

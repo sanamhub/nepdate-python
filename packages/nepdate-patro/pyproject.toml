@@ -18,7 +18,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "nepdate>=0.1,<0.2",
+    "nepdate-core>=0.1,<0.2",
 ]
 
 [build-system]
@@ -29,4 +29,4 @@ build-backend = "uv_build"
 module-name = "nepdate_patro"
 
 [tool.uv.sources]
-nepdate = { workspace = true }
+nepdate-core = { workspace = true }

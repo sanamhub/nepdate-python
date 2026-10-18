@@ -2,7 +2,8 @@
 
 ## Supported versions
 
-The latest release of each package: `nepdate` and `nepdate-patro`. Older versions get no fixes.
+The latest release of each package: `nepdate-core` (import `nepdate`) and `nepdate-patro`. Older
+versions get no fixes.
 
 ## Reporting a vulnerability
 

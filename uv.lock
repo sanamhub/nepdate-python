@@ -9,7 +9,7 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "nepdate",
+    "nepdate-core",
     "nepdate-patro",
 ]
 
@@ -563,7 +563,7 @@ wheels = [
 ]
 
 [[package]]
-name = "nepdate"
+name = "nepdate-core"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -620,11 +620,11 @@ name = "nepdate-patro"
 version = "0.1.0"
 source = { editable = "packages/nepdate-patro" }
 dependencies = [
-    { name = "nepdate" },
+    { name = "nepdate-core" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nepdate", editable = "." }]
+requires-dist = [{ name = "nepdate-core", editable = "." }]
 
 [[package]]
 name = "nepkit"

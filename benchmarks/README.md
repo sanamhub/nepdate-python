@@ -31,7 +31,7 @@ competitor that rejects some dates is timed only on the ones it accepts and show
 
 | Package | B1 BS to AD | B2 AD to BS |
 |---|---|---|
-| `nepdate` | `NepaliDate(y, m, d).to_date()` | `NepaliDate.from_date(ad)` |
+| `nepdate-core` | `NepaliDate(y, m, d).to_date()` | `NepaliDate.from_date(ad)` |
 | `nepali-datetime` | `nepali_datetime.date(y, m, d).to_datetime_date()` | `nepali_datetime.date.from_datetime_date(ad)` |
 | `npdatetime` | `npdatetime.NepaliDate(y, m, d).to_gregorian()` | `npdatetime.NepaliDate.from_gregorian(y, m, d)` |
 | `nepali` | `converter.nepali_to_english(y, m, d)` | `converter.english_to_nepali(y, m, d)` |
@@ -51,4 +51,6 @@ competitor columns are `n/a`. B7 and B8 are patro operations and only this port 
 
 `bench.py --probe` calls every competitor on all 64 dates in both directions and compares the
 result with the committed data. `agrees` is true only when all 64 B1 results and all 64 B2 results
-match. A package that is fast but wrong is listed, never ranked.
+match. Each direction also lists every rejected or differing date with the input, the competitor's
+result and ours; `docs/competitors.md` tabulates them. A package that is fast but wrong is listed,
+never ranked.

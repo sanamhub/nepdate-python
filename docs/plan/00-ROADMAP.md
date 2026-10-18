@@ -21,6 +21,7 @@ before P1 ends. P2 and P3 may run in parallel.
 | P3 | [`P3-format-and-parse.md`](P3-format-and-parse.md) | `short`/`long`/`format`/`__format__`, strict and lenient parse |
 | P4 | [`P4-patro-and-interop.md`](P4-patro-and-interop.md) | `nepdate_patro` tables and queries, `today()`, core/patro separation checks |
 | P5 | [`P5-docs-bench-release.md`](P5-docs-bench-release.md) | docs, benchmarks vs competitors, release workflow, 0.1.0 of both distributions |
+| P6 | [`P6-name-and-import.md`](P6-name-and-import.md) | `nepdate-core` name, import cost, release-from-main guard, competitor miss detail |
 
 Every phase file ends with a **Checkpoint** section. The implementation agent stops there, opens
 the PR and waits for the reviewer to tick every line before starting the next phase.

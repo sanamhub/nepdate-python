@@ -23,7 +23,7 @@ machine report, not a quiet-machine target run, and nothing was tuned for it.
 | CPython | 3.13.14 (64-bit) |
 | uv | 0.12.1 |
 | pyperf | 2.10.0 |
-| `nepdate` | 0.1.0 |
+| `nepdate-core` | 0.1.0 |
 | `nepdate-patro` | 0.1.0 |
 | `nepali-datetime` | 1.0.8.5 |
 | `npdatetime` | 0.2.10 |
@@ -74,12 +74,13 @@ dates, so it is 64 month grids per iteration.
 ## Competitors: B1, BS to AD
 
 `n/64` is the number of BENCHMARK dates the package accepted. `matches` is how many of those
-results equal the committed `shared/data` table (raw counts in
-`benchmarks/results/2026-10-18/probe.json`). A package below 64 on either count is never ranked.
+results equal the committed `shared/data` table (counts and every rejected or differing date are in
+`benchmarks/results/2026-10-18/probe.json`; the dates are tabulated in
+[`competitors.md`](competitors.md)). A package below 64 on either count is never ranked.
 
 | Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
 |---|---:|---:|---:|---|
-| `nepdate` | 724.4 | 64/64 | 64 | 31.5 (8.5 to 100.0) |
+| `nepdate-core` | 724.4 | 64/64 | 64 | 31.5 (8.5 to 100.0) |
 | `bikram-sambat` | 1244.8 | 64/64 | 61 | 37.5 (10.7 to 80.2) |
 | `nepkit` | 2106.4 | 64/64 | 62 | 33.8 (8.0 to 81.2) |
 | `nepali-datetime` | 2618.4 | 64/64 | 62 | 40.6 (11.4 to 97.4) |
@@ -93,7 +94,7 @@ results equal the committed `shared/data` table (raw counts in
 
 | Package | ns/op | n/64 | matches | Load, CPU % mean (min to max) |
 |---|---:|---:|---:|---|
-| `nepdate` | 821.6 | 64/64 | 64 | 66.1 (23.2 to 100.0) |
+| `nepdate-core` | 821.6 | 64/64 | 64 | 66.1 (23.2 to 100.0) |
 | `bikram-sambat` | 1103.2 | 64/64 | 61 | 92.6 (39.8 to 100.0) |
 | `nepkit` | 2089.4 | 64/64 | 62 | 52.7 (17.3 to 98.6) |
 | `npdatetime` | 3953.0 | 64/64 | 62 | 41.3 (17.7 to 83.9) |
@@ -114,16 +115,45 @@ claim. The numbers above still show where each package would land.
 
 ## Import time
 
-Best of five `-X importtime` runs, with the load sampled before each run. This is the ADR-0002
-§7 measurement.
+Best of five `-X importtime` runs, with the load sampled before each run. The first table is the
+P5 measurement against the old 5 ms target.
 
 | Import | Best us | Samples, us | Load, CPU % mean (min to max) |
 |---|---:|---|---|
 | `import nepdate` | 15086 | 46715, 25968, 27548, 15086, 23354 | 69.8 (56.9 to 91.1) |
 | `import nepdate` then `import nepdate_patro` | 8253 | 8745, 11410, 8253, 8890, 11649 | 64.4 (40.6 to 76.1) |
 
-`import nepdate_patro` is under its 10 ms budget. `import nepdate` is over its 5 ms budget on this
-loaded machine, as in every earlier phase; the gate's coarse ceiling still passes.
+P6 first deferred the formatting, lenient parser and fiscal label tables. The before and after runs below
+alternate between a copy of `main` at `31a994f` on `PYTHONPATH` and this branch, seven fresh
+processes each, so load drift affects both sides.
+
+| Tree | Best us | Median us | Mean us | Load, CPU % mean (min to max) |
+|---|---:|---:|---:|---|
+| Before | 14294 | 22154 | 21372 | 74.2 (41.9 to 90.8) |
+| After | 13883 | 19485 | 18406 | 79.4 (55.9 to 91.6) |
+
+At about 90 % load the pairs were 24454 to 17849 us and 29785 to 20749 us. The package's own module
+self time in the first pair fell from 11808 to 9284 us: `_format` (1160 us) and `_pattern` (630 us)
+are no longer imported by `import nepdate`, and `_parse` (886 to 530 us) and `_fiscal` (999 to
+656 us) build less.
+
+Review restored `_format` and `_pattern` at import: importing them inside `__str__` and `long`
+cost a module lookup per call, about 210 to 600 ns for `str(d)` and 340 to 800 ns for B5 on this
+machine. The after row above therefore includes about 1790 us (at about 90 % load) that the merged
+tree pays again; only the lenient parser and the fiscal labels stay deferred.
+
+The floor is the bare interpreter, measured in the same loaded window:
+
+| Import | Best us | Load, CPU % |
+|---|---:|---:|
+| `datetime` | 1510 | 59.0 |
+| `enum` | 3418 | 65.9 |
+| both | 4530 | 68.8 |
+
+ADR-0008 proposes a load-aware budget of 15 ms for the core and 20 ms for the patro, best of five
+at up to 80 % CPU, while the quiet-machine targets stay 5 ms and 10 ms. Until ADR-0008 is accepted,
+the 5 ms number in ADR-0002 §7 is still the published target, and the loaded numbers above miss it.
+The gate's 50 ms ceiling passes (ADR-0006).
 
 ## Targets
 

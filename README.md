@@ -5,8 +5,7 @@ newer. Part of the NepDate family: the shared data and spec live in the hub
 [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate); the C# original is
 [NepDate](https://github.com/RajuPrasai/NepDate).
 
-- Import `nepdate`. The distribution name is chosen before the first release; `nepdate` is the
-  current name.
+- Import `nepdate`. The core distribution is `nepdate-core`, the name recorded in ADR-0007.
 - Tithi, public holidays and events are a separate distribution, `nepdate-patro` (import
   `nepdate_patro`). The core has none of that data.
 - Pure Python, zero runtime dependencies (except `tzdata` on Windows, for `today()`), typed
@@ -17,7 +16,7 @@ newer. Part of the NepDate family: the shared data and spec live in the hub
 ## Install
 
 ```console
-pip install nepdate
+pip install nepdate-core
 ```
 
 ## Quick start
@@ -54,7 +53,7 @@ NepaliDate(2081, 6, 15)
 The core has no patro data. Install both distributions:
 
 ```console
-pip install nepdate nepdate-patro
+pip install nepdate-core nepdate-patro
 ```
 
 ```python

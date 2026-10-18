@@ -10,96 +10,891 @@
       "b1": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     },
     "npdatetime": {
       "b1": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     },
     "nepali": {
       "b1": {
         "supported": 64,
         "matches": 61,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 63,
         "matches": 60,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              1943,
+              4,
+              14
+            ],
+            "theirs": null,
+            "ours": [
+              2000,
+              1,
+              1
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     },
     "bikram-sambat": {
       "b1": {
         "supported": 64,
         "matches": 61,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 61,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     },
     "bikram": {
       "b1": {
         "supported": 63,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2000,
+              1,
+              1
+            ],
+            "theirs": [
+              1944,
+              1,
+              2
+            ],
+            "ours": [
+              1943,
+              4,
+              14
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2090,
+              11,
+              24
+            ],
+            "theirs": null,
+            "ours": [
+              2034,
+              3,
+              8
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 62,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              1943,
+              4,
+              14
+            ],
+            "theirs": null,
+            "ours": [
+              2000,
+              1,
+              1
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2034,
+              3,
+              8
+            ],
+            "theirs": null,
+            "ours": [
+              2090,
+              11,
+              24
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
       }
     },
     "pyBSDate": {
       "b1": {
         "supported": 64,
         "matches": 60,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2063,
+              6,
+              22
+            ],
+            "theirs": [
+              2005,
+              10,
+              8
+            ],
+            "ours": [
+              2006,
+              10,
+              8
+            ],
+            "bs_year": 2063,
+            "questionable": false
+          },
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2090,
+              11,
+              24
+            ],
+            "theirs": [
+              2034,
+              3,
+              9
+            ],
+            "ours": [
+              2034,
+              3,
+              8
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          }
+        ]
       }
     },
     "nepali-calendar-utils": {
       "b1": {
         "supported": 64,
         "matches": 61,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 61,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     },
     "nepkit": {
       "b1": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       },
       "b2": {
         "supported": 64,
         "matches": 62,
-        "agrees": false
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
       }
     }
   },
