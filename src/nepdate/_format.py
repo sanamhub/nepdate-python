@@ -112,9 +112,8 @@ def format_long(  # noqa: PLR0913 - the three date fields and the four options a
     year: int,
     month: int,
     day: int,
-    weekday: int,
+    weekday: int | None,
     *,
-    with_weekday: bool,
     include_year: bool,
     pad: bool,
     lang: Lang,
@@ -125,8 +124,7 @@ def format_long(  # noqa: PLR0913 - the three date fields and the four options a
         year: The BS year.
         month: The BS month.
         day: The BS day.
-        weekday: The weekday index, Sunday = 0.
-        with_weekday: Whether to start with the weekday name.
+        weekday: The weekday index, Sunday = 0; None omits the weekday name.
         include_year: Whether to end with the year.
         pad: Whether the day is two digits.
         lang: The language of the names and digits.
@@ -138,11 +136,11 @@ def format_long(  # noqa: PLR0913 - the three date fields and the four options a
         y = _YEAR_NE[year - MIN_YEAR]
         d = _DAY_NE_PAD[day] if pad else _DAY_NE[day]
         month_name = _MONTH_NE[month]
-        prefix = f"{_WEEKDAY_NE[weekday]}, " if with_weekday else ""
+        prefix = f"{_WEEKDAY_NE[weekday]}, " if weekday is not None else ""
     else:
         y = _YEAR_EN[year - MIN_YEAR]
         d = _DAY_EN_PAD[day] if pad else _DAY_EN[day]
         month_name = _MONTH_EN[month]
-        prefix = f"{_WEEKDAY_EN[weekday]}, " if with_weekday else ""
+        prefix = f"{_WEEKDAY_EN[weekday]}, " if weekday is not None else ""
     suffix = f", {y}" if include_year else ""
     return f"{prefix}{month_name} {d}{suffix}"
