@@ -524,7 +524,8 @@ def rehearse(version: str, root: Path = ROOT) -> list[str]:
             patro_sdist = _pick(artifacts, patro_prefix, ".tar.gz")
         except RehearsalError as exc:
             return [str(exc)]
-        print(f"release: built {len(artifacts)} artifacts")
+        for artifact in artifacts:
+            print(f"release: built {artifact.name}")
         errors.extend(twine_check(artifacts, root))
         errors.extend(check_wheel(core_wheel, "nepdate", version))
         errors.extend(check_wheel(patro_wheel, "nepdate_patro", version))
