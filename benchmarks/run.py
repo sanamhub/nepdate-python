@@ -17,8 +17,6 @@ from datetime import date as date_type
 from datetime import datetime
 from pathlib import Path
 
-import psutil
-
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -28,20 +26,55 @@ LOAD_LIMIT = 15.0
 CORE_INDEX = 2
 
 
+def _cpu_fields(per_cpu: list[float]) -> dict[str, float]:
+    """Split per-CPU percentages into the all-CPU, CPU 2 and background loads.
+
+    The benchmark process is pinned to CPU 2, so while it runs that CPU is busy by design. The
+    background load is the mean of every other CPU and is what decides whether a run was loaded.
+
+    Args:
+        per_cpu: One percentage per logical CPU.
+
+    Returns:
+        ``cpu_percent`` over all CPUs, ``cpu2_percent`` and ``background_percent``.
+    """
+    others = [value for index, value in enumerate(per_cpu) if index != CORE_INDEX] or [0.0]
+    return {
+        "cpu_percent": round(sum(per_cpu) / len(per_cpu), 1),
+        "cpu2_percent": round(per_cpu[CORE_INDEX], 1) if len(per_cpu) > CORE_INDEX else 0.0,
+        "background_percent": round(sum(others) / len(others), 1),
+    }
+
+
 def _load_sample() -> dict[str, float | int]:
     """Take one machine load sample.
 
     Returns:
-        All-CPU and logical-CPU-2 percent, memory percent, and the number of processes.
+        The ``_cpu_fields`` loads, memory percent, and the number of processes.
     """
-    per_cpu = psutil.cpu_percent(interval=0.5, percpu=True)
-    all_cpu = sum(per_cpu) / len(per_cpu)
+    import psutil  # noqa: PLC0415 - the tests import this module without the bench group
+
     return {
-        "cpu_percent": round(all_cpu, 1),
-        "cpu2_percent": round(per_cpu[CORE_INDEX], 1) if len(per_cpu) > CORE_INDEX else 0.0,
+        **_cpu_fields(psutil.cpu_percent(interval=0.5, percpu=True)),
         "memory_percent": psutil.virtual_memory().percent,
         "processes": len(psutil.pids()),
     }
+
+
+def _is_loaded(before: dict[str, float | int], samples: list[dict[str, float | int]]) -> bool:
+    """Tell whether a benchmark row was measured on a loaded machine.
+
+    Args:
+        before: The sample taken before the process started, when nothing is pinned.
+        samples: The samples taken while the process ran.
+
+    Returns:
+        True when the all-CPU load before the run, or the background load during it, reached
+        ``LOAD_LIMIT``.
+    """
+    if float(before["cpu_percent"]) >= LOAD_LIMIT:
+        return True
+    return any(float(sample["background_percent"]) >= LOAD_LIMIT for sample in samples)
 
 
 def _summarise(samples: list[dict[str, float | int]]) -> dict[str, float | int]:
@@ -51,17 +84,19 @@ def _summarise(samples: list[dict[str, float | int]]) -> dict[str, float | int]:
         samples: The samples taken while the process ran.
 
     Returns:
-        Min, mean, median and max CPU percent, the mean memory percent, the process count and
-        the number of samples.
+        Min, mean, median and max CPU percent, the CPU 2 and background maxima, the mean memory
+        percent, the process count and the number of samples.
     """
     cpu = [float(sample["cpu_percent"]) for sample in samples] or [0.0]
     cpu2 = [float(sample["cpu2_percent"]) for sample in samples] or [0.0]
+    background = [float(sample["background_percent"]) for sample in samples] or [0.0]
     return {
         "cpu_min": min(cpu),
         "cpu_mean": round(statistics.mean(cpu), 1),
         "cpu_median": round(statistics.median(cpu), 1),
         "cpu_max": max(cpu),
         "cpu2_max": max(cpu2),
+        "background_max": max(background),
         "memory_mean": round(
             statistics.mean(float(sample["memory_percent"]) for sample in samples)
             if samples
@@ -127,6 +162,8 @@ def run_one(key: str, output: Path) -> dict[str, object]:
         timed_out = False
         while process.poll() is None:
             if time.perf_counter() - started > TIMEOUT_S:
+                import psutil  # noqa: PLC0415 - see _load_sample
+
                 timed_out = True
                 for child in psutil.Process(process.pid).children(recursive=True):
                     child.kill()
@@ -137,7 +174,7 @@ def run_one(key: str, output: Path) -> dict[str, object]:
     stdout = log_path.read_text(encoding="utf-8")
     elapsed = time.perf_counter() - started
     load = _summarise(samples)
-    loaded = load_before["cpu_percent"] >= LOAD_LIMIT or load["cpu_max"] >= LOAD_LIMIT
+    loaded = _is_loaded(load_before, samples)
     if timed_out:
         return {
             "key": key,

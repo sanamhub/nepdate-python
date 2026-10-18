@@ -58,3 +58,9 @@ def docs_check() -> Any:
 def benchmark_inputs() -> Any:
     """Load ``benchmarks/inputs.py`` as a module."""
     return _load("benchmark_inputs_script", "../benchmarks/inputs.py")
+
+
+@pytest.fixture(scope="session")
+def bench_run() -> Any:
+    """Load ``benchmarks/run.py`` as a module."""
+    return _load("bench_run_script", "../benchmarks/run.py")

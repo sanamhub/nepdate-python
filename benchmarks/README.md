@@ -26,8 +26,10 @@ competitor counts. `benchmarks/bench.py --only b7` runs one benchmark by hand.
 `run.py --check-load` samples the all-CPU and logical-CPU-2 load without importing a competitor,
 appends the sample to `quiet.json` and exits 1 when the all-CPU load is 15 % or more. A normal run
 stops with exit 3 above 15 % unless `--allow-loaded` is given. Every row records `load_before`,
-`loaded` and the load range while the process ran; a row with `loaded: true` is not a target
-verdict (P7).
+`loaded` and the load range while the process ran. A row is loaded when the all-CPU load before it,
+or the load of the CPUs other than the pinned CPU 2 while it runs, reaches 15 %; a row with
+`loaded: true` is not a target verdict (P7). `scripts/tests/test_bench_load_gate.py` covers the
+gate without the bench group.
 
 Each benchmark function walks all its inputs and returns the result list; pyperf divides by
 `inner_loops`, the number of accepted inputs, so the reported value is per single operation. A

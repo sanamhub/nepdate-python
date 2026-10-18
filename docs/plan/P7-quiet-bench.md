@@ -14,8 +14,10 @@ stays pending and the report says so.
   does in `bench/load.ts` and `bench/measure.ts`.
 - Every measured process is pinned to logical CPU 2: `--affinity 2` for pyperf, and
   `start /affinity 4 /wait` for the C# benchmark.
-- A row is eligible for a verdict only when its `load_before` and its `load_max` are both under
-  15 %. A row above either is marked `loaded: true` and is not a verdict.
+- A row is eligible for a verdict only when its `load_before` (all CPUs, nothing pinned yet) and
+  its `background_max` (every CPU except CPU 2, sampled while it runs) are both under 15 %. CPU 2
+  is left out during the run because the benchmark keeps it busy by design. A row above either is
+  marked `loaded: true` and is not a verdict.
 - If no window comes, `benchmarks/results/<date>/quiet.json` records the attempts and every
   target stays pending. No loaded number is copied into a target column or used to accept or
   reject an ADR.
@@ -73,7 +75,8 @@ The reviewer checks:
 - [ ] `uv run python scripts/ci.py` passes 9/9 and `release-check 0.1.0` passes.
 - [ ] `quiet.json` shows a batch whose loads were under 15 %, or records that no window came and
       leaves every target pending.
-- [ ] Every B1 to B8 row has `load_before`, `load_max` and `loaded`; no loaded row is a verdict.
+- [ ] Every B1 to B8 row has `load_before`, `background_max` and `loaded`; no loaded row is a
+      verdict.
 - [ ] The import table has the core, the patro and the bare floor with the load.
 - [ ] The C# column comes from this machine and this session, with its load.
 - [ ] B5 and `str(d)` are compared with `main` and are not slower by more than 10 %.
