@@ -9,30 +9,30 @@
   "targets": [
     {
       "target": "parse",
-      "runs": 2038189,
+      "runs": 3002124,
       "seconds": 61,
       "coverage": 57,
       "exit_code": 0,
       "findings": 0,
-      "tool_summary": "Done 2038189 runs in 61 second(s)"
+      "tool_summary": "Done 3002124 runs in 61 second(s)"
     },
     {
       "target": "parse_lenient",
-      "runs": 1986715,
+      "runs": 174582,
       "seconds": 61,
-      "coverage": 58,
+      "coverage": 122,
       "exit_code": 0,
       "findings": 0,
-      "tool_summary": "Done 1986715 runs in 61 second(s)"
+      "tool_summary": "Done 174582 runs in 61 second(s)"
     },
     {
       "target": "format",
-      "runs": 95316,
+      "runs": 144801,
       "seconds": 61,
       "coverage": 75,
       "exit_code": 0,
       "findings": 0,
-      "tool_summary": "Done 95316 runs in 61 second(s)"
+      "tool_summary": "Done 144801 runs in 61 second(s)"
     }
   ],
   "logs": [
@@ -40,5 +40,6 @@
     "docs/fuzz/2026-10-18/parse_lenient.txt",
     "docs/fuzz/2026-10-18/format.txt"
   ],
-  "artifacts": "none; the artifact directory /mnt/d/devcache/p9/fuzz-artifacts was empty"
+  "artifacts": "none; the artifact directory /mnt/d/devcache/p9/fuzz-artifacts was empty",
+  "note": "Review rerun after fuzz/_common.py instruments nepdate._lenient; the first run left the lenient scanner uninstrumented (parse_lenient coverage 58, now 122)."
 }

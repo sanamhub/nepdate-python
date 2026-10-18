@@ -46,3 +46,11 @@ def test_release_runs_fuzz_before_publish() -> None:
     assert BUDGET in text
     assert "needs: [preflight, build, mutation, fuzz]" in text
     assert text.count("needs: [preflight, build, mutation, fuzz]") == PUBLISH_JOBS
+
+
+def test_crash_inputs_are_uploaded_on_failure() -> None:
+    """Both fuzz jobs keep the crash input when a target fails."""
+    for path in (WORKFLOW, RELEASE):
+        text = path.read_text(encoding="utf-8")
+        assert "if: failure()" in text, path.name
+        assert "name: fuzz-artifacts-${{ matrix.target }}" in text, path.name

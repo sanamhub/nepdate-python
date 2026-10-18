@@ -21,15 +21,20 @@ becomes a string and invalid UTF-8 bytes become lone surrogates. The parse targe
 Atheris runs on Linux and macOS, not Windows. Use WSL Ubuntu:
 
 ```console
-python3 -m venv /home/sanam/p9-venv
-/home/sanam/p9-venv/bin/python -m pip install "atheris==3.1.0"
+python3 -m venv /mnt/d/devcache/p9/venv
+/mnt/d/devcache/p9/venv/bin/python -m pip install "atheris==3.1.0"
 mkdir -p /mnt/d/devcache/p9/fuzz-artifacts
 cd /mnt/e/github/sanamhub/nepdate-python
 for target in parse parse_lenient format; do
-  PYTHONPATH=src /home/sanam/p9-venv/bin/python "fuzz/fuzz_$target.py" \
+  PYTHONPATH=src /mnt/d/devcache/p9/venv/bin/python "fuzz/fuzz_$target.py" \
     -max_total_time=60 -artifact_prefix=/mnt/d/devcache/p9/fuzz-artifacts/
 done
 ```
+
+`fuzz/_common.py` imports `nepdate._lenient` inside `atheris.instrument_imports()`, because the
+package loads it lazily on the first `parse_lenient` call and it would otherwise run without
+coverage feedback. The first P9 run missed this (parse_lenient coverage 58); the review rerun
+reached 122.
 
 The local budget is 60 s per target. Run at most 3 targets at once, and no more than 4 jobs on
 the machine. The 2026-10-18 run took 61 s per target and is recorded in

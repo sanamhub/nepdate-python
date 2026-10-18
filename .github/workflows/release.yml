@@ -146,6 +146,13 @@ jobs:
           uv run --no-sync python "fuzz/fuzz_${TARGET}.py" \
             -max_total_time=300 \
             -artifact_prefix="$RUNNER_TEMP/fuzz-artifacts/"
+      - name: Upload the crash input
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: fuzz-artifacts-${{ matrix.target }}
+          path: ${{ runner.temp }}/fuzz-artifacts/
+          if-no-files-found: ignore
 
   publish:
     name: publish to PyPI

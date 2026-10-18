@@ -7,7 +7,10 @@ from collections.abc import Callable
 
 import atheris
 
+# `nepdate._lenient` loads on the first `parse_lenient` call, after this block, so it is
+# imported here explicitly; otherwise the lenient scanner runs without coverage feedback.
 with atheris.instrument_imports():
+    import nepdate._lenient  # noqa: F401
     from nepdate import Lang, NepaliDate  # noqa: F401
     from nepdate._errors import NepDateError  # noqa: F401
 
