@@ -1,0 +1,767 @@
+{
+  "all": {
+    "nepdate": [
+      "DateDiff",
+      "DateOrder",
+      "DateRange",
+      "ErrorKind",
+      "FiscalYear",
+      "Lang",
+      "MAX",
+      "MIN",
+      "Month",
+      "NepDateError",
+      "NepaliDate",
+      "Overflow",
+      "Quarter",
+      "Separator",
+      "Weekday",
+      "to_nepali_digits"
+    ],
+    "nepdate_patro": [
+      "CalendarInfo",
+      "Event",
+      "Tithi",
+      "coverage",
+      "info",
+      "public_holidays"
+    ]
+  },
+  "items": {
+    "nepdate.DateDiff": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(negative: bool, years: int, months: int, days: int, total_days: int) -> None"
+    },
+    "nepdate.DateDiff.__delattr__": {
+      "kind": "method",
+      "signature": "(self, name: str) -> None"
+    },
+    "nepdate.DateDiff.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.DateDiff.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.DateDiff.__init__": {
+      "kind": "method",
+      "signature": "(self, negative: bool, years: int, months: int, days: int, total_days: int) -> None"
+    },
+    "nepdate.DateDiff.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate.DateDiff.__setattr__": {
+      "kind": "method",
+      "signature": "(self, name: str, value: object) -> None"
+    },
+    "nepdate.DateDiff.days": {
+      "annotation": "int",
+      "kind": "attribute"
+    },
+    "nepdate.DateDiff.months": {
+      "annotation": "int",
+      "kind": "attribute"
+    },
+    "nepdate.DateDiff.negative": {
+      "annotation": "bool",
+      "kind": "attribute"
+    },
+    "nepdate.DateDiff.total_days": {
+      "annotation": "int",
+      "kind": "attribute"
+    },
+    "nepdate.DateDiff.years": {
+      "annotation": "int",
+      "kind": "attribute"
+    },
+    "nepdate.DateOrder": {
+      "bases": [
+        "Enum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.DateOrder.DMY": {
+      "kind": "enum_member",
+      "value": "'DMY'"
+    },
+    "nepdate.DateOrder.DYM": {
+      "kind": "enum_member",
+      "value": "'DYM'"
+    },
+    "nepdate.DateOrder.MDY": {
+      "kind": "enum_member",
+      "value": "'MDY'"
+    },
+    "nepdate.DateOrder.MYD": {
+      "kind": "enum_member",
+      "value": "'MYD'"
+    },
+    "nepdate.DateOrder.YDM": {
+      "kind": "enum_member",
+      "value": "'YDM'"
+    },
+    "nepdate.DateOrder.YMD": {
+      "kind": "enum_member",
+      "value": "'YMD'"
+    },
+    "nepdate.DateRange": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(start: NepaliDate, end: NepaliDate) -> None"
+    },
+    "nepdate.DateRange.__contains__": {
+      "kind": "method",
+      "signature": "(self, d: object) -> bool"
+    },
+    "nepdate.DateRange.__init__": {
+      "kind": "method",
+      "signature": "(self, start: NepaliDate, end: NepaliDate) -> None"
+    },
+    "nepdate.DateRange.__iter__": {
+      "kind": "method",
+      "signature": "(self) -> Iterator[NepaliDate]"
+    },
+    "nepdate.DateRange.__len__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.DateRange.__reversed__": {
+      "kind": "method",
+      "signature": "(self) -> Iterator[NepaliDate]"
+    },
+    "nepdate.DateRange.end": {
+      "annotation": "NepaliDate",
+      "kind": "property"
+    },
+    "nepdate.DateRange.month": {
+      "kind": "method",
+      "signature": "(cls, year: int, month: int) -> DateRange"
+    },
+    "nepdate.DateRange.start": {
+      "annotation": "NepaliDate",
+      "kind": "property"
+    },
+    "nepdate.DateRange.year": {
+      "kind": "method",
+      "signature": "(cls, year: int) -> DateRange"
+    },
+    "nepdate.ErrorKind": {
+      "bases": [
+        "Enum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.ErrorKind.AMBIGUOUS": {
+      "kind": "enum_member",
+      "value": "'ambiguous'"
+    },
+    "nepdate.ErrorKind.INVALID_CHARACTER": {
+      "kind": "enum_member",
+      "value": "'invalid_character'"
+    },
+    "nepdate.ErrorKind.INVALID_DAY": {
+      "kind": "enum_member",
+      "value": "'invalid_day'"
+    },
+    "nepdate.ErrorKind.INVALID_GREGORIAN": {
+      "kind": "enum_member",
+      "value": "'invalid_gregorian'"
+    },
+    "nepdate.ErrorKind.INVALID_MONTH": {
+      "kind": "enum_member",
+      "value": "'invalid_month'"
+    },
+    "nepdate.ErrorKind.NUMBER_TOO_LONG": {
+      "kind": "enum_member",
+      "value": "'number_too_long'"
+    },
+    "nepdate.ErrorKind.OUT_OF_RANGE": {
+      "kind": "enum_member",
+      "value": "'out_of_range'"
+    },
+    "nepdate.ErrorKind.UNRECOGNIZED": {
+      "kind": "enum_member",
+      "value": "'unrecognized'"
+    },
+    "nepdate.ErrorKind.WRONG_GROUP_COUNT": {
+      "kind": "enum_member",
+      "value": "'wrong_group_count'"
+    },
+    "nepdate.FiscalYear": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(start_year: int) -> None"
+    },
+    "nepdate.FiscalYear.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.FiscalYear.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.FiscalYear.__init__": {
+      "kind": "method",
+      "signature": "(self, start_year: int) -> None"
+    },
+    "nepdate.FiscalYear.containing": {
+      "kind": "method",
+      "signature": "(cls, d: NepaliDate) -> FiscalYear"
+    },
+    "nepdate.FiscalYear.end": {
+      "kind": "method",
+      "signature": "(self) -> NepaliDate"
+    },
+    "nepdate.FiscalYear.label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.FiscalYear.quarter_range": {
+      "kind": "method",
+      "signature": "(self, q: Quarter) -> DateRange"
+    },
+    "nepdate.FiscalYear.range": {
+      "kind": "method",
+      "signature": "(self) -> DateRange"
+    },
+    "nepdate.FiscalYear.start": {
+      "kind": "method",
+      "signature": "(self) -> NepaliDate"
+    },
+    "nepdate.FiscalYear.start_year": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.Lang": {
+      "bases": [
+        "Enum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Lang.EN": {
+      "kind": "enum_member",
+      "value": "'en'"
+    },
+    "nepdate.Lang.NE": {
+      "kind": "enum_member",
+      "value": "'ne'"
+    },
+    "nepdate.MAX": {
+      "kind": "constant",
+      "type": "NepaliDate",
+      "value": "NepaliDate(2199, 12, 30)"
+    },
+    "nepdate.MIN": {
+      "kind": "constant",
+      "type": "NepaliDate",
+      "value": "NepaliDate(1901, 1, 1)"
+    },
+    "nepdate.Month": {
+      "bases": [
+        "IntEnum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Month.ASHAD": {
+      "kind": "enum_member",
+      "value": "3"
+    },
+    "nepdate.Month.ASHOJ": {
+      "kind": "enum_member",
+      "value": "6"
+    },
+    "nepdate.Month.BAISHAKH": {
+      "kind": "enum_member",
+      "value": "1"
+    },
+    "nepdate.Month.BHADRA": {
+      "kind": "enum_member",
+      "value": "5"
+    },
+    "nepdate.Month.CHAITRA": {
+      "kind": "enum_member",
+      "value": "12"
+    },
+    "nepdate.Month.FALGUN": {
+      "kind": "enum_member",
+      "value": "11"
+    },
+    "nepdate.Month.JESTHA": {
+      "kind": "enum_member",
+      "value": "2"
+    },
+    "nepdate.Month.KARTIK": {
+      "kind": "enum_member",
+      "value": "7"
+    },
+    "nepdate.Month.MAGH": {
+      "kind": "enum_member",
+      "value": "10"
+    },
+    "nepdate.Month.MANGSIR": {
+      "kind": "enum_member",
+      "value": "8"
+    },
+    "nepdate.Month.POUSH": {
+      "kind": "enum_member",
+      "value": "9"
+    },
+    "nepdate.Month.SHRAWAN": {
+      "kind": "enum_member",
+      "value": "4"
+    },
+    "nepdate.Month.label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.Month.short_label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.NepDateError": {
+      "bases": [
+        "ValueError"
+      ],
+      "kind": "exception",
+      "signature": "(kind: ErrorKind, message: str) -> None"
+    },
+    "nepdate.NepDateError.__init__": {
+      "kind": "method",
+      "signature": "(self, kind: ErrorKind, message: str) -> None"
+    },
+    "nepdate.NepDateError.kind": {
+      "annotation": "ErrorKind",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(year: int, month: int, day: int) -> None"
+    },
+    "nepdate.NepaliDate.__add__": {
+      "kind": "method",
+      "signature": "(self, td: datetime.timedelta) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.NepaliDate.__format__": {
+      "kind": "method",
+      "signature": "(self, spec: str) -> str"
+    },
+    "nepdate.NepaliDate.__ge__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.NepaliDate.__gt__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.NepaliDate.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.NepaliDate.__init__": {
+      "kind": "method",
+      "signature": "(self, year: int, month: int, day: int) -> None"
+    },
+    "nepdate.NepaliDate.__le__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.NepaliDate.__lt__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.NepaliDate.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate.NepaliDate.__str__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate.NepaliDate.__sub__": {
+      "kind": "method",
+      "signature": "(self, other: NepaliDate | datetime.timedelta) -> datetime.timedelta | NepaliDate"
+    },
+    "nepdate.NepaliDate.add_days": {
+      "kind": "method",
+      "signature": "(self, n: int) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.add_months": {
+      "kind": "method",
+      "signature": "(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.add_years": {
+      "kind": "method",
+      "signature": "(self, n: int, overflow: Overflow = Overflow.CLAMP) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.day": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.day_of_year": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.days_until": {
+      "kind": "method",
+      "signature": "(self, other: NepaliDate) -> int"
+    },
+    "nepdate.NepaliDate.diff": {
+      "kind": "method",
+      "signature": "(self, other: NepaliDate) -> DateDiff"
+    },
+    "nepdate.NepaliDate.first_of_month": {
+      "kind": "method",
+      "signature": "(self) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.fiscal_year": {
+      "kind": "method",
+      "signature": "(self) -> FiscalYear"
+    },
+    "nepdate.NepaliDate.format": {
+      "kind": "method",
+      "signature": "(self, pattern: str, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.NepaliDate.from_date": {
+      "kind": "method",
+      "signature": "(cls, d: datetime.date) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.from_ordinal": {
+      "kind": "method",
+      "signature": "(cls, n: int) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.isoformat": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate.NepaliDate.last_of_month": {
+      "kind": "method",
+      "signature": "(self) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.long": {
+      "kind": "method",
+      "signature": "(self, *, weekday: bool = False, year: bool = True, pad: bool = True, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.NepaliDate.month": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.month_enum": {
+      "annotation": "Month",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.month_length": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.parse": {
+      "kind": "method",
+      "signature": "(cls, s: str) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.parse_lenient": {
+      "kind": "method",
+      "signature": "(cls, s: str) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.quarter": {
+      "kind": "method",
+      "signature": "(self) -> Quarter"
+    },
+    "nepdate.NepaliDate.short": {
+      "kind": "method",
+      "signature": "(self, order: DateOrder = DateOrder.YMD, sep: Separator = Separator.SLASH, pad: bool = True, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.NepaliDate.to_date": {
+      "kind": "method",
+      "signature": "(self) -> datetime.date"
+    },
+    "nepdate.NepaliDate.to_ordinal": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.NepaliDate.today": {
+      "kind": "method",
+      "signature": "(cls, tz: datetime.tzinfo | None = None) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.weekday": {
+      "annotation": "Weekday",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.year": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.Overflow": {
+      "bases": [
+        "Enum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Overflow.CLAMP": {
+      "kind": "enum_member",
+      "value": "'clamp'"
+    },
+    "nepdate.Overflow.SPILL": {
+      "kind": "enum_member",
+      "value": "'spill'"
+    },
+    "nepdate.Quarter": {
+      "bases": [
+        "IntEnum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Quarter.Q1": {
+      "kind": "enum_member",
+      "value": "1"
+    },
+    "nepdate.Quarter.Q2": {
+      "kind": "enum_member",
+      "value": "2"
+    },
+    "nepdate.Quarter.Q3": {
+      "kind": "enum_member",
+      "value": "3"
+    },
+    "nepdate.Quarter.Q4": {
+      "kind": "enum_member",
+      "value": "4"
+    },
+    "nepdate.Quarter.months": {
+      "kind": "method",
+      "signature": "(self) -> tuple[Month, Month, Month]"
+    },
+    "nepdate.Separator": {
+      "bases": [
+        "Enum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Separator.BACKSLASH": {
+      "kind": "enum_member",
+      "value": "'\\\\'"
+    },
+    "nepdate.Separator.DASH": {
+      "kind": "enum_member",
+      "value": "'-'"
+    },
+    "nepdate.Separator.DOT": {
+      "kind": "enum_member",
+      "value": "'.'"
+    },
+    "nepdate.Separator.SLASH": {
+      "kind": "enum_member",
+      "value": "'/'"
+    },
+    "nepdate.Separator.SPACE": {
+      "kind": "enum_member",
+      "value": "' '"
+    },
+    "nepdate.Separator.UNDERSCORE": {
+      "kind": "enum_member",
+      "value": "'_'"
+    },
+    "nepdate.Weekday": {
+      "bases": [
+        "IntEnum"
+      ],
+      "kind": "enum"
+    },
+    "nepdate.Weekday.FRIDAY": {
+      "kind": "enum_member",
+      "value": "5"
+    },
+    "nepdate.Weekday.MONDAY": {
+      "kind": "enum_member",
+      "value": "1"
+    },
+    "nepdate.Weekday.SATURDAY": {
+      "kind": "enum_member",
+      "value": "6"
+    },
+    "nepdate.Weekday.SUNDAY": {
+      "kind": "enum_member",
+      "value": "0"
+    },
+    "nepdate.Weekday.THURSDAY": {
+      "kind": "enum_member",
+      "value": "4"
+    },
+    "nepdate.Weekday.TUESDAY": {
+      "kind": "enum_member",
+      "value": "2"
+    },
+    "nepdate.Weekday.WEDNESDAY": {
+      "kind": "enum_member",
+      "value": "3"
+    },
+    "nepdate.Weekday.label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.Weekday.short_label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.to_nepali_digits": {
+      "kind": "function",
+      "signature": "(n: int, min_width: int = 0) -> str"
+    },
+    "nepdate_patro.CalendarInfo": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(tithi: Tithi | None, is_public_holiday: bool, events: tuple[Event, ...]) -> None"
+    },
+    "nepdate_patro.CalendarInfo.__delattr__": {
+      "kind": "method",
+      "signature": "(self, name: str) -> None"
+    },
+    "nepdate_patro.CalendarInfo.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate_patro.CalendarInfo.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate_patro.CalendarInfo.__init__": {
+      "kind": "method",
+      "signature": "(self, tithi: Tithi | None, is_public_holiday: bool, events: tuple[Event, ...]) -> None"
+    },
+    "nepdate_patro.CalendarInfo.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate_patro.CalendarInfo.__setattr__": {
+      "kind": "method",
+      "signature": "(self, name: str, value: object) -> None"
+    },
+    "nepdate_patro.CalendarInfo.events": {
+      "annotation": "tuple[Event, ...]",
+      "kind": "attribute"
+    },
+    "nepdate_patro.CalendarInfo.is_public_holiday": {
+      "annotation": "bool",
+      "kind": "attribute"
+    },
+    "nepdate_patro.CalendarInfo.tithi": {
+      "annotation": "Tithi | None",
+      "kind": "attribute"
+    },
+    "nepdate_patro.Event": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(np: str, en: str) -> None"
+    },
+    "nepdate_patro.Event.__delattr__": {
+      "kind": "method",
+      "signature": "(self, name: str) -> None"
+    },
+    "nepdate_patro.Event.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate_patro.Event.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate_patro.Event.__init__": {
+      "kind": "method",
+      "signature": "(self, np: str, en: str) -> None"
+    },
+    "nepdate_patro.Event.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate_patro.Event.__setattr__": {
+      "kind": "method",
+      "signature": "(self, name: str, value: object) -> None"
+    },
+    "nepdate_patro.Event.en": {
+      "annotation": "str",
+      "kind": "attribute"
+    },
+    "nepdate_patro.Event.label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate_patro.Event.np": {
+      "annotation": "str",
+      "kind": "attribute"
+    },
+    "nepdate_patro.Tithi": {
+      "bases": [
+        "object"
+      ],
+      "kind": "class",
+      "signature": "(np: str, en: str) -> None"
+    },
+    "nepdate_patro.Tithi.__delattr__": {
+      "kind": "method",
+      "signature": "(self, name: str) -> None"
+    },
+    "nepdate_patro.Tithi.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate_patro.Tithi.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate_patro.Tithi.__init__": {
+      "kind": "method",
+      "signature": "(self, np: str, en: str) -> None"
+    },
+    "nepdate_patro.Tithi.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate_patro.Tithi.__setattr__": {
+      "kind": "method",
+      "signature": "(self, name: str, value: object) -> None"
+    },
+    "nepdate_patro.Tithi.en": {
+      "annotation": "str",
+      "kind": "attribute"
+    },
+    "nepdate_patro.Tithi.label": {
+      "kind": "method",
+      "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate_patro.Tithi.np": {
+      "annotation": "str",
+      "kind": "attribute"
+    },
+    "nepdate_patro.coverage": {
+      "kind": "function",
+      "signature": "() -> DateRange"
+    },
+    "nepdate_patro.info": {
+      "kind": "function",
+      "signature": "(d: NepaliDate) -> CalendarInfo"
+    },
+    "nepdate_patro.public_holidays": {
+      "kind": "function",
+      "signature": "() -> Iterator[NepaliDate]"
+    }
+  },
+  "schema": 1
+}

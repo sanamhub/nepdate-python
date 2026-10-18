@@ -1,9 +1,10 @@
 """Run every quality gate in order and stop at the first failure.
 
 The entry point is ``uv run --locked python scripts/ci.py``; ``--locked`` makes a stale
-``uv.lock`` fail instead of being rewritten. Each gate is defined in ADR-0004. Gates 6 and 7
-install the wheels built from this checkout into throwaway virtualenvs and test each
-distribution on its own, so a core-only install is proven to have no ``nepdate_patro``.
+``uv.lock`` fail instead of being rewritten. Gates 1 to 9 are defined in ADR-0004 and ADR-0006;
+gate 10 is the API snapshot from ADR-0010. Gates 6 and 7 install the wheels built from this
+checkout into throwaway virtualenvs and test each distribution on its own, so a core-only install
+is proven to have no ``nepdate_patro``.
 """
 
 from __future__ import annotations
@@ -464,6 +465,11 @@ def gate_docs() -> None:
     _run(["uv", "run", "python", "scripts/docs_check.py"])
 
 
+def gate_api() -> None:
+    """Check the public surface against the committed API snapshot."""
+    _run(["uv", "run", "python", "scripts/api_snapshot.py", "--check"])
+
+
 def gate_consumer() -> None:
     """Install both built wheels in a fresh venv outside the repo and use each one."""
     core_wheel = _find_archive(CORE_PREFIX, ".whl")
@@ -686,6 +692,7 @@ GATES: tuple[tuple[str, Callable[[], None]], ...] = (
     ("core alone", gate_core_alone),
     ("patro alone", gate_patro_alone),
     ("docs", gate_docs),
+    ("api", gate_api),
     ("consumer", gate_consumer),
 )
 

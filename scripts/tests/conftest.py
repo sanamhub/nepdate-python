@@ -61,6 +61,12 @@ def mutation_check() -> Any:
 
 
 @pytest.fixture(scope="session")
+def api_snapshot() -> Any:
+    """Load ``scripts/api_snapshot.py`` as a module."""
+    return _load("api_snapshot_script", "api_snapshot.py")
+
+
+@pytest.fixture(scope="session")
 def benchmark_inputs() -> Any:
     """Load ``benchmarks/inputs.py`` as a module."""
     return _load("benchmark_inputs_script", "../benchmarks/inputs.py")

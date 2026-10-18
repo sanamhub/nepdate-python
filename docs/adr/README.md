@@ -15,3 +15,4 @@ ADR.
 | [0007](0007-core-distribution-name.md) | The core distribution name | Accepted |
 | [0008](0008-import-budget.md) | The import budget on a loaded machine | Proposed |
 | [0009](0009-mutation-testing.md) | Mutation testing with mutmut | Accepted |
+| [0010](0010-api-compatibility-gate.md) | API compatibility gate | Accepted |
