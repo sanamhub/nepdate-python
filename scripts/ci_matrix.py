@@ -127,6 +127,10 @@ def environment(cache_root: Path, version: str, python_dir: Path | None = None) 
             "UV_PROJECT_ENVIRONMENT": str(cache_root / "envs" / _slug(version)),
             "UV_PYTHON_INSTALL_DIR": str(python_dir or cache_root / "python"),
             "UV_CACHE_DIR": str(cache_root / "uv-cache"),
+            # Parallel versions share the checkout, so every file a gate writes there moves out.
+            "NEPDATE_CI_DIST": str(cache_root / "dist" / _slug(version)),
+            "COVERAGE_FILE": str(cache_root / "coverage" / f"{_slug(version)}.coverage"),
+            "MYPY_CACHE_DIR": str(cache_root / "mypy-cache" / _slug(version)),
             "TEMP": str(cache_root / "tmp"),
             "TMP": str(cache_root / "tmp"),
             "UV_LINK_MODE": "copy",
@@ -216,7 +220,7 @@ def run_version(version: str, cache_root: Path, python_dir: Path | None = None) 
         The outcome, with the log path when the version ran.
     """
     env = environment(cache_root, version, python_dir)
-    for name in ("envs", "tmp", "logs", "uv-cache", "python"):
+    for name in ("envs", "tmp", "logs", "uv-cache", "python", "dist", "coverage", "mypy-cache"):
         (cache_root / name).mkdir(parents=True, exist_ok=True)
     if find_python(version, env) is None:
         return RunResult(version, "skipped", f"uv cannot provide Python {version}")

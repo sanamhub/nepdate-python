@@ -7,6 +7,8 @@ from typing import Any
 
 import pytest
 
+from conftest import _load
+
 WORKFLOW = """\
 name: ci
 on: [pull_request]
@@ -79,6 +81,27 @@ def test_environment_puts_everything_under_the_cache_root(
     assert env["TEMP"] == str(tmp_path / "tmp")
     assert env["TMP"] == str(tmp_path / "tmp")
     assert env["UV_PYTHON"] == "3.14t"
+
+
+def test_parallel_versions_write_nothing_shared(ci_matrix: Any, tmp_path: Path) -> None:
+    """Two versions running at once get separate build, coverage and mypy folders."""
+    first = ci_matrix.environment(tmp_path, "3.11")
+    second = ci_matrix.environment(tmp_path, "3.14t")
+    for key in ("NEPDATE_CI_DIST", "COVERAGE_FILE", "MYPY_CACHE_DIR"):
+        assert first[key] != second[key]
+        assert Path(first[key]).is_relative_to(tmp_path)
+        assert Path(second[key]).is_relative_to(tmp_path)
+
+
+def test_ci_builds_into_the_folder_the_matrix_gives(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """scripts/ci.py reads NEPDATE_CI_DIST, so parallel runs never share dist/."""
+    monkeypatch.setenv("NEPDATE_CI_DIST", str(tmp_path / "dist-3.11"))
+    assert tmp_path / "dist-3.11" == _load("ci_dist_probe", "ci.py").DIST
+    monkeypatch.delenv("NEPDATE_CI_DIST")
+    module = _load("ci_dist_probe", "ci.py")
+    assert module.DIST == module.ROOT / "dist"
 
 
 def test_skip_is_not_a_pass(ci_matrix: Any) -> None:
