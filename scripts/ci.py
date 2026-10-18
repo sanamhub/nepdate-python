@@ -273,7 +273,10 @@ def _outside(modules: set[str], package: str, allowed: frozenset[str]) -> list[s
 def gate_import_time() -> None:
     """Check what each import loads, that the core never loads the patro, and a coarse ceiling."""
     core_new = _new_modules("", f"import {CORE_MODULE}")
-    if extra := _outside(core_new, CORE_MODULE, CORE_IMPORT_ALLOWED):
+    # What the allowed stdlib modules load themselves differs by version (datetime pulls in
+    # math on 3.11), so it is measured on this interpreter instead of listed.
+    stdlib_deps = _new_modules("", "import " + ", ".join(sorted(CORE_IMPORT_ALLOWED)))
+    if extra := _outside(core_new, CORE_MODULE, CORE_IMPORT_ALLOWED | stdlib_deps):
         raise GateError(f"import {CORE_MODULE} loaded unexpected modules: {', '.join(extra)}")
     if PATRO_MODULE in core_new:
         raise GateError(f"import {CORE_MODULE} loaded {PATRO_MODULE}")
