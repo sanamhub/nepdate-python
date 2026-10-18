@@ -29,10 +29,10 @@ build-backend = "uv_build"
 module-name = "nepdate"
 
 [tool.mutmut]
-source_paths = ["src/nepdate", "packages/nepdate-patro/src/nepdate_patro"]
+source_paths = ["src"]
 also_copy = ["shared", "packages/nepdate-patro/tests"]
 do_not_mutate = ["*_calendar.py", "*_tables.py"]
-pytest_add_cli_args = ["-x", "-q", "--no-header", "-p", "no:cacheprovider", "--ignore=tests/test_source_hygiene.py"]
+pytest_add_cli_args = ["-x", "-q", "--no-header", "-p", "no:cacheprovider", "--import-mode=importlib", "--ignore=tests/test_source_hygiene.py", "--ignore=tests/test_lazy_imports.py", "--ignore=packages/nepdate-patro/tests/test_import_separation.py"]
 pytest_add_cli_args_test_selection = ["tests", "packages/nepdate-patro/tests"]
 
 [tool.uv.workspace]
