@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import datetime
+import operator
+from collections.abc import Callable
 
 import pytest
 
-from nepdate import FiscalYear, Lang, NepaliDate, Overflow, Quarter
+from nepdate import DateRange, FiscalYear, Lang, NepaliDate, Overflow, Quarter
 from nepdate._calendar import MONTH_NUM, MONTH_START_ORD, MONTH_YEAR
 from nepdate._date import _from_serial, _now
 from nepdate._errors import ErrorKind, NepDateError
@@ -56,12 +58,6 @@ def test_comparisons_between_two_dates_use_the_ordinal() -> None:
     assert first <= second
     assert second > first
     assert second >= first
-
-
-def test_comparison_with_another_type_raises_type_error() -> None:
-    """Comparing a date with a non-date is a TypeError, not an AttributeError."""
-    with pytest.raises(TypeError):
-        _ = NepaliDate(2080, 1, 1) < "2080-01-01"  # type: ignore[operator]
 
 
 def test_format_with_an_empty_spec_is_str() -> None:
@@ -205,3 +201,88 @@ def test_lenient_numeric_form_keeps_the_error_kind_without_a_year() -> None:
 def test_lenient_dotted_number_starts_at_the_first_digit() -> None:
     """A dotted number is split at its dots, starting at the first character."""
     assert NepaliDate.parse_lenient("15.04.2080") == NepaliDate(2080, 4, 15)
+
+
+def test_parse_strict_zero_padded_five_digit_year_is_number_too_long() -> None:
+    """The fast path does not accept a five-digit group even when its value is a valid year."""
+    with pytest.raises(NepDateError) as caught:
+        NepaliDate.parse("02080/01/01")
+    assert caught.value.kind is ErrorKind.NUMBER_TOO_LONG
+
+
+def test_format_ne_month_without_padding_uses_the_digit_table() -> None:
+    """``M`` in Nepali is the unpadded month in Devanagari digits."""
+    assert NepaliDate(2080, 5, 15).format("M", Lang.NE) == "५"
+
+
+def test_format_single_y_is_followed_by_the_next_token() -> None:
+    """A one-character ``y`` run ends after itself; the next character is still read."""
+    assert NepaliDate(2080, 5, 15).format("y-M") == "80-5"
+
+
+def test_format_empty_quoted_literal_is_empty() -> None:
+    """``''`` is an empty literal; the closing quote is the next character."""
+    assert NepaliDate(2080, 5, 15).format("yyyy''MM") == "208005"
+
+
+@pytest.mark.parametrize("compare", [operator.lt, operator.le, operator.gt, operator.ge])
+def test_ordering_with_another_type_raises_type_error(
+    compare: Callable[[object, object], bool],
+) -> None:
+    """Every ordering operator returns NotImplemented for a non-date, so Python raises."""
+    with pytest.raises(TypeError):
+        compare(NepaliDate(2080, 1, 1), "2080-01-01")
+
+
+@pytest.mark.parametrize("args", [(2080, True, 1), (2080, 1, True), (True, 1, 1)])
+def test_bool_in_any_position_is_rejected(args: tuple[int, int, int]) -> None:
+    """``bool`` is rejected as the year, the month or the day, not read as 0 or 1."""
+    with pytest.raises(TypeError):
+        NepaliDate(*args)
+
+
+def test_add_months_spill_past_the_last_month_is_out_of_range() -> None:
+    """Day 32 of Ashad 2199 shifted to Chaitra 2199 (30 days) would spill into 2200."""
+    with pytest.raises(NepDateError) as caught:
+        NepaliDate(2199, 3, 32).add_months(9, Overflow.SPILL)
+    assert caught.value.kind is ErrorKind.OUT_OF_RANGE
+
+
+_RAISERS: tuple[Callable[[], object], ...] = (
+    lambda: NepaliDate(1800, 1, 1),
+    lambda: NepaliDate(2080, 13, 1),
+    lambda: NepaliDate(2080, 1, 40),
+    lambda: NepaliDate(True, 1, 1),
+    lambda: NepaliDate.from_ordinal(0),
+    lambda: NepaliDate(2080, 1, 1).add_months(10**6),
+    lambda: NepaliDate(2199, 3, 32).add_months(9, Overflow.SPILL),
+    lambda: NepaliDate(2080, 1, 1) + datetime.timedelta(seconds=1),
+    lambda: NepaliDate(2080, 1, 1).short(order="x"),  # type: ignore[arg-type]
+    lambda: DateRange(NepaliDate(2080, 1, 2), NepaliDate(2080, 1, 1)),
+    lambda: FiscalYear(1800),
+    lambda: FiscalYear(1900).start(),
+    lambda: FiscalYear(2199).end(),
+    lambda: FiscalYear(1900).quarter_range(Quarter.Q1),
+    lambda: NepaliDate.parse("2080/01/01/01"),
+    lambda: NepaliDate.parse("20801/05/15"),
+    lambda: NepaliDate.parse("2080/0a/01"),
+    lambda: NepaliDate.parse("2080/05"),
+    lambda: NepaliDate.parse_lenient("15 notamonth 2080"),
+    lambda: NepaliDate.parse_lenient("15 Shrawan Bhadra 2080"),
+    lambda: NepaliDate.parse_lenient("1 2"),
+    lambda: NepaliDate.parse_lenient("12345/01/01"),
+    lambda: NepaliDate.parse_lenient("15 Shrawan 80"),
+    lambda: NepaliDate.parse_lenient("100 Shrawan 2080"),
+    lambda: NepaliDate.parse_lenient("15/04/80"),
+    lambda: delattr(NepaliDate(2080, 1, 1).diff(NepaliDate(2080, 1, 2)), "days"),
+)
+
+
+@pytest.mark.parametrize("raiser", _RAISERS)
+def test_every_error_carries_a_message(raiser: Callable[[], object]) -> None:
+    """The wording is not API (docs/API.md matches on ``kind``), but no error is blank."""
+    with pytest.raises((NepDateError, TypeError, ValueError, AttributeError)) as caught:
+        raiser()
+    message = str(caught.value)
+    assert message
+    assert message != "None"
