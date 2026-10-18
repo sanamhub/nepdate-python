@@ -26,6 +26,7 @@ before P1 ends. P2 and P3 may run in parallel.
 | P8 | [`P8-mutation.md`](P8-mutation.md) | mutmut scope and baseline, survivor triage, floor, release and weekly mutation gates |
 | P9 | [`P9-fuzz-api.md`](P9-fuzz-api.md) | hypothesis properties with independent oracles, atheris fuzzing, API compatibility gate, dead argument cleanup |
 | P10 | [`P10-release-rehearsal.md`](P10-release-rehearsal.md) | local CI matrix from `ci.yml`, patro data freshness gate, release artifact rehearsal, docs drift checks |
+| P11 | [`P11-post-publish.md`](P11-post-publish.md) | release notes for 0.1.0, post-publish verification on PyPI and TestPyPI, release runbook |
 
 Every phase file ends with a **Checkpoint** section. The implementation agent stops there, opens
 the PR and waits for the reviewer to tick every line before starting the next phase.

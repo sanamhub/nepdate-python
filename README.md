@@ -93,7 +93,7 @@ The complete signatures, defaults and exceptions are in the
 | [Competitors](https://github.com/sanamhub/nepdate-python/blob/main/docs/competitors.md) | The Python packages in the benchmark |
 | [Mutation testing](https://github.com/sanamhub/nepdate-python/blob/main/docs/mutation.md) | How the test suite is checked against mutmut |
 | [Fuzzing](https://github.com/sanamhub/nepdate-python/blob/main/docs/fuzzing.md) | How the parsers and formatter are fuzzed with atheris |
-| [Release](https://github.com/sanamhub/nepdate-python/blob/main/docs/release.md) | The pre-tag matrix, freshness rule and artifact rehearsal |
+| [Release](https://github.com/sanamhub/nepdate-python/blob/main/docs/release.md) | The pre-tag matrix, freshness rule, rehearsal and post-publish check |
 | [ADRs](https://github.com/sanamhub/nepdate-python/blob/main/docs/adr/README.md) | Why the design is what it is |
 | [Contributing](https://github.com/sanamhub/nepdate-python/blob/main/CONTRIBUTING.md) | Setup, tests and commits |
 | [Spec](https://github.com/sanamhub/nepdate/tree/main/spec) | Behaviour and vectors, in the hub |

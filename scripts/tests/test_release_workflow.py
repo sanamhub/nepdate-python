@@ -9,6 +9,10 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 SHA = re.compile(r"@[0-9a-f]{40}$")
 EXPRESSION = "${{"
+VERIFY_JOBS = (
+    ("verify", "publish", "https://pypi.org/simple/"),
+    ("verify-testpypi", "publish-testpypi", "https://test.pypi.org/simple/"),
+)
 
 
 def _indent(line: str) -> int:
@@ -58,6 +62,65 @@ def _job(lines: list[str], name: str) -> list[str]:
     return []
 
 
+def _needs(block: str) -> set[str]:
+    """Return the jobs in a job block's ``needs`` list.
+
+    Args:
+        block: One job block.
+
+    Returns:
+        The job names, or an empty set when the block has no inline needs list.
+    """
+    match = re.search(r"^    needs:\s*\[(.*?)\]$", block, re.MULTILINE)
+    if match is None:
+        return set()
+    return {part.strip() for part in match.group(1).split(",")}
+
+
+def verify_problems(text: str) -> list[str]:  # noqa: PLR0912 - one branch per rule
+    """Check the two post-publish jobs and the index each one uses.
+
+    Args:
+        text: The release workflow text.
+
+    Returns:
+        One message per missing or wrong rule.
+    """
+    lines = text.splitlines()
+    found: list[str] = []
+    for name, publisher, index in VERIFY_JOBS:
+        block = "\n".join(_job(lines, name))
+        if not block:
+            found.append(f"missing {name} job")
+            continue
+        needs = _needs(block)
+        if publisher not in needs:
+            found.append(f"{name} must need {publisher}")
+        if "preflight" not in needs:
+            found.append(f"{name} must need preflight for the version")
+        if "    permissions:\n      contents: read" not in block:
+            found.append(f"{name} must set contents: read")
+        if "id-token" in block:
+            found.append(f"{name} must not request id-token")
+        if "runs-on: ubuntu-latest" not in block:
+            found.append(f"{name} must run on ubuntu-latest")
+        if "astral-sh/setup-uv@" not in block:
+            found.append(f"{name} must install uv")
+        if index not in block:
+            found.append(f"{name} must use {index}")
+        if "VERSION: ${{ needs.preflight.outputs.version }}" not in block:
+            found.append(f"{name} must read the preflight version")
+        if "uv pip install" not in block or "SECONDS + 600" not in block or "sleep" not in block:
+            found.append(f"{name} must retry the install for up to 10 minutes")
+        if "nepdate-core==$VERSION" not in block or "nepdate-patro==$VERSION" not in block:
+            found.append(f"{name} must install both exact versions")
+        if "NepaliDate(2080, 5, 15)" not in block:
+            found.append(f"{name} must run the README quick start")
+        if "from nepdate_patro import info" not in block or "info(d)" not in block:
+            found.append(f"{name} must call nepdate_patro.info")
+    return found
+
+
 def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one message per rule
     """Check the workflow rules that a review keeps missing.
 
@@ -102,8 +165,10 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one 
     publish = "\n".join(_job(lines, "publish"))
     if "environment: production" not in publish:
         found.append("publish must use the production environment")
-    if "contents: write" not in publish or "id-token: write" not in publish:
-        found.append("publish needs contents: write and id-token: write")
+    if "id-token: write" not in publish or "contents: write" in publish:
+        found.append("publish needs id-token: write and not contents: write")
+    if "action-gh-release" in publish:
+        found.append("publish must not create the GitHub Release; github-release does after verify")
     if "github.event_name == 'push'" not in publish or "refs/tags/v" not in publish:
         found.append("publish must run only on a tag push")
     if "fetch-depth: 0" not in publish:
@@ -125,6 +190,36 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one 
         found.append("TestPyPI needs id-token: write and not contents: write")
     if "default: true" not in text:
         found.append("the dry-run input must default to true")
+    found.extend(verify_problems(text))
+    found.extend(github_release_problems(text))
+    return found
+
+
+def github_release_problems(text: str) -> list[str]:
+    """Check that the GitHub Release is created only after the PyPI verify job.
+
+    Args:
+        text: The release workflow text.
+
+    Returns:
+        One message per missing or wrong rule.
+    """
+    lines = text.splitlines()
+    block = "\n".join(_job(lines, "github-release"))
+    if not block:
+        return ["missing github-release job"]
+    found: list[str] = []
+    if "verify" not in _needs(block):
+        found.append("github-release must need verify")
+    if "    permissions:\n      contents: write" not in block:
+        found.append("github-release must set contents: write")
+    if "id-token" in block:
+        found.append("github-release must not request id-token")
+    if "softprops/action-gh-release@" not in block:
+        found.append("github-release must create the release")
+    for name in ("verify", "verify-testpypi"):
+        if "action-gh-release" in "\n".join(_job(lines, name)):
+            found.append(f"{name} must not create the GitHub Release")
     return found
 
 
@@ -160,3 +255,99 @@ jobs:
     assert any("verify the tag is on origin/main" in message for message in found)
     assert any("build-release" in message for message in found)
     assert any("check the built files" in message for message in found)
+
+
+def _verify_block(text: str, name: str = "verify") -> str:
+    """Return one verify job as text.
+
+    Args:
+        text: The release workflow text.
+        name: The job name.
+
+    Returns:
+        The job block without its trailing newline.
+    """
+    return "\n".join(_job(text.splitlines(), name))
+
+
+def test_verify_jobs_follow_the_publishers() -> None:
+    """Both verify jobs exist and use the index that their publisher wrote to."""
+    assert verify_problems(WORKFLOW.read_text(encoding="utf-8")) == []
+
+
+def test_verify_job_missing_is_reported() -> None:
+    """A workflow without the PyPI verify job fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text)
+    assert block
+    found = verify_problems(text.replace(block + "\n", "", 1))
+    assert "missing verify job" in found
+
+
+def test_verify_job_wrong_needs_is_reported() -> None:
+    """A verify job that does not follow publish fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text)
+    bad_block = block.replace("needs: [preflight, publish]", "needs: [preflight]", 1)
+    assert bad_block != block
+    found = verify_problems(text.replace(block, bad_block, 1))
+    assert "verify must need publish" in found
+
+
+def test_verify_job_id_token_is_reported() -> None:
+    """A verify job with an upload permission fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text)
+    bad_block = block.replace(
+        "      contents: read",
+        "      contents: read\n      id-token: write",
+        1,
+    )
+    assert bad_block != block
+    found = verify_problems(text.replace(block, bad_block, 1))
+    assert "verify must not request id-token" in found
+
+
+def test_release_page_after_verify() -> None:
+    """The shipped workflow creates the GitHub Release only after verify."""
+    assert github_release_problems(WORKFLOW.read_text(encoding="utf-8")) == []
+
+
+def test_release_page_before_verify_is_reported() -> None:
+    """A GitHub Release job that does not wait for verify fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text, "github-release")
+    bad_block = block.replace("needs: [preflight, verify]", "needs: [preflight, publish]", 1)
+    assert bad_block != block
+    found = problems(text.replace(block, bad_block, 1))
+    assert "github-release must need verify" in found
+
+
+def test_release_page_in_publish_is_reported() -> None:
+    """Creating the GitHub Release in the publish job again fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text, "publish")
+    write_block = block.replace(
+        "      contents: read\n      id-token", "      contents: write\n      id-token", 1
+    )
+    assert write_block != block
+    bad_block = write_block + (
+        "\n      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65"
+    )
+    found = problems(text.replace(block, bad_block, 1))
+    assert "publish needs id-token: write and not contents: write" in found
+    assert any("publish must not create the GitHub Release" in message for message in found)
+
+
+def test_verify_jobs_run_the_same_steps() -> None:
+    """The two verify jobs differ only in name, needs and index, so the copy cannot drift."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    pypi = _verify_block(text, "verify")
+    testpypi = _verify_block(text, "verify-testpypi")
+    normalised = (
+        testpypi.replace("  verify-testpypi:", "  verify:", 1)
+        .replace("name: verify from TestPyPI", "name: verify from PyPI", 1)
+        .replace("[preflight, publish-testpypi]", "[preflight, publish]", 1)
+        .replace("https://test.pypi.org/simple/", "https://pypi.org/simple/", 1)
+    )
+    assert normalised.rstrip() == pypi.rstrip()

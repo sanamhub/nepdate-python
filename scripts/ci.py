@@ -509,32 +509,56 @@ def gate_consumer() -> None:
         _run([str(_venv_python(venv)), "-c", code], cwd=outside)
 
 
+def _unreleased_errors(text: str) -> list[str]:
+    """Check that the ``[Unreleased]`` changelog section has no entries.
+
+    Args:
+        text: The ``CHANGELOG.md`` contents.
+
+    Returns:
+        One message when the section has content; an empty list otherwise.
+    """
+    heading = re.search(r"^## \[Unreleased\][ \t]*$", text, re.MULTILINE)
+    if heading is None:
+        return []
+    rest = text[heading.end() :]
+    following = re.search(r"^## \[", rest, re.MULTILINE)
+    body = rest[: following.start()] if following else rest
+    if not body.strip():
+        return []
+    return ["CHANGELOG.md has entries under [Unreleased]; move them into the dated release section"]
+
+
 def _changelog_errors(version: str, root: Path) -> list[str]:
-    """Check the dated changelog heading for one version.
+    """Check the dated changelog heading for one version and an empty ``[Unreleased]``.
 
     Args:
         version: The released ``X.Y.Z`` version.
         root: The repository root.
 
     Returns:
-        One message per problem; an empty list when the section is present and dated.
+        One message per problem; an empty list when the section is present, dated and
+        ``[Unreleased]`` is empty.
     """
     changelog = root / "CHANGELOG.md"
     if not changelog.is_file():
         return ["CHANGELOG.md is missing"]
     text = changelog.read_text(encoding="utf-8")
+    errors: list[str] = []
     heading = re.search(
         rf"^## \[{re.escape(version)}\] - ([0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}})$",
         text,
         re.MULTILINE,
     )
     if heading is None:
-        return [f"CHANGELOG.md has no '## [{version}] - YYYY-MM-DD' section"]
-    try:
-        datetime.date.fromisoformat(heading.group(1))
-    except ValueError:
-        return [f"CHANGELOG.md has an invalid date: {heading.group(1)}"]
-    return []
+        errors.append(f"CHANGELOG.md has no '## [{version}] - YYYY-MM-DD' section")
+    else:
+        try:
+            datetime.date.fromisoformat(heading.group(1))
+        except ValueError:
+            errors.append(f"CHANGELOG.md has an invalid date: {heading.group(1)}")
+    errors.extend(_unreleased_errors(text))
+    return errors
 
 
 def release_check(  # noqa: PLR0912 - one branch per release file family
