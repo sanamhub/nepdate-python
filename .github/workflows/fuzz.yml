@@ -1,0 +1,34 @@
+name: fuzz
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    name: fuzz (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [parse, parse_lenient, format]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Install the fuzz group
+        run: uv sync --all-packages --group fuzz
+      - name: Run the target for 300 seconds
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/fuzz-artifacts"
+          uv run --no-sync python "fuzz/fuzz_${TARGET}.py" \
+            -max_total_time=300 \
+            -artifact_prefix="$RUNNER_TEMP/fuzz-artifacts/"
