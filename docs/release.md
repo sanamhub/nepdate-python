@@ -29,7 +29,7 @@ request, not by lowering the threshold.
 
 `release-check` checks both `pyproject.toml` versions, the patro dependency range, the dated
 changelog section, the data freshness rule and the release rehearsal. It prints a tithi warning
-when one applies.
+when one applies. Pass `--today YYYY-MM-DD` after the version to use another data date.
 
 ## Rehearsal
 
