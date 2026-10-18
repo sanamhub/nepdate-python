@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
+
+from nepdate import NepaliDate
 
 
 def _write(root: Path, name: str, text: str) -> None:
@@ -166,3 +170,19 @@ def test_sort_dist_rejects_an_unknown_artifact(ci: Any, tmp_path: Path) -> None:
     (dist / "other-0.1.0.whl").write_text("x", encoding="utf-8")
     with pytest.raises(ci.GateError):
         ci.sort_dist(tmp_path)
+
+
+def test_release_check_fails_when_holidays_end_in_182_days(ci: Any, tmp_path: Path) -> None:
+    """The data freshness gate is part of the release command, not a separate note."""
+    _release(ci, tmp_path)
+    folder = tmp_path / "shared" / "data" / "patro"
+    folder.mkdir(parents=True)
+    last = NepaliDate(2081, 1, 1).to_date()
+    (folder / "2081.json").write_text(
+        json.dumps({"days": {"2081-01-01": {"holiday": True}}}), encoding="utf-8"
+    )
+    at_182 = last - timedelta(days=182)
+    errors = ci.release_check("0.1.0", tmp_path, today=at_182)
+    assert any("public holiday" in error for error in errors)
+    at_183 = last - timedelta(days=183)
+    assert ci.release_check("0.1.0", tmp_path, today=at_183) == []

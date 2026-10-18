@@ -23,6 +23,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import data_status
+
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
 
@@ -89,6 +91,7 @@ CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
 VERSION_RE = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
+TODAY_OPTION_PARTS = 2
 
 
 class GateError(Exception):
@@ -532,12 +535,20 @@ def _changelog_errors(version: str, root: Path) -> list[str]:
     return []
 
 
-def release_check(version: str, root: Path = ROOT) -> list[str]:
-    """Check the version, the patro requirement and the dated changelog section.
+def release_check(  # noqa: PLR0912 - one branch per release file family
+    version: str,
+    root: Path = ROOT,
+    *,
+    today: datetime.date | None = None,
+    warnings: list[str] | None = None,
+) -> list[str]:
+    """Check the version, the dependencies, the changelog and the patro data freshness.
 
     Args:
         version: The ``X.Y.Z`` version being released.
         root: The repository root. Tests pass a temporary copy.
+        today: The AD date for the data freshness check; the local date when None.
+        warnings: When given, receives the tithi and event warnings.
 
     Returns:
         One message per inconsistency; an empty list means the release is consistent.
@@ -574,6 +585,15 @@ def release_check(version: str, root: Path = ROOT) -> list[str]:
             f"patro requires {core_name} with {sorted(specifiers)}, expected {sorted(expected)}"
         )
     errors.extend(_changelog_errors(version, root))
+    if (root / data_status.DATA).is_dir():
+        try:
+            report = data_status.diagnose(root, today)
+        except data_status.DataError as exc:
+            errors.append(str(exc))
+        else:
+            errors.extend(report.failures)
+            if warnings is not None:
+                warnings.extend(report.warnings)
     return errors
 
 
@@ -729,24 +749,54 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _run_command(argv: list[str]) -> int:
+def _release_today(options: list[str]) -> datetime.date | None:
+    """Read an optional ``--today YYYY-MM-DD`` release option.
+
+    Args:
+        options: The arguments after the version.
+
+    Returns:
+        The parsed date, or None when the option is absent.
+
+    Raises:
+        ValueError: The option is malformed or the date is not real.
+    """
+    if not options:
+        return None
+    if len(options) != TODAY_OPTION_PARTS or options[0] != "--today":
+        raise ValueError(f"expected --today YYYY-MM-DD, got {' '.join(options)}")
+    return datetime.date.fromisoformat(options[1])
+
+
+def _run_command(argv: list[str]) -> int:  # noqa: PLR0911 - one branch per command
     """Run a release helper command.
 
     Args:
-        argv: ``release-check VERSION``, ``release-notes VERSION`` or ``sort-dist``.
+        argv: ``release-check VERSION [--today DATE]``, ``release-notes VERSION``,
+            ``data-status`` or ``sort-dist``.
 
     Returns:
-        0 on success, 1 on a release inconsistency, 2 on an unknown command.
+        0 on success, 1 on a release inconsistency, 2 on an unknown or bad command.
     """
     command, *rest = argv
-    if command == "release-check" and len(rest) == 1:
-        errors = release_check(rest[0])
+    if command == "release-check" and rest:
+        try:
+            today = _release_today(rest[1:])
+        except ValueError as exc:
+            print(f"release: {exc}", file=sys.stderr)
+            return 2
+        warnings: list[str] = []
+        errors = release_check(rest[0], today=today, warnings=warnings)
+        for warning in warnings:
+            print(f"release: WARNING: {warning}")
         for error in errors:
             print(f"release: {error}", file=sys.stderr)
         if errors:
             return 1
         print(f"release: {rest[0]} is consistent")
         return 0
+    if command == "data-status":
+        return data_status.main(rest)
     if command == "release-notes" and len(rest) == 1:
         try:
             sys.stdout.write(release_notes(rest[0]))
