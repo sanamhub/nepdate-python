@@ -123,7 +123,7 @@ P5 measurement against the old 5 ms target.
 | `import nepdate` | 15086 | 46715, 25968, 27548, 15086, 23354 | 69.8 (56.9 to 91.1) |
 | `import nepdate` then `import nepdate_patro` | 8253 | 8745, 11410, 8253, 8890, 11649 | 64.4 (40.6 to 76.1) |
 
-P6 deferred the formatting, lenient parser and fiscal label tables. The before and after runs below
+P6 first deferred the formatting, lenient parser and fiscal label tables. The before and after runs below
 alternate between a copy of `main` at `31a994f` on `PYTHONPATH` and this branch, seven fresh
 processes each, so load drift affects both sides.
 
@@ -136,6 +136,11 @@ At about 90 % load the pairs were 24454 to 17849 us and 29785 to 20749 us. The p
 self time in the first pair fell from 11808 to 9284 us: `_format` (1160 us) and `_pattern` (630 us)
 are no longer imported by `import nepdate`, and `_parse` (886 to 530 us) and `_fiscal` (999 to
 656 us) build less.
+
+Review restored `_format` and `_pattern` at import: importing them inside `__str__` and `long`
+cost a module lookup per call, about 210 to 600 ns for `str(d)` and 340 to 800 ns for B5 on this
+machine. The after row above therefore includes about 1790 us (at about 90 % load) that the merged
+tree pays again; only the lenient parser and the fiscal labels stay deferred.
 
 The floor is the bare interpreter, measured in the same loaded window:
 

@@ -27,6 +27,13 @@ Two pairs at about 90 % load were 24454 to 17849 us and 29785 to 20749 us. The p
 self time in those pairs fell from 11808 to 9284 us; `_format` and `_pattern` are no longer imported
 at all, and `_parse` and `_fiscal` build less.
 
+Review then put `_format` and `_pattern` back at import. A call-time `from ._format import ...` in
+`__str__` and `long` is a module lookup on every call: on the same machine `str(d)` went from about
+210 to 600 ns and `long(lang=Lang.NE)` (B5) from about 340 to 800 ns, against a 400 ns B5 target.
+Their 1790 us of self time at about 90 % load is back in `import nepdate`, so the after numbers
+above are better than the merged tree by about that much. Only the lenient parser and the fiscal
+label strings stay deferred.
+
 The best after-run was 13883 us at 65.5 % load, against the 4530 us floor at about the same load.
 The remaining cost is CPython (`datetime`, `enum`), eight enum classes, the `NepaliDate` class body
 and the 63 KB calendar table. None of those is removable without changing the public API or the
@@ -49,6 +56,7 @@ conversion design.
   change is recorded here, not by editing the Accepted ADR.
 - The budget is a ceiling for this Windows machine with Defender and the usual background services,
   not a claim that CPython can import a calendar library in 5 ms here.
-- The deferral moves the formatting tables from `import nepdate` to the first `str`, `short`,
-  `long` or `format` call, the lenient tables to the first `parse_lenient` call, and the fiscal
-  label strings to the first `FiscalYear.label(Lang.NE)` call. Each is paid once, on first use.
+- The deferral moves the lenient tables to the first `parse_lenient` call and builds the fiscal
+  label strings per `FiscalYear.label(Lang.NE)` call. A deferral that puts an import on a
+  benchmarked path (B1 to B8) is not taken; `tests/test_lazy_imports.py` pins which modules load
+  with the package.
