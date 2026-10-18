@@ -96,7 +96,9 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one 
             found.append(f"line {index + 1}: action is not pinned by SHA")
     build = "\n".join(_job(lines, "build"))
     if "scripts/ci.py build-release" not in build:
-        found.append("the build job must stage the shared data before uv build")
+        found.append("the build job must build with scripts/ci.py build-release")
+    if 'release-rehearsal "$VERSION" --dist dist' not in build:
+        found.append("the build job must check the built files it uploads")
     publish = "\n".join(_job(lines, "publish"))
     if "environment: production" not in publish:
         found.append("publish must use the production environment")
@@ -156,4 +158,5 @@ jobs:
     assert any("expression inside run" in message for message in found)
     assert any("tag push" in message for message in found)
     assert any("verify the tag is on origin/main" in message for message in found)
-    assert any("stage the shared data" in message for message in found)
+    assert any("build-release" in message for message in found)
+    assert any("check the built files" in message for message in found)

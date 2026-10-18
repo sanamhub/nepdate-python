@@ -2,7 +2,8 @@
 
 The source is ``shared/data/patro/*.json``, not the generated ``_tables.py``. Public holidays are
 the release blocker: fewer than 183 days left fails. Tithi and events ending that soon are
-warnings, as in the hub H1-02 rule and the Rust W4-00 gate.
+warnings, as in the hub H1-02 rule and the Rust W4-00 gate. Days are counted from today's UTC
+date, the same in every port, so a release near midnight gets one answer everywhere.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from nepdate import NepaliDate, NepDateError
@@ -121,7 +122,7 @@ def diagnose(root: Path = ROOT, today: date | None = None) -> Report:
 
     Args:
         root: The repository root.
-        today: The AD date to count from; the local date when None.
+        today: The AD date to count from; today's UTC date when None.
 
     Returns:
         The report with all lines, warnings and failures.
@@ -129,7 +130,7 @@ def diagnose(root: Path = ROOT, today: date | None = None) -> Report:
     Raises:
         DataError: The data cannot be read.
     """
-    day = today or date.today()
+    day = today or datetime.now(UTC).date()
     ranges = coverage(root)
     report = Report()
     for kind in KINDS:
@@ -186,7 +187,12 @@ def main(argv: list[str] | None = None) -> int:
         0 when public holidays reach the gate, 1 when they do not, 2 on bad arguments.
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--today", type=_iso_date, default=None, help="AD date to count from")
+    parser.add_argument(
+        "--today",
+        type=_iso_date,
+        default=None,
+        help="AD date to count from (default: today in UTC)",
+    )
     parser.add_argument("--root", type=Path, default=ROOT, help="repository root (for tests)")
     args = parser.parse_args(argv)
     try:

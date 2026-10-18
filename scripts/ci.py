@@ -27,7 +27,8 @@ import data_status
 import rehearsal
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist"
+# scripts/ci_matrix.py runs several versions at once in this checkout; each gets its own folder.
+DIST = Path(os.environ.get("NEPDATE_CI_DIST") or ROOT / "dist")
 
 
 def _project_name(pyproject: Path) -> str:
@@ -393,7 +394,7 @@ def _venv_python(venv: Path) -> Path:
 def gate_core_alone() -> None:
     """Build both distributions and prove the core wheel has no patro content."""
     shutil.rmtree(DIST, ignore_errors=True)
-    _run(["uv", "build", "--all-packages"])
+    _run(["uv", "build", "--all-packages", "--out-dir", str(DIST)])
     core_wheel = _find_archive(CORE_PREFIX, ".whl")
     core_sdist = _find_archive(CORE_PREFIX, ".tar.gz")
 
@@ -542,14 +543,17 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
     *,
     today: datetime.date | None = None,
     warnings: list[str] | None = None,
+    data: bool = True,
 ) -> list[str]:
     """Check the version, the dependencies, the changelog and the patro data freshness.
 
     Args:
         version: The ``X.Y.Z`` version being released.
         root: The repository root. Tests pass a temporary copy.
-        today: The AD date for the data freshness check; the local date when None.
+        today: The AD date for the data freshness check; today's UTC date when None.
         warnings: When given, receives the tithi and event warnings.
+        data: Whether to run the data freshness check. Only tests of the version rules turn it
+            off; a missing patro folder is an error, never a skipped check.
 
     Returns:
         One message per inconsistency; an empty list means the release is consistent.
@@ -586,7 +590,7 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
             f"patro requires {core_name} with {sorted(specifiers)}, expected {sorted(expected)}"
         )
     errors.extend(_changelog_errors(version, root))
-    if (root / data_status.DATA).is_dir():
+    if data:
         try:
             report = data_status.diagnose(root, today)
         except data_status.DataError as exc:
@@ -790,11 +794,6 @@ def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch
         errors = release_check(rest[0], today=today, warnings=warnings)
         for warning in warnings:
             print(f"release: WARNING: {warning}")
-        for error in errors:
-            print(f"release: {error}", file=sys.stderr)
-        if errors:
-            return 1
-        errors = rehearsal.rehearse(rest[0])
         for error in errors:
             print(f"release: {error}", file=sys.stderr)
         if errors:

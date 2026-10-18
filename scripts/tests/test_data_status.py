@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -81,3 +81,31 @@ def test_cli_rejects_a_bad_date(data_status: Any) -> None:
     """``--today`` must be a real ISO date."""
     with pytest.raises(SystemExit):
         data_status.main(["--today", "2026-02-30"])
+
+
+def test_default_day_is_the_utc_date(
+    data_status: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without --today the count starts from the UTC date, as in every other port."""
+    calls: list[object] = []
+
+    class FakeDatetime:
+        """Stand-in for ``datetime`` with a fixed UTC clock."""
+
+        @staticmethod
+        def now(tz: object) -> Any:
+            """Return 2027-01-01 23:30 UTC and record the zone asked for."""
+            calls.append(tz)
+            return datetime(2027, 1, 1, 23, 30, tzinfo=UTC)
+
+    folder = tmp_path / "shared" / "data" / "patro"
+    folder.mkdir(parents=True)
+    (folder / "2083.json").write_text(
+        json.dumps({"days": {"2083-12-30": {"holiday": True, "tithi": 1}}}), encoding="utf-8"
+    )
+    monkeypatch.setattr(data_status, "datetime", FakeDatetime)
+    report = data_status.diagnose(tmp_path)
+    assert calls == [UTC]
+    left = (NepaliDate(2083, 12, 30).to_date() - date(2027, 1, 1)).days
+    assert "holidays  BS 2083-12-30 to 2083-12-30" in report.lines[1]
+    assert report.lines[1].endswith(f", {left} days left")
