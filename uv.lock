@@ -1068,7 +1068,7 @@ wheels = [
 
 [[package]]
 name = "nepdate-core"
-version = "0.1.0"
+version = "0.1.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "tzdata", marker = "sys_platform == 'win32'" },
@@ -1139,7 +1139,7 @@ release = [{ name = "twine", specifier = "==7.0.0" }]
 
 [[package]]
 name = "nepdate-patro"
-version = "0.1.0"
+version = "0.1.0b1"
 source = { editable = "packages/nepdate-patro" }
 dependencies = [
     { name = "nepdate-core" },

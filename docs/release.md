@@ -19,7 +19,7 @@ Check the data and the version:
 
 ```console
 uv run python scripts/data_status.py
-uv run python scripts/ci.py release-check 0.1.0
+uv run python scripts/ci.py release-check 0.1.0-beta.1
 ```
 
 `data_status` reads `shared/data/patro/*.json` directly and counts from today's UTC date, as every
@@ -56,7 +56,7 @@ that folder fails. The release workflow builds once and checks the files it will
 
 ```console
 uv run python scripts/ci.py build-release
-uv run python scripts/ci.py release-rehearsal 0.1.0 --dist dist
+uv run python scripts/ci.py release-rehearsal 0.1.0-beta.1 --dist dist
 uv run python scripts/ci.py sort-dist
 ```
 
