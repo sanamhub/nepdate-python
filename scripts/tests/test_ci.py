@@ -118,6 +118,28 @@ def test_outside_flags_only_foreign_modules(ci: Any) -> None:
     assert ci._outside(modules, "nepdate", frozenset({"enum"})) == ["json", "nepdatex"]
 
 
+def test_allowlist_covers_every_stdlib_import_of_the_core(ci: Any) -> None:
+    """Each stdlib module the core imports at module level is on the allowlist.
+
+    The import gate only sees modules the interpreter has not loaded yet, so a direct import that
+    a given Python version happens to preload passes there and fails on the next version (3.14
+    stopped preloading ``operator``). Reading the source catches it on every version.
+    """
+    import ast  # noqa: PLC0415 - only this test needs it
+    import sys  # noqa: PLC0415
+
+    imported: set[str] = set()
+    for path in Path(ci.ROOT, "src", "nepdate").glob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in tree.body:
+            if isinstance(node, ast.Import):
+                imported.update(alias.name.split(".")[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                imported.add(node.module.split(".")[0])
+    stdlib = {name for name in imported if name in sys.stdlib_module_names}
+    assert stdlib - ci.CORE_IMPORT_ALLOWED == set()
+
+
 def test_outside_flags_the_patro_module_for_the_core(ci: Any) -> None:
     """A core import that loads ``nepdate_patro`` is a gate failure.
 
