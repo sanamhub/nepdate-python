@@ -63,18 +63,6 @@ def test_archive_not_contains_targz(ci: Any, tmp_path: Path) -> None:
     assert not ci._archive_contains(sdist, NEEDLE)
 
 
-def test_same_minor_range(ci: Any) -> None:
-    """The patro dependency range tracks the minor version."""
-    assert ci._same_minor_range("0.0.0") == f"{ci.CORE_DIST}>=0.0,<0.1"
-    assert ci._same_minor_range("0.1.0") == f"{ci.CORE_DIST}>=0.1,<0.2"
-
-
-def test_same_minor_specifiers(ci: Any) -> None:
-    """The expected specifier set is exactly the two bounds."""
-    assert ci._same_minor_specifiers("0.0.0") == {">=0.0", "<0.1"}
-    assert ci._same_minor_specifiers("1.4.2") == {">=1.4", "<1.5"}
-
-
 def test_requirement_specifiers_ignores_order(ci: Any) -> None:
     """The two specifiers compare as a set, so their order in METADATA does not matter."""
     first = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.1\n"
@@ -85,7 +73,7 @@ def test_requirement_specifiers_ignores_order(ci: Any) -> None:
 
 def test_requirement_specifiers_negative_control(ci: Any) -> None:
     """A wrong bound, an extra bound or no requirement does not match the expected set."""
-    expected = ci._same_minor_specifiers("0.0.0")
+    expected = ci.versions.core_specifiers("0.0.0")
     wrong = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.2\n"
     extra = f"Requires-Dist: {ci.CORE_DIST}>=0.0,<0.1,!=0.0.1\n"
     missing = "Requires-Dist: other>=0.0\n"

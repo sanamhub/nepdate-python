@@ -146,6 +146,72 @@ def test_bad_semver_fails(ci: Any, tmp_path: Path) -> None:
     _release(ci, tmp_path)
     assert ci.release_check("0.01.0", tmp_path, data=False) != []
     assert ci.release_check("1.0", tmp_path, data=False) != []
+    assert ci.release_check("0.1.0b1", tmp_path, data=False) != []  # the PyPI spelling, not a tag
+    assert ci.release_check("0.1.0-dev.1", tmp_path, data=False) != []
+
+
+BETA_CHANGELOG = "# Changelog\n\n## [Unreleased]\n\n## [0.1.0-beta.1] - 2026-10-21\n\n- Beta.\n"
+
+
+def _beta(ci: Any, root: Path, **overrides: str) -> None:
+    """Create a consistent 0.1.0-beta.1 release, with optional overrides.
+
+    Args:
+        ci: The loaded ``scripts/ci.py`` module.
+        root: The temporary repository root.
+        **overrides: Fields passed on to ``_release``.
+    """
+    fields = {
+        "core_version": "0.1.0b1",
+        "patro_version": "0.1.0b1",
+        "dependency": f"{ci.CORE_DIST}>=0.1.0b1,<0.2",
+        "changelog": BETA_CHANGELOG,
+    }
+    fields.update(overrides)
+    _release(ci, root, **fields)
+
+
+def test_beta_release_check_passes(ci: Any, tmp_path: Path) -> None:
+    """The tag version is semver, the pyprojects carry its PEP 440 form."""
+    _beta(ci, tmp_path)
+    assert ci.release_check("0.1.0-beta.1", tmp_path, data=False) == []
+
+
+def test_beta_pyproject_in_semver_spelling_fails(ci: Any, tmp_path: Path) -> None:
+    """A pyproject that copies the tag spelling instead of 0.1.0b1 is reported."""
+    _beta(ci, tmp_path, core_version="0.1.0-beta.1")
+    errors = ci.release_check("0.1.0-beta.1", tmp_path, data=False)
+    assert any("expected '0.1.0b1'" in error for error in errors)
+
+
+def test_beta_with_the_stable_range_fails(ci: Any, tmp_path: Path) -> None:
+    """A beta patro that requires >=0.1 could not install the beta core, so it is refused."""
+    _beta(ci, tmp_path, dependency=f"{ci.CORE_DIST}>=0.1,<0.2")
+    errors = ci.release_check("0.1.0-beta.1", tmp_path, data=False)
+    assert any("patro requires" in error for error in errors)
+
+
+def test_beta_and_stable_sections_are_not_interchangeable(ci: Any, tmp_path: Path) -> None:
+    """The stable tag does not pass on the beta's section, nor the beta on a stable one."""
+    _release(ci, tmp_path, changelog=BETA_CHANGELOG)
+    assert any(
+        "no '## [0.1.0]" in error for error in ci.release_check("0.1.0", tmp_path, data=False)
+    )
+    _beta(ci, tmp_path, changelog="# Changelog\n\n## [0.1.0] - 2026-10-21\n\n- Stable.\n")
+    errors = ci.release_check("0.1.0-beta.1", tmp_path, data=False)
+    assert any("no '## [0.1.0-beta.1]" in error for error in errors)
+
+
+def test_release_notes_add_install_and_verification(ci: Any, tmp_path: Path) -> None:
+    """A beta's notes install with --pre and the PEP 440 version, and say how to verify."""
+    _beta(ci, tmp_path)
+    notes = ci.release_notes("0.1.0-beta.1", tmp_path)
+    assert notes.startswith("- Beta.\n")
+    assert f"pip install --pre {ci.CORE_DIST}==0.1.0b1 {ci.PATRO_DIST}==0.1.0b1" in notes
+    assert "pypi-attestations verify pypi" in notes
+    stable = tmp_path / "stable"
+    _release(ci, stable)
+    assert "--pre" not in ci.release_notes("0.1.0", stable)
 
 
 def test_release_notes_extract_one_section(ci: Any, tmp_path: Path) -> None:

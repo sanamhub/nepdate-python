@@ -21,8 +21,9 @@ import zipfile
 from collections.abc import Callable
 from pathlib import Path
 
+import versions
+
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
 VERSION_LITERAL = re.compile(r"""__version__\s*=\s*["']([^"']+)["']""")
 CHANGELOG = re.compile(r"^## \[([^\]]+)\] - ([0-9]{4}-[0-9]{2}-[0-9]{2})$", re.MULTILINE)
 FORBIDDEN = frozenset({"tests", "fuzz", "docs"})
@@ -69,21 +70,21 @@ def _project(path: Path) -> dict[str, object]:
 
 
 def project_version(root: Path = ROOT) -> str:
-    """Return the one version both pyprojects declare.
+    """Return the one version both pyprojects declare, in its PyPI (PEP 440) spelling.
 
     Args:
         root: The repository root.
 
     Returns:
-        The version string.
+        The version string, for example ``0.1.0b1``.
 
     Raises:
         RehearsalError: A version is missing, invalid or different between the two projects.
     """
     core = _project(root / "pyproject.toml").get("version")
     patro = _project(root / "packages" / "nepdate-patro" / "pyproject.toml").get("version")
-    if not isinstance(core, str) or not VERSION.fullmatch(core):
-        raise RehearsalError(f"core version is not X.Y.Z: {core!r}")
+    if not isinstance(core, str) or versions.PEP440.fullmatch(core) is None:
+        raise RehearsalError(f"core version is not X.Y.Z or X.Y.Z(a|b|rc)N: {core!r}")
     if patro != core:
         raise RehearsalError(f"patro version {patro!r} differs from core {core!r}")
     return core
@@ -168,22 +169,23 @@ def check_versions(version: str, root: Path = ROOT) -> list[str]:
     """Check the pyprojects, the changelog and any version literal in ``__init__``.
 
     Args:
-        version: The version being released.
+        version: The semver version being released, as in the tag and the changelog.
         root: The repository root.
 
     Returns:
         One message per inconsistency; an empty list means the versions agree.
     """
     errors: list[str] = []
+    pypi_version = versions.to_pep440(version)
     try:
         actual = project_version(root)
     except RehearsalError as exc:
         errors.append(str(exc))
     else:
-        if actual != version:
-            errors.append(f"pyproject versions are {actual!r}, expected {version!r}")
+        if actual != pypi_version:
+            errors.append(f"pyproject versions are {actual!r}, expected {pypi_version!r}")
     errors.extend(_changelog_errors(version, root))
-    errors.extend(_version_literal_errors(version, root))
+    errors.extend(_version_literal_errors(pypi_version, root))
     return errors
 
 
@@ -484,9 +486,11 @@ def _version_errors(version: str) -> list[str]:
         version: The version being released.
 
     Returns:
-        One message when the version is not ``X.Y.Z``.
+        One message when the version is not ``X.Y.Z`` or ``X.Y.Z-(alpha|beta|rc).N``.
     """
-    return [] if VERSION.fullmatch(version) else [f"not a strict semver: {version}"]
+    if versions.is_semver(version):
+        return []
+    return [f"not a release version (X.Y.Z or X.Y.Z-alpha|beta|rc.N): {version}"]
 
 
 def check_artifacts(artifacts: list[Path], version: str, root: Path = ROOT) -> list[str]:
@@ -494,12 +498,13 @@ def check_artifacts(artifacts: list[Path], version: str, root: Path = ROOT) -> l
 
     Args:
         artifacts: The two wheels and two sdists.
-        version: The version being released.
+        version: The semver version being released; the files carry its PEP 440 form.
         root: The repository root.
 
     Returns:
         One message per failure; an empty list means the artifacts pass.
     """
+    version = versions.to_pep440(version)
     try:
         core_prefix = _prefix(_distribution_name(root, "core"))
         patro_prefix = _prefix(_distribution_name(root, "patro"))
@@ -525,7 +530,7 @@ def rehearse(version: str, root: Path = ROOT, dist: Path | None = None) -> list[
     """Check the versions, then build (unless ``dist`` is given) and check the four artifacts.
 
     Args:
-        version: The version being released.
+        version: The semver version being released, as in the tag and the changelog.
         root: The repository root.
         dist: A directory of already built artifacts; a temporary build when None.
 
@@ -533,6 +538,8 @@ def rehearse(version: str, root: Path = ROOT, dist: Path | None = None) -> list[
         One message per failure; an empty list means the rehearsal passed.
     """
     errors = _version_errors(version)
+    if errors:
+        return errors
     errors.extend(check_versions(version, root))
     if errors:
         return errors
@@ -563,14 +570,16 @@ def main(argv: list[str] | None = None) -> int:
         0 when the rehearsal passes, 1 on a failure, 2 on bad arguments.
     """
     parser = argparse.ArgumentParser(prog="release-rehearsal", description=__doc__.splitlines()[0])
-    parser.add_argument("version", nargs="?", default=None, help="X.Y.Z; the pyproject version")
+    parser.add_argument(
+        "version", nargs="?", default=None, help="X.Y.Z or X.Y.Z-beta.N; the pyproject version"
+    )
     parser.add_argument("--dist", type=Path, default=None, help="check built files, do not build")
     try:
         args = parser.parse_args(argv if argv is not None else [])
     except SystemExit as exc:
         return 2 if exc.code else 0
     try:
-        version = args.version or project_version()
+        version = args.version or versions.to_semver(project_version())
     except RehearsalError as exc:
         print(f"release: {exc}", file=sys.stderr)
         return 1

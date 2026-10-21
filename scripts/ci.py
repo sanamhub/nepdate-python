@@ -25,6 +25,7 @@ from typing import Any
 
 import data_status
 import rehearsal
+import versions
 
 ROOT = Path(__file__).resolve().parent.parent
 # scripts/ci_matrix.py runs several versions at once in this checkout; each gets its own folder.
@@ -94,7 +95,6 @@ PATRO_IMPORT_LIMIT_US = 50_000
 CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum", "operator"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
-VERSION_RE = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
 TODAY_OPTION_PARTS = 2
 
 
@@ -443,7 +443,7 @@ def gate_patro_alone() -> None:
         raise GateError("core and patro wheels have different versions")
 
     specifiers = _requirement_specifiers(patro_metadata, CORE_DIST)
-    expected = _same_minor_specifiers(version)
+    expected = versions.core_specifiers(versions.to_semver(version))
     if specifiers != expected:
         raise GateError(
             f"patro wheel requires {CORE_DIST} with {sorted(specifiers)}, "
@@ -574,7 +574,8 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
     """Check the version, the dependencies, the changelog and the patro data freshness.
 
     Args:
-        version: The ``X.Y.Z`` version being released.
+        version: The semver version being released, as in the tag and the changelog
+            (``0.1.0`` or ``0.1.0-beta.1``). The pyprojects carry its PEP 440 form.
         root: The repository root. Tests pass a temporary copy.
         today: The AD date for the data freshness check; today's UTC date when None.
         warnings: When given, receives the tithi and event warnings.
@@ -584,8 +585,9 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
     Returns:
         One message per inconsistency; an empty list means the release is consistent.
     """
-    if not VERSION_RE.fullmatch(version):
-        return [f"not a strict semver: {version}"]
+    if not versions.is_semver(version):
+        return [f"not a release version (X.Y.Z or X.Y.Z-alpha|beta|rc.N): {version}"]
+    pypi_version = versions.to_pep440(version)
     errors: list[str] = []
     core_path = root / "pyproject.toml"
     patro_path = root / "packages" / "nepdate-patro" / "pyproject.toml"
@@ -597,8 +599,8 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
         core_name = CORE_DIST
     for label, project in (("core", core_project), ("patro", patro_project)):
         actual = project.get("version")
-        if actual != version:
-            errors.append(f"{label} pyproject version is {actual!r}, expected {version!r}")
+        if actual != pypi_version:
+            errors.append(f"{label} pyproject version is {actual!r}, expected {pypi_version!r}")
     dependencies = patro_project.get("dependencies", [])
     if not isinstance(dependencies, list):
         errors.append("patro dependencies is not a list")
@@ -610,7 +612,7 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
             if found:
                 specifiers = found
                 break
-    expected = _same_minor_specifiers(version)
+    expected = versions.core_specifiers(version)
     if specifiers != expected:
         errors.append(
             f"patro requires {core_name} with {sorted(specifiers)}, expected {sorted(expected)}"
@@ -629,14 +631,17 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
 
 
 def release_notes(version: str, root: Path = ROOT) -> str:
-    """Return the changelog section for ``version``, ready for a GitHub Release.
+    """Return the GitHub Release body: the changelog section, then install and verify steps.
+
+    The notes come from the changelog, not the commit log, so a release page says what a package
+    user gets rather than how the work happened.
 
     Args:
-        version: The released ``X.Y.Z`` version.
+        version: The released semver version, as in the tag and the changelog.
         root: The repository root.
 
     Returns:
-        The section body without its heading.
+        The section body without its heading, followed by the Install and Verification blocks.
 
     Raises:
         GateError: The changelog has no matching section.
@@ -648,7 +653,29 @@ def release_notes(version: str, root: Path = ROOT) -> str:
     rest = text[heading.end() :]
     following = re.search(r"^## \[", rest, re.MULTILINE)
     body = rest[: following.start()] if following else rest
-    return body.strip() + "\n"
+    pypi_version = versions.to_pep440(version)
+    pre = " --pre" if versions.is_prerelease(version) else ""
+    core_wheel = f"{_archive_prefix(CORE_DIST)}{pypi_version}-py3-none-any.whl"
+    return (
+        f"{body.strip()}\n\n"
+        "### Install\n\n"
+        "```\n"
+        f"pip install{pre} {CORE_DIST}=={pypi_version} {PATRO_DIST}=={pypi_version}\n"
+        "```\n\n"
+        f"The import names are `{CORE_MODULE}` and `{PATRO_MODULE}`. Install only "
+        f"`{CORE_DIST}` if you do not need tithi, holidays or events.\n\n"
+        "### Verification\n\n"
+        "- Both distributions were uploaded by this tag's release workflow with PyPI trusted\n"
+        "  publishing, so no API token exists for this project. PyPI keeps a provenance\n"
+        "  attestation for every file; to check one:\n\n"
+        "  ```\n"
+        "  pip install pypi-attestations\n"
+        "  pypi-attestations verify pypi --repository "
+        f"https://github.com/sanamhub/nepdate-python pypi:{core_wheel}\n"
+        "  ```\n\n"
+        "- After the upload, the workflow installed both from PyPI on Linux, macOS and Windows\n"
+        "  with Python 3.11 and 3.14 and checked one conversion and one patro lookup.\n"
+    )
 
 
 def sort_dist(root: Path = ROOT) -> None:
@@ -680,33 +707,6 @@ def sort_dist(root: Path = ROOT) -> None:
             raise GateError(f"unknown artifact in dist: {artifact.name}")
         shutil.move(str(artifact), str(target / artifact.name))
         print(f"release: {artifact.name} -> {target.relative_to(root)}")
-
-
-def _same_minor_range(version: str) -> str:
-    """Build the core dependency range a patro release must pin.
-
-    Args:
-        version: A ``major.minor.patch`` version.
-
-    Returns:
-        The ``<core>>=major.minor,<major.(minor+1)`` requirement, ``<core>`` being the core
-        distribution name.
-    """
-    major, minor, _ = version.split(".")
-    return f"{CORE_DIST}>={major}.{minor},<{major}.{int(minor) + 1}"
-
-
-def _same_minor_specifiers(version: str) -> set[str]:
-    """Build the exact specifier set a patro release must put on the core.
-
-    Args:
-        version: A ``major.minor.patch`` version.
-
-    Returns:
-        ``{">=major.minor", "<major.(minor+1)"}``.
-    """
-    major, minor, _ = version.split(".")
-    return {f">={major}.{minor}", f"<{major}.{int(minor) + 1}"}
 
 
 def _requirement_specifiers(metadata: str, distribution: str) -> set[str]:
@@ -804,7 +804,8 @@ def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch
 
     Args:
         argv: ``release-check VERSION [--today DATE]``, ``release-notes VERSION``,
-            ``data-status``, ``release-rehearsal [VERSION]``, ``build-release`` or ``sort-dist``.
+            ``pypi-version VERSION``, ``data-status``, ``release-rehearsal [VERSION]``,
+            ``build-release`` or ``sort-dist``.
 
     Returns:
         0 on success, 1 on a release inconsistency, 2 on an unknown or bad command.
@@ -825,6 +826,13 @@ def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch
         if errors:
             return 1
         print(f"release: {rest[0]} is consistent")
+        return 0
+    if command == "pypi-version" and len(rest) == 1:
+        try:
+            print(versions.to_pep440(rest[0]))
+        except ValueError as exc:
+            print(f"release: {exc}", file=sys.stderr)
+            return 1
         return 0
     if command == "data-status":
         return data_status.main(rest)
