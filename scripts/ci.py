@@ -88,8 +88,10 @@ CORE_IMPORT_LIMIT_US = 50_000
 PATRO_IMPORT_LIMIT_US = 50_000
 # The only modules outside our own packages that `import nepdate` may add to a bare interpreter.
 # Widen this only with a reason in the commit; dataclasses alone adds 27 modules
-# and breaks the ADR-0002 §7 budget, so value types are written by hand.
-CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum"})
+# and breaks the ADR-0002 §7 budget, so value types are written by hand. `operator` is here
+# because the constructor validates with operator.index (ADR-0002); before 3.14 the interpreter
+# had already loaded it at startup, so the gate never saw it.
+CORE_IMPORT_ALLOWED = frozenset({"__future__", "_datetime", "datetime", "enum", "operator"})
 COVERAGE_MIN = 90
 IMPORT_TIME_FIELDS = 3
 VERSION_RE = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
