@@ -70,8 +70,10 @@ environment-gated publish. A tag push publishes to PyPI; a dispatch run publishe
 publish job checks that the tagged commit is on `origin/main` and uses trusted publishing. There is
 no API token in the repository.
 
-If the core upload succeeds and the patro upload fails, rerun the job: the core step has
-`skip-existing: true`, and the patro step does not.
+If the core upload succeeds and the patro upload fails, do not tag again. The
+[detailed release runbook](runbooks/release.md#if-only-the-core-was-published) explains which step
+can be re-run, why `skip-existing` is set only on the core, and when the patro files are too
+incomplete to retry.
 
 ## After the publish
 
