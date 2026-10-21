@@ -1,13 +1,16 @@
 # Changelog
 
-All notable changes to `nepdate` and `nepdate-patro` are documented here. The two distributions
-share this file and a version number (ADR-0005). The format follows
+All notable changes to `nepdate-core` (import `nepdate`) and `nepdate-patro` are documented here.
+The two distributions share this file and a version number (ADR-0005). The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-10-18
+## [0.1.0-beta.1] - 2026-10-22
+
+First public pre-release. The API may still change before 0.1.0. On PyPI the version is `0.1.0b1`;
+install it with `pip install --pre nepdate-core nepdate-patro`.
 
 ### Added
 
@@ -25,9 +28,6 @@ share this file and a version number (ADR-0005). The format follows
 - The `nepdate-patro` distribution (BS 2077 to 2084): `Tithi`, `Event` and `CalendarInfo`,
   `info` for one day, `coverage` for the data range, and `public_holidays` for the 294
   gazetted dates.
-
-### Changed
-
-- The core distribution is published as `nepdate-core`; the import name is still `nepdate` and
-  `nepdate-patro` now depends on `nepdate-core` (ADR-0007).
+- The core distribution is `nepdate-core` on PyPI, because `nepdate` there belongs to an
+  unrelated project; the import name is `nepdate` (ADR-0007).
 

@@ -46,21 +46,25 @@ def _sdist(path: Path, members: tuple[str, ...]) -> None:
             archive.addfile(info, io.BytesIO(data))
 
 
-def _release(root: Path, version: str = "0.1.0", literal: str | None = None) -> None:
+def _release(
+    root: Path, version: str = "0.1.0", literal: str | None = None, pyproject: str | None = None
+) -> None:
     """Write the minimal release files ``check_versions`` reads.
 
     Args:
         root: The temporary repository root.
-        version: The version in both pyprojects and the changelog.
+        version: The semver version in the changelog.
         literal: An optional ``__version__`` literal in the core init.
+        pyproject: The version in both pyprojects; ``version`` when None.
     """
+    pyproject = version if pyproject is None else pyproject
     (root / "pyproject.toml").write_text(
-        f'[project]\nname = "nepdate-core"\nversion = "{version}"\n', encoding="utf-8"
+        f'[project]\nname = "nepdate-core"\nversion = "{pyproject}"\n', encoding="utf-8"
     )
     patro = root / "packages" / "nepdate-patro"
     patro.mkdir(parents=True)
     (patro / "pyproject.toml").write_text(
-        f'[project]\nname = "nepdate-patro"\nversion = "{version}"\n', encoding="utf-8"
+        f'[project]\nname = "nepdate-patro"\nversion = "{pyproject}"\n', encoding="utf-8"
     )
     (root / "CHANGELOG.md").write_text(
         f"# Changelog\n\n## [{version}] - 2026-10-18\n\n- Release.\n", encoding="utf-8"
@@ -71,6 +75,20 @@ def _release(root: Path, version: str = "0.1.0", literal: str | None = None) -> 
     patro_init = patro / "src" / "nepdate_patro" / "__init__.py"
     patro_init.parent.mkdir(parents=True)
     patro_init.write_text("", encoding="utf-8")
+
+
+def test_beta_versions_agree_across_spellings(rehearsal: Any, tmp_path: Path) -> None:
+    """The changelog says 0.1.0-beta.1 and the pyprojects say 0.1.0b1: consistent."""
+    _release(tmp_path, "0.1.0-beta.1", pyproject="0.1.0b1")
+    assert rehearsal.check_versions("0.1.0-beta.1", tmp_path) == []
+    assert rehearsal.project_version(tmp_path) == "0.1.0b1"
+
+
+def test_beta_pyproject_in_tag_spelling_fails(rehearsal: Any, tmp_path: Path) -> None:
+    """A pyproject that copies the tag spelling is not a valid PyPI version here."""
+    _release(tmp_path, "0.1.0-beta.1")
+    errors = rehearsal.check_versions("0.1.0-beta.1", tmp_path)
+    assert any("core version is not" in error for error in errors)
 
 
 def test_clean_wheel_passes(rehearsal: Any, tmp_path: Path) -> None:

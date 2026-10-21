@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish to TestPyPI (X.Y.Z)"
+        description: "Version to publish to TestPyPI, as in the tag (X.Y.Z or X.Y.Z-beta.N)"
         required: true
         type: string
       dry-run:
@@ -26,8 +26,12 @@ jobs:
     name: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # version is the tag and changelog spelling (0.1.0-beta.1); pypi-version is the PEP 440
+    # spelling the pyprojects, wheels and pip use (0.1.0b1).
     outputs:
       version: ${{ steps.version.outputs.version }}
+      pypi-version: ${{ steps.pypi.outputs.pypi-version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -54,10 +58,15 @@ jobs:
             VERSION="$INPUT_VERSION"
             DRY_RUN="$INPUT_DRY_RUN"
           fi
-          if ! printf '%s' "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
-            echo "release: not a strict semver: $VERSION" >&2
+          if ! printf '%s' "$VERSION" |
+            grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.(0|[1-9][0-9]*))?$'; then
+            echo "release: not X.Y.Z or X.Y.Z-alpha|beta|rc.N: $VERSION" >&2
             exit 1
           fi
+          case "$VERSION" in
+            *-*) echo "prerelease=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "prerelease=false" >> "$GITHUB_OUTPUT" ;;
+          esac
           if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DRY_RUN" != "true" ]; then
             echo "release: a dispatch publishes to TestPyPI only; PyPI needs a tag push" >&2
             exit 1
@@ -67,6 +76,11 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: uv run --locked python scripts/ci.py release-check "$VERSION"
+      - name: Spell the version for PyPI
+        id: pypi
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: echo "pypi-version=$(uv run --locked python scripts/ci.py pypi-version "$VERSION")" >> "$GITHUB_OUTPUT"
 
   ci:
     name: ci
@@ -205,56 +219,12 @@ jobs:
   verify:
     name: verify from PyPI
     needs: [preflight, publish]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     permissions:
       contents: read
-    env:
-      INDEX_URL: https://pypi.org/simple/
-    steps:
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-      - name: Install the released versions with retries
-        env:
-          VERSION: ${{ needs.preflight.outputs.version }}
-        run: |
-          set -euo pipefail
-          VENV="$RUNNER_TEMP/verify"
-          uv venv "$VENV"
-          deadline=$((SECONDS + 600))
-          while true; do
-            if uv pip install --python "$VENV/bin/python" --no-cache \
-              --index-url "$INDEX_URL" \
-              "nepdate-core==$VERSION" "nepdate-patro==$VERSION"; then
-              break
-            fi
-            now=$SECONDS
-            if [ "$now" -ge "$deadline" ]; then
-              echo "verify: install failed after 10 minutes" >&2
-              exit 1
-            fi
-            pause=$((deadline - now))
-            if [ "$pause" -gt 30 ]; then pause=30; fi
-            echo "verify: install failed, retrying in ${pause}s" >&2
-            sleep "$pause"
-          done
-      - name: Run the README quick start and one patro lookup
-        run: |
-          "$RUNNER_TEMP/verify/bin/python" - <<'PY'
-          from nepdate import Lang, NepaliDate
-          from nepdate_patro import info
-
-          d = NepaliDate(2080, 5, 15)
-          assert str(d) == "2080/05/15"
-          assert d.to_date().isoformat() == "2023-09-01"
-          assert d.long(weekday=True, lang=Lang.NE) == "शुक्रवार, भदौ १५, २०८०"
-          assert NepaliDate.parse("2080/05/15") == d
-
-          day = info(d)
-          assert day.tithi is not None
-          assert day.tithi.label(Lang.EN) == "Dwitiya"
-          print("verify: README quick start and one patro lookup passed")
-          PY
-
+    uses: ./.github/workflows/verify-published.yml
+    with:
+      version: ${{ needs.preflight.outputs.pypi-version }}
+      index-url: https://pypi.org/simple/
   github-release:
     name: GitHub Release
     needs: [preflight, verify]
@@ -279,6 +249,8 @@ jobs:
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           body_path: release-notes.md
+          # A beta or rc tag is a pre-release, so the release page never shows it as latest.
+          prerelease: ${{ needs.preflight.outputs.prerelease == 'true' }}
           files: |
             dist/core/*
             dist/patro/*
@@ -314,52 +286,11 @@ jobs:
   verify-testpypi:
     name: verify from TestPyPI
     needs: [preflight, publish-testpypi]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     permissions:
       contents: read
-    env:
-      INDEX_URL: https://test.pypi.org/simple/
-    steps:
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-      - name: Install the released versions with retries
-        env:
-          VERSION: ${{ needs.preflight.outputs.version }}
-        run: |
-          set -euo pipefail
-          VENV="$RUNNER_TEMP/verify"
-          uv venv "$VENV"
-          deadline=$((SECONDS + 600))
-          while true; do
-            if uv pip install --python "$VENV/bin/python" --no-cache \
-              --index-url "$INDEX_URL" \
-              "nepdate-core==$VERSION" "nepdate-patro==$VERSION"; then
-              break
-            fi
-            now=$SECONDS
-            if [ "$now" -ge "$deadline" ]; then
-              echo "verify: install failed after 10 minutes" >&2
-              exit 1
-            fi
-            pause=$((deadline - now))
-            if [ "$pause" -gt 30 ]; then pause=30; fi
-            echo "verify: install failed, retrying in ${pause}s" >&2
-            sleep "$pause"
-          done
-      - name: Run the README quick start and one patro lookup
-        run: |
-          "$RUNNER_TEMP/verify/bin/python" - <<'PY'
-          from nepdate import Lang, NepaliDate
-          from nepdate_patro import info
-
-          d = NepaliDate(2080, 5, 15)
-          assert str(d) == "2080/05/15"
-          assert d.to_date().isoformat() == "2023-09-01"
-          assert d.long(weekday=True, lang=Lang.NE) == "शुक्रवार, भदौ १५, २०८०"
-          assert NepaliDate.parse("2080/05/15") == d
-
-          day = info(d)
-          assert day.tithi is not None
-          assert day.tithi.label(Lang.EN) == "Dwitiya"
-          print("verify: README quick start and one patro lookup passed")
-          PY
+    uses: ./.github/workflows/verify-published.yml
+    with:
+      version: ${{ needs.preflight.outputs.pypi-version }}
+      index-url: https://test.pypi.org/simple/
+      # tzdata (Windows) and pip's own build tools are not reliably on TestPyPI.
+      extra-index-url: https://pypi.org/simple/

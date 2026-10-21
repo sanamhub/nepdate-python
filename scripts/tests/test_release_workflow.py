@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
+VERIFY_WORKFLOW = ROOT / ".github" / "workflows" / "verify-published.yml"
 SHA = re.compile(r"@[0-9a-f]{40}$")
 EXPRESSION = "${{"
 VERIFY_JOBS = (
@@ -77,7 +78,7 @@ def _needs(block: str) -> set[str]:
     return {part.strip() for part in match.group(1).split(",")}
 
 
-def verify_problems(text: str) -> list[str]:  # noqa: PLR0912 - one branch per rule
+def verify_problems(text: str) -> list[str]:
     """Check the two post-publish jobs and the index each one uses.
 
     Args:
@@ -102,22 +103,38 @@ def verify_problems(text: str) -> list[str]:  # noqa: PLR0912 - one branch per r
             found.append(f"{name} must set contents: read")
         if "id-token" in block:
             found.append(f"{name} must not request id-token")
-        if "runs-on: ubuntu-latest" not in block:
-            found.append(f"{name} must run on ubuntu-latest")
-        if "astral-sh/setup-uv@" not in block:
-            found.append(f"{name} must install uv")
-        if index not in block:
+        if "uses: ./.github/workflows/verify-published.yml" not in block:
+            found.append(f"{name} must call verify-published.yml")
+        if f"index-url: {index}" not in block:
             found.append(f"{name} must use {index}")
-        if "VERSION: ${{ needs.preflight.outputs.version }}" not in block:
-            found.append(f"{name} must read the preflight version")
-        if "uv pip install" not in block or "SECONDS + 600" not in block or "sleep" not in block:
-            found.append(f"{name} must retry the install for up to 10 minutes")
-        if "nepdate-core==$VERSION" not in block or "nepdate-patro==$VERSION" not in block:
-            found.append(f"{name} must install both exact versions")
-        if "NepaliDate(2080, 5, 15)" not in block:
-            found.append(f"{name} must run the README quick start")
-        if "from nepdate_patro import info" not in block or "info(d)" not in block:
-            found.append(f"{name} must call nepdate_patro.info")
+        if "version: ${{ needs.preflight.outputs.pypi-version }}" not in block:
+            found.append(f"{name} must pass the PyPI spelling of the preflight version")
+    return found
+
+
+def verify_workflow_problems(text: str) -> list[str]:
+    """Check the reusable post-upload workflow.
+
+    Args:
+        text: The ``verify-published.yml`` text.
+
+    Returns:
+        One message per missing or wrong rule.
+    """
+    found: list[str] = []
+    if "workflow_call:" not in text or "workflow_dispatch:" not in text:
+        found.append("verify-published must be callable and dispatchable")
+    if "permissions:\n  contents: read" not in text or "id-token" in text:
+        found.append("verify-published must be read-only")
+    for os_name in ("ubuntu-latest", "macos-latest", "windows-latest"):
+        if os_name not in text:
+            found.append(f"verify-published must run on {os_name}")
+    if 'python: ["3.11", "3.14"]' not in text:
+        found.append("verify-published must run the oldest and newest Python")
+    if "scripts/verify_published.py" not in text or "--wait-seconds" not in text:
+        found.append("verify-published must run scripts/verify_published.py with a wait")
+    if "VERSION: ${{ inputs.version }}" not in text:
+        found.append("verify-published must pass the version through env")
     return found
 
 
@@ -190,6 +207,9 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one 
         found.append("TestPyPI needs id-token: write and not contents: write")
     if "default: true" not in text:
         found.append("the dry-run input must default to true")
+    preflight = "\n".join(_job(lines, "preflight"))
+    if "pypi-version: ${{ steps.pypi.outputs.pypi-version }}" not in preflight:
+        found.append("preflight must output the PyPI spelling of the version")
     found.extend(verify_problems(text))
     found.extend(github_release_problems(text))
     return found
@@ -217,6 +237,8 @@ def github_release_problems(text: str) -> list[str]:
         found.append("github-release must not request id-token")
     if "softprops/action-gh-release@" not in block:
         found.append("github-release must create the release")
+    if "prerelease: ${{ needs.preflight.outputs.prerelease == 'true' }}" not in block:
+        found.append("github-release must mark a beta or rc tag as a pre-release")
     for name in ("verify", "verify-testpypi"):
         if "action-gh-release" in "\n".join(_job(lines, name)):
             found.append(f"{name} must not create the GitHub Release")
@@ -350,4 +372,36 @@ def test_verify_jobs_run_the_same_steps() -> None:
         .replace("[preflight, publish-testpypi]", "[preflight, publish]", 1)
         .replace("https://test.pypi.org/simple/", "https://pypi.org/simple/", 1)
     )
-    assert normalised.rstrip() == pypi.rstrip()
+    testpypi_only = (
+        "      # tzdata (Windows) and pip's own build tools are not reliably on TestPyPI.\n"
+        "      extra-index-url: https://pypi.org/simple/"
+    )
+    assert normalised.replace("\n" + testpypi_only, "").rstrip() == pypi.rstrip()
+
+
+def test_verify_workflow_rules() -> None:
+    """The reusable post-upload workflow satisfies every rule."""
+    text = VERIFY_WORKFLOW.read_text(encoding="utf-8")
+    assert verify_workflow_problems(text) == []
+    assert [p for p in problems(text) if "expression inside run" in p or "not pinned" in p] == []
+
+
+def test_verify_workflow_negative_control() -> None:
+    """Dropping Windows, the newest Python or the wait is reported."""
+    text = VERIFY_WORKFLOW.read_text(encoding="utf-8")
+    bad = (
+        text.replace("windows-latest", "")
+        .replace('"3.11", "3.14"', '"3.11"')
+        .replace("--wait-seconds", "--no-wait")
+    )
+    found = verify_workflow_problems(bad)
+    assert "verify-published must run on windows-latest" in found
+    assert "verify-published must run the oldest and newest Python" in found
+    assert "verify-published must run scripts/verify_published.py with a wait" in found
+
+
+def test_release_without_prerelease_flag_is_reported() -> None:
+    """A GitHub Release that never sets prerelease would show a beta as the latest release."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    bad = text.replace("prerelease: ${{ needs.preflight.outputs.prerelease == 'true' }}", "")
+    assert "github-release must mark a beta or rc tag as a pre-release" in problems(bad)

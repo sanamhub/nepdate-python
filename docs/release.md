@@ -19,7 +19,7 @@ Check the data and the version:
 
 ```console
 uv run python scripts/data_status.py
-uv run python scripts/ci.py release-check 0.1.0
+uv run python scripts/ci.py release-check 0.1.0-beta.1
 ```
 
 `data_status` reads `shared/data/patro/*.json` directly and counts from today's UTC date, as every
@@ -56,7 +56,7 @@ that folder fails. The release workflow builds once and checks the files it will
 
 ```console
 uv run python scripts/ci.py build-release
-uv run python scripts/ci.py release-rehearsal 0.1.0 --dist dist
+uv run python scripts/ci.py release-rehearsal 0.1.0-beta.1 --dist dist
 uv run python scripts/ci.py sort-dist
 ```
 
@@ -77,14 +77,14 @@ incomplete to retry.
 
 ## After the publish
 
-A tag run publishes to PyPI, then the `verify` job installs `nepdate-core==X.Y.Z` and
-`nepdate-patro==X.Y.Z` from PyPI in a clean virtualenv. A dispatch dry run publishes to TestPyPI,
-then `verify-testpypi` does the same against `https://test.pypi.org/simple/`. Both jobs wait up to
-10 minutes for the files to appear, retrying every 30 seconds while time remains. They run the
-README quick start and one `nepdate_patro.info` call. Both are read-only: `contents: read`, no
-`id-token`, and no upload. Each installs from one index only. That works because on Linux the two
-distributions have no dependency outside themselves (`tzdata` is Windows only); a new runtime
-dependency needs this revisited, since TestPyPI does not mirror PyPI.
+A tag run publishes to PyPI, then the `verify` job calls `verify-published.yml`, which installs
+both exact versions with pip in a fresh venv outside the checkout, on Linux, macOS and Windows with
+Python 3.11 and 3.14. A dispatch dry run publishes to TestPyPI, then `verify-testpypi` does the
+same against `https://test.pypi.org/simple/`, with PyPI as a second index for `tzdata` on Windows.
+Each install is retried for up to 15 minutes while the index catches up. The check
+(`scripts/verify_published.py`) runs the README quick start and one `nepdate_patro.info` call and
+compares both installed versions. The jobs are read-only: `contents: read`, no `id-token`, and no
+upload. The workflow can also be run by hand for any version already on PyPI.
 
 The GitHub Release is created by the `github-release` job, which needs `verify`. It is the only
 job with `contents: write`. When verify fails there is no release page, only the PyPI files to

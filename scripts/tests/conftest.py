@@ -82,6 +82,18 @@ def data_status() -> Any:
 
 
 @pytest.fixture(scope="session")
+def verify_published() -> Any:
+    """Load ``scripts/verify_published.py`` as a module."""
+    return _load("verify_published_script", "verify_published.py")
+
+
+@pytest.fixture(scope="session")
+def versions() -> Any:
+    """Load ``scripts/versions.py`` as a module."""
+    return _load("versions_script", "versions.py")
+
+
+@pytest.fixture(scope="session")
 def rehearsal() -> Any:
     """Load ``scripts/rehearsal.py`` as a module."""
     return _load("rehearsal_script", "rehearsal.py")
