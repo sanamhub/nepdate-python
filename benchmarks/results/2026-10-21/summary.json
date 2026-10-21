@@ -1,0 +1,1608 @@
+{
+  "date": "2026-10-21",
+  "generated": "2026-10-21T07:05:30+05:45",
+  "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "affinity": 2,
+  "load_limit": 15.0,
+  "quiet_before": {
+    "cpu_percent": 11.1,
+    "cpu2_percent": 9.4,
+    "background_percent": 11.2,
+    "memory_percent": 70.7,
+    "processes": 431
+  },
+  "quiet": false,
+  "command": "uv run --group bench python benchmarks/run.py --date 2026-10-21",
+  "probe": {
+    "nepali-datetime": {
+      "b1": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "npdatetime": {
+      "b1": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "nepali": {
+      "b1": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 63,
+        "matches": 60,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              1943,
+              4,
+              14
+            ],
+            "theirs": null,
+            "ours": [
+              2000,
+              1,
+              1
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "bikram-sambat": {
+      "b1": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "bikram": {
+      "b1": {
+        "supported": 63,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2000,
+              1,
+              1
+            ],
+            "theirs": [
+              1944,
+              1,
+              2
+            ],
+            "ours": [
+              1943,
+              4,
+              14
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2090,
+              11,
+              24
+            ],
+            "theirs": null,
+            "ours": [
+              2034,
+              3,
+              8
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 62,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              1943,
+              4,
+              14
+            ],
+            "theirs": null,
+            "ours": [
+              2000,
+              1,
+              1
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2034,
+              3,
+              8
+            ],
+            "theirs": null,
+            "ours": [
+              2090,
+              11,
+              24
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "pyBSDate": {
+      "b1": {
+        "supported": 64,
+        "matches": 60,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2063,
+              6,
+              22
+            ],
+            "theirs": [
+              2005,
+              10,
+              8
+            ],
+            "ours": [
+              2006,
+              10,
+              8
+            ],
+            "bs_year": 2063,
+            "questionable": false
+          },
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2090,
+              11,
+              24
+            ],
+            "theirs": [
+              2034,
+              3,
+              9
+            ],
+            "ours": [
+              2034,
+              3,
+              8
+            ],
+            "bs_year": 2090,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "nepali-calendar-utils": {
+      "b1": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "nepkit": {
+      "b1": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    }
+  },
+  "benchmarks": [
+    {
+      "key": "b1",
+      "name": "b1 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 619.83,
+      "stdev_ns": 10.09,
+      "elapsed_s": 42.1,
+      "last_line": "b1 nepdate: Mean +- std dev: 620 ns +- 10 ns",
+      "load_before": {
+        "cpu_percent": 6.9,
+        "cpu2_percent": 12.1,
+        "background_percent": 6.6,
+        "memory_percent": 71.0,
+        "processes": 432
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.4,
+        "cpu_mean": 11.8,
+        "cpu_median": 10.4,
+        "cpu_max": 34.5,
+        "cpu2_max": 100.0,
+        "background_max": 33.2,
+        "memory_mean": 70.8,
+        "processes": 436,
+        "samples": 84
+      }
+    },
+    {
+      "key": "b2",
+      "name": "b2 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 540.3,
+      "stdev_ns": 6.79,
+      "elapsed_s": 38.1,
+      "last_line": "b2 nepdate: Mean +- std dev: 540 ns +- 7 ns",
+      "load_before": {
+        "cpu_percent": 4.8,
+        "cpu2_percent": 0.0,
+        "background_percent": 5.1,
+        "memory_percent": 70.0,
+        "processes": 427
+      },
+      "loaded": false,
+      "load": {
+        "cpu_min": 6.6,
+        "cpu_mean": 10.4,
+        "cpu_median": 9.9,
+        "cpu_max": 18.2,
+        "cpu2_max": 100.0,
+        "background_max": 14.1,
+        "memory_mean": 70.1,
+        "processes": 431,
+        "samples": 76
+      }
+    },
+    {
+      "key": "b3",
+      "name": "b3 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 498.97,
+      "stdev_ns": 9.49,
+      "elapsed_s": 36.6,
+      "last_line": "b3 nepdate: Mean +- std dev: 499 ns +- 9 ns",
+      "load_before": {
+        "cpu_percent": 18.3,
+        "cpu2_percent": 31.2,
+        "background_percent": 17.5,
+        "memory_percent": 70.1,
+        "processes": 427
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.0,
+        "cpu_mean": 12.7,
+        "cpu_median": 11.3,
+        "cpu_max": 24.4,
+        "cpu2_max": 100.0,
+        "background_max": 22.7,
+        "memory_mean": 69.9,
+        "processes": 436,
+        "samples": 73
+      }
+    },
+    {
+      "key": "b4",
+      "name": "b4 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 453.52,
+      "stdev_ns": 9.23,
+      "elapsed_s": 34.6,
+      "last_line": "b4 nepdate: Mean +- std dev: 454 ns +- 9 ns",
+      "load_before": {
+        "cpu_percent": 2.1,
+        "cpu2_percent": 0.0,
+        "background_percent": 2.3,
+        "memory_percent": 69.6,
+        "processes": 423
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.2,
+        "cpu_mean": 12.9,
+        "cpu_median": 11.8,
+        "cpu_max": 26.6,
+        "cpu2_max": 100.0,
+        "background_max": 24.2,
+        "memory_mean": 70.0,
+        "processes": 435,
+        "samples": 69
+      }
+    },
+    {
+      "key": "b5",
+      "name": "b5 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 428.13,
+      "stdev_ns": 5.58,
+      "elapsed_s": 33.1,
+      "last_line": "b5 nepdate: Mean +- std dev: 428 ns +- 6 ns",
+      "load_before": {
+        "cpu_percent": 5.4,
+        "cpu2_percent": 0.0,
+        "background_percent": 5.8,
+        "memory_percent": 69.7,
+        "processes": 423
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.6,
+        "cpu_mean": 11.4,
+        "cpu_median": 10.1,
+        "cpu_max": 23.4,
+        "cpu2_max": 100.0,
+        "background_max": 19.3,
+        "memory_mean": 69.9,
+        "processes": 430,
+        "samples": 66
+      }
+    },
+    {
+      "key": "b6",
+      "name": "b6 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 1053.41,
+      "stdev_ns": 14.39,
+      "elapsed_s": 37.6,
+      "last_line": "b6 nepdate: Mean +- std dev: 1.05 us +- 0.01 us",
+      "load_before": {
+        "cpu_percent": 9.8,
+        "cpu2_percent": 19.4,
+        "background_percent": 9.1,
+        "memory_percent": 69.9,
+        "processes": 423
+      },
+      "loaded": false,
+      "load": {
+        "cpu_min": 5.5,
+        "cpu_mean": 10.6,
+        "cpu_median": 10.0,
+        "cpu_max": 17.1,
+        "cpu2_max": 100.0,
+        "background_max": 12.9,
+        "memory_mean": 69.9,
+        "processes": 433,
+        "samples": 75
+      }
+    },
+    {
+      "key": "b7",
+      "name": "b7 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 134.67,
+      "stdev_ns": 15.24,
+      "elapsed_s": 40.1,
+      "last_line": "b7 nepdate: Mean +- std dev: 135 ns +- 15 ns",
+      "load_before": {
+        "cpu_percent": 7.3,
+        "cpu2_percent": 9.4,
+        "background_percent": 7.1,
+        "memory_percent": 69.7,
+        "processes": 423
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.6,
+        "cpu_mean": 28.7,
+        "cpu_median": 25.5,
+        "cpu_max": 89.7,
+        "cpu2_max": 100.0,
+        "background_max": 89.2,
+        "memory_mean": 71.2,
+        "processes": 465,
+        "samples": 80
+      }
+    },
+    {
+      "key": "b8",
+      "name": "b8 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 16426.52,
+      "stdev_ns": 776.24,
+      "elapsed_s": 37.1,
+      "last_line": "b8 nepdate: Mean +- std dev: 16.4 us +- 0.8 us",
+      "load_before": {
+        "cpu_percent": 7.9,
+        "cpu2_percent": 15.2,
+        "background_percent": 7.4,
+        "memory_percent": 72.4,
+        "processes": 454
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.8,
+        "cpu_mean": 14.4,
+        "cpu_median": 12.6,
+        "cpu_max": 44.5,
+        "cpu2_max": 100.0,
+        "background_max": 42.7,
+        "memory_mean": 72.4,
+        "processes": 471,
+        "samples": 74
+      }
+    },
+    {
+      "key": "b1:nepali-datetime",
+      "name": "b1 nepali-datetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 2644.65,
+      "stdev_ns": 707.15,
+      "elapsed_s": 50.1,
+      "last_line": "b1 nepali-datetime: Mean +- std dev: 2.64 us +- 0.71 us",
+      "load_before": {
+        "cpu_percent": 1.7,
+        "cpu2_percent": 0.0,
+        "background_percent": 1.8,
+        "memory_percent": 72.2,
+        "processes": 455
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.8,
+        "cpu_mean": 45.3,
+        "cpu_median": 39.6,
+        "cpu_max": 99.6,
+        "cpu2_max": 100.0,
+        "background_max": 99.6,
+        "memory_mean": 73.6,
+        "processes": 505,
+        "samples": 96
+      }
+    },
+    {
+      "key": "b1:npdatetime",
+      "name": "b1 npdatetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 5283.85,
+      "stdev_ns": 1013.7,
+      "elapsed_s": 37.5,
+      "last_line": "b1 npdatetime: Mean +- std dev: 5.28 us +- 1.01 us",
+      "load_before": {
+        "cpu_percent": 99.6,
+        "cpu2_percent": 100.0,
+        "background_percent": 99.6,
+        "memory_percent": 75.6,
+        "processes": 475
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 23.6,
+        "cpu_mean": 51.6,
+        "cpu_median": 41.5,
+        "cpu_max": 100.0,
+        "cpu2_max": 100.0,
+        "background_max": 100.0,
+        "memory_mean": 74.7,
+        "processes": 489,
+        "samples": 73
+      }
+    },
+    {
+      "key": "b1:nepali",
+      "name": "b1 nepali",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 14751.12,
+      "stdev_ns": 3335.25,
+      "elapsed_s": 39.7,
+      "last_line": "b1 nepali: Mean +- std dev: 14.8 us +- 3.3 us",
+      "load_before": {
+        "cpu_percent": 30.0,
+        "cpu2_percent": 68.8,
+        "background_percent": 27.4,
+        "memory_percent": 73.5,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.6,
+        "cpu_mean": 39.0,
+        "cpu_median": 36.9,
+        "cpu_max": 100.0,
+        "cpu2_max": 100.0,
+        "background_max": 100.0,
+        "memory_mean": 80.9,
+        "processes": 479,
+        "samples": 79
+      }
+    },
+    {
+      "key": "b1:bikram-sambat",
+      "name": "b1 bikram-sambat",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 1056.22,
+      "stdev_ns": 67.96,
+      "elapsed_s": 38.6,
+      "last_line": "b1 bikram-sambat: Mean +- std dev: 1.06 us +- 0.07 us",
+      "load_before": {
+        "cpu_percent": 7.0,
+        "cpu2_percent": 0.0,
+        "background_percent": 7.5,
+        "memory_percent": 89.6,
+        "processes": 433
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.8,
+        "cpu_mean": 15.0,
+        "cpu_median": 12.4,
+        "cpu_max": 62.6,
+        "cpu2_max": 100.0,
+        "background_max": 61.2,
+        "memory_mean": 82.8,
+        "processes": 442,
+        "samples": 77
+      }
+    },
+    {
+      "key": "b1:bikram",
+      "name": "b1 bikram",
+      "runs": 120,
+      "inner_loops": 63,
+      "ns_op": 11561.15,
+      "stdev_ns": 447.65,
+      "elapsed_s": 46.1,
+      "last_line": "b1 bikram: Mean +- std dev: 11.6 us +- 0.4 us",
+      "load_before": {
+        "cpu_percent": 2.0,
+        "cpu2_percent": 6.1,
+        "background_percent": 1.7,
+        "memory_percent": 73.6,
+        "processes": 428
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.4,
+        "cpu_mean": 13.1,
+        "cpu_median": 11.5,
+        "cpu_max": 46.2,
+        "cpu2_max": 100.0,
+        "background_max": 42.6,
+        "memory_mean": 72.5,
+        "processes": 441,
+        "samples": 92
+      }
+    },
+    {
+      "key": "b1:pyBSDate",
+      "name": "b1 pyBSDate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 5394.73,
+      "stdev_ns": 111.24,
+      "elapsed_s": 44.1,
+      "last_line": "b1 pyBSDate: Mean +- std dev: 5.39 us +- 0.11 us",
+      "load_before": {
+        "cpu_percent": 9.7,
+        "cpu2_percent": 15.6,
+        "background_percent": 9.3,
+        "memory_percent": 69.9,
+        "processes": 420
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 6.6,
+        "cpu_mean": 12.5,
+        "cpu_median": 11.6,
+        "cpu_max": 30.4,
+        "cpu2_max": 100.0,
+        "background_max": 27.0,
+        "memory_mean": 70.0,
+        "processes": 425,
+        "samples": 88
+      }
+    },
+    {
+      "key": "b1:nepali-calendar-utils",
+      "name": "b1 nepali-calendar-utils",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 65188.78,
+      "stdev_ns": 3066.05,
+      "elapsed_s": 38.1,
+      "last_line": "b1 nepali-calendar-utils: Mean +- std dev: 65.2 us +- 3.1 us",
+      "load_before": {
+        "cpu_percent": 1.7,
+        "cpu2_percent": 3.1,
+        "background_percent": 1.6,
+        "memory_percent": 69.7,
+        "processes": 421
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.8,
+        "cpu_mean": 19.0,
+        "cpu_median": 16.3,
+        "cpu_max": 45.8,
+        "cpu2_max": 100.0,
+        "background_max": 42.2,
+        "memory_mean": 70.6,
+        "processes": 439,
+        "samples": 76
+      }
+    },
+    {
+      "key": "b1:nepkit",
+      "name": "b1 nepkit",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 1775.02,
+      "stdev_ns": 61.55,
+      "elapsed_s": 34.6,
+      "last_line": "b1 nepkit: Mean +- std dev: 1.78 us +- 0.06 us",
+      "load_before": {
+        "cpu_percent": 4.3,
+        "cpu2_percent": 6.2,
+        "background_percent": 4.2,
+        "memory_percent": 70.8,
+        "processes": 429
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.1,
+        "cpu_mean": 14.0,
+        "cpu_median": 11.7,
+        "cpu_max": 37.6,
+        "cpu2_max": 100.0,
+        "background_max": 33.6,
+        "memory_mean": 70.8,
+        "processes": 439,
+        "samples": 69
+      }
+    },
+    {
+      "key": "b2:nepali-datetime",
+      "name": "b2 nepali-datetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 6996.08,
+      "stdev_ns": 968.57,
+      "elapsed_s": 36.2,
+      "last_line": "b2 nepali-datetime: Mean +- std dev: 7.00 us +- 0.97 us",
+      "load_before": {
+        "cpu_percent": 3.9,
+        "cpu2_percent": 3.1,
+        "background_percent": 3.9,
+        "memory_percent": 70.6,
+        "processes": 429
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.0,
+        "cpu_mean": 25.5,
+        "cpu_median": 17.1,
+        "cpu_max": 87.8,
+        "cpu2_max": 100.0,
+        "background_max": 87.0,
+        "memory_mean": 71.6,
+        "processes": 475,
+        "samples": 72
+      }
+    },
+    {
+      "key": "b2:npdatetime",
+      "name": "b2 npdatetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 3239.6,
+      "stdev_ns": 113.03,
+      "elapsed_s": 33.6,
+      "last_line": "b2 npdatetime: Mean +- std dev: 3.24 us +- 0.11 us",
+      "load_before": {
+        "cpu_percent": 47.7,
+        "cpu2_percent": 68.8,
+        "background_percent": 46.3,
+        "memory_percent": 73.2,
+        "processes": 459
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.5,
+        "cpu_mean": 19.5,
+        "cpu_median": 19.3,
+        "cpu_max": 50.2,
+        "cpu2_max": 100.0,
+        "background_max": 47.7,
+        "memory_mean": 72.8,
+        "processes": 477,
+        "samples": 67
+      }
+    },
+    {
+      "key": "b2:nepali",
+      "name": "b2 nepali",
+      "runs": 120,
+      "inner_loops": 63,
+      "ns_op": 5943.07,
+      "stdev_ns": 680.3,
+      "elapsed_s": 50.0,
+      "last_line": "b2 nepali: Mean +- std dev: 5.94 us +- 0.68 us",
+      "load_before": {
+        "cpu_percent": 16.7,
+        "cpu2_percent": 51.5,
+        "background_percent": 14.4,
+        "memory_percent": 74.5,
+        "processes": 462
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.8,
+        "cpu_mean": 28.6,
+        "cpu_median": 25.9,
+        "cpu_max": 64.3,
+        "cpu2_max": 100.0,
+        "background_max": 63.5,
+        "memory_mean": 81.8,
+        "processes": 485,
+        "samples": 98
+      }
+    },
+    {
+      "key": "b2:bikram-sambat",
+      "name": "b2 bikram-sambat",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 662.99,
+      "stdev_ns": 170.53,
+      "elapsed_s": 51.1,
+      "last_line": "b2 bikram-sambat: Mean +- std dev: 663 ns +- 171 ns",
+      "load_before": {
+        "cpu_percent": 28.3,
+        "cpu2_percent": 84.4,
+        "background_percent": 24.6,
+        "memory_percent": 72.7,
+        "processes": 460
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 9.7,
+        "cpu_mean": 43.0,
+        "cpu_median": 34.8,
+        "cpu_max": 100.0,
+        "cpu2_max": 100.0,
+        "background_max": 100.0,
+        "memory_mean": 71.7,
+        "processes": 505,
+        "samples": 98
+      }
+    },
+    {
+      "key": "b2:bikram",
+      "name": "b2 bikram",
+      "runs": 120,
+      "inner_loops": 62,
+      "ns_op": 56527.82,
+      "stdev_ns": 4843.57,
+      "elapsed_s": 36.1,
+      "last_line": "b2 bikram: Mean +- std dev: 56.5 us +- 4.8 us",
+      "load_before": {
+        "cpu_percent": 17.1,
+        "cpu2_percent": 36.4,
+        "background_percent": 15.9,
+        "memory_percent": 67.6,
+        "processes": 458
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.2,
+        "cpu_mean": 23.5,
+        "cpu_median": 18.7,
+        "cpu_max": 79.4,
+        "cpu2_max": 100.0,
+        "background_max": 78.8,
+        "memory_mean": 79.7,
+        "processes": 474,
+        "samples": 72
+      }
+    },
+    {
+      "key": "b2:pyBSDate",
+      "name": "b2 pyBSDate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 7398.73,
+      "stdev_ns": 1870.2,
+      "elapsed_s": 62.0,
+      "last_line": "b2 pyBSDate: Mean +- std dev: 7.40 us +- 1.87 us",
+      "load_before": {
+        "cpu_percent": 4.8,
+        "cpu2_percent": 9.4,
+        "background_percent": 4.5,
+        "memory_percent": 72.1,
+        "processes": 460
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.8,
+        "cpu_mean": 43.2,
+        "cpu_median": 34.9,
+        "cpu_max": 100.0,
+        "cpu2_max": 100.0,
+        "background_max": 100.0,
+        "memory_mean": 73.5,
+        "processes": 513,
+        "samples": 122
+      }
+    },
+    {
+      "key": "b2:nepali-calendar-utils",
+      "name": "b2 nepali-calendar-utils",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 50429.21,
+      "stdev_ns": 2894.1,
+      "elapsed_s": 33.6,
+      "last_line": "b2 nepali-calendar-utils: Mean +- std dev: 50.4 us +- 2.9 us",
+      "load_before": {
+        "cpu_percent": 52.9,
+        "cpu2_percent": 51.5,
+        "background_percent": 53.0,
+        "memory_percent": 86.7,
+        "processes": 471
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.0,
+        "cpu_mean": 17.9,
+        "cpu_median": 15.4,
+        "cpu_max": 73.9,
+        "cpu2_max": 100.0,
+        "background_max": 72.5,
+        "memory_mean": 81.7,
+        "processes": 486,
+        "samples": 67
+      }
+    },
+    {
+      "key": "b2:nepkit",
+      "name": "b2 nepkit",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 1628.36,
+      "stdev_ns": 37.5,
+      "elapsed_s": 33.1,
+      "last_line": "b2 nepkit: Mean +- std dev: 1.63 us +- 0.04 us",
+      "load_before": {
+        "cpu_percent": 2.3,
+        "cpu2_percent": 3.2,
+        "background_percent": 2.2,
+        "memory_percent": 72.5,
+        "processes": 459
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 4.6,
+        "cpu_mean": 13.0,
+        "cpu_median": 12.3,
+        "cpu_max": 23.8,
+        "cpu2_max": 97.0,
+        "background_max": 18.9,
+        "memory_mean": 71.6,
+        "processes": 472,
+        "samples": 66
+      }
+    }
+  ]
+}

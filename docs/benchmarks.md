@@ -157,11 +157,50 @@ The gate's 50 ms ceiling passes (ADR-0006).
 
 ## P7 quiet window
 
-P7 checked the load before measuring anything: 19 `run.py --check-load` samples between 10:09 and
-10:28 on 2026-10-18. The all-CPU load ranged from 21.1 to 95.4 % (mean 68.0 %) and was never under
-the 15 % limit; logical CPU 2 reached 100 %. No quiet batch was possible. Every import and B1 to B8
-target stays pending, no loaded number is used as a verdict, and ADR-0008 stays Proposed. The
-attempts are in `benchmarks/results/2026-10-18-p7/quiet.json`.
+P7 checked the load before measuring anything. The 2026-10-18 session made 19 `--check-load`
+samples and found no window. The 2026-10-21 session made 17 samples between 06:24:23 and 07:05:59.
+The all-CPU load ranged from 1.9 to 87.9 % (mean 26.7 %); 8 samples were under the 15 % limit. The
+usable window was 06:45:48 to 06:49:12. The attempts are in
+`benchmarks/results/2026-10-21/quiet.json`.
+
+The import measurement ran inside that window. A sample at or above 15 % was retried, and only the
+five quiet samples per import count. The JSON is
+`benchmarks/results/2026-10-21/import_time.json`.
+
+| Import | Best us | Samples, us | Load, CPU % mean (min to max) |
+|---|---:|---|---|
+| `import nepdate` | 5825 | 6417, 5938, 6439, 5825, 6611 | 6.3 (1.0 to 14.9) |
+| `import nepdate` then `import nepdate_patro` | 3499 | 4240, 3527, 3538, 3499, 3755 | 5.7 (1.1 to 10.3) |
+| `import datetime, enum` | 1814 | 1868, 1814, 1820, 1844, 1848 | 5.7 (1.0 to 14.8) |
+
+The best separate `-X importtime` captures were 6170 us for the core and 4134 us for the patro.
+Their self times, in us:
+
+| Module | Self us |
+|---|---:|
+| `nepdate._names` | 738 |
+| `nepdate._calendar` | 496 |
+| `nepdate` | 462 |
+| `nepdate._date` | 409 |
+| `nepdate._format` | 394 |
+| `nepdate._errors` | 290 |
+| `nepdate._fiscal` | 220 |
+| `nepdate._parse` | 210 |
+| `nepdate._range` | 210 |
+| `nepdate._diff` | 203 |
+| `enum` | 1390 |
+| `nepdate_patro._tables` | 1182 |
+| `nepdate_patro` | 2953 |
+
+The quiet core 5825 us misses the 5 ms target and meets the proposed 15 ms budget. The patro
+3499 us holds both the 10 ms target and the proposed 20 ms budget. The decision therefore leaves
+ADR-0008 Proposed and records the numbers for the owner; no new ADR was written.
+
+The B1 to B8 batch started at 11.1 % but did not stay quiet. `b1`, `b3`, `b4`, `b5`, `b7` and
+`b8` crossed the 15 % background limit; `b7` reached 89.2 %. Only `b2` and `b6` are unloaded, so
+the batch is not a verdict. The loaded batch summary is in
+`benchmarks/results/2026-10-21/summary.json`. No P7 B1 to B8 table and no C# column are published,
+and the B1 to B8 work and the miss profiles stay pending.
 
 ## Targets
 
