@@ -3,8 +3,8 @@
 Read first: ADR-0002 §7, ADR-0008, `docs/benchmarks.md`, `benchmarks/README.md`,
 `shared/spec/BENCHMARK.md`, the P6 plan and the P6 review row in `PROGRESS.md`.
 
-Status on 2026-10-20: P7-01 is done. P7-02 to P7-05 are pending because no quiet window has come.
-The plan is refreshed for `main` at `1bb53ee` and the 10-gate CI. It does not run a benchmark.
+Status on 2026-10-21: P7-01, P7-02 and P7-04 are done. P7-03 and P7-05 are pending because the
+B1 to B8 batch did not stay under 15 %. The quiet import run leaves ADR-0008 Proposed.
 
 P5 and P6 measured on a machine that was busy: the all-CPU load ranged from 20 to 100 %. This
 phase takes no target verdict from a loaded run. If a quiet window does not come, every target
