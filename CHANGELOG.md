@@ -7,7 +7,7 @@ The two distributions share this file and a version number (ADR-0005). The forma
 
 ## [Unreleased]
 
-## [0.1.0-beta.1] - 2026-10-21
+## [0.1.0-beta.1] - 2026-10-22
 
 First public pre-release. The API may still change before 0.1.0. On PyPI the version is `0.1.0b1`;
 install it with `pip install --pre nepdate-core nepdate-patro`.
