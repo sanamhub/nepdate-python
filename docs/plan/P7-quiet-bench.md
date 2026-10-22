@@ -58,14 +58,14 @@ slower than `ebb4f9a`; the before/after numbers are in `docs/benchmarks.md`.
 
 ### P7-04 ADR-0008 decision path
 Choose exactly one outcome from the quiet import run:
-- 5 ms core and 10 ms patro hold: mark ADR-0008 Rejected and write ADR-0012 saying the ADR-0002
-  §7 targets hold. ADR-0012 is the next free number; ADR-0009 is mutation and ADR-0011 is release.
+- 5 ms core and 10 ms patro hold: mark ADR-0008 Rejected and write ADR-0013 saying the ADR-0002
+  §7 targets hold. ADR-0013 is the next free number; ADR-0009 is mutation, ADR-0011 is release and ADR-0012 is the publishing environments.
 - 15 ms core and 20 ms patro hold but 5 ms and 10 ms do not: leave ADR-0008 Proposed and give the
   owner the numbers to accept it. The agent does not accept it.
 - 15 ms and 20 ms are missed: report a regression with a `cProfile` or importtime breakdown and
   change no target.
 AC: the chosen path is recorded in `PROGRESS.md`, and ADR-0008's status matches it; a new ADR, when
-written, is 0012. If no quiet window came, ADR-0008 stays Proposed and the path is "pending".
+written, is 0013. If no quiet window came, ADR-0008 stays Proposed and the path is "pending".
 
 ### P7-05 Misses
 For each B1 to B8 miss in the quiet run, give a `cProfile` top 10 and one proposed change with
@@ -85,6 +85,6 @@ The reviewer checks:
 - [ ] The C# column comes from this machine and this session, with its load.
 - [ ] B5 and `str(d)` are compared with the P6 merge `ebb4f9a` and are not slower by more than
       10 %.
-- [ ] ADR-0008 is Rejected, left Proposed, or followed by ADR-0012, exactly as P7-04 says.
+- [ ] ADR-0008 is Rejected, left Proposed, or followed by ADR-0013, exactly as P7-04 says.
 - [ ] Every declared miss has a `cProfile` top 10 and one proposal, and no proposal is implemented.
 - [ ] No tag, publish, remote or settings change.
