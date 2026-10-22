@@ -11,9 +11,50 @@ VERIFY_WORKFLOW = ROOT / ".github" / "workflows" / "verify-published.yml"
 SHA = re.compile(r"@[0-9a-f]{40}$")
 EXPRESSION = "${{"
 VERIFY_JOBS = (
-    ("verify", "publish", "https://pypi.org/simple/"),
-    ("verify-testpypi", "publish-testpypi", "https://test.pypi.org/simple/"),
+    ("verify", "publish-patro", "https://pypi.org/simple/"),
+    ("verify-testpypi", "publish-patro-testpypi", "https://test.pypi.org/simple/"),
 )
+# Each upload job, its environment and the one dist directory it uploads. PyPI matches a trusted
+# publisher on repository, workflow and environment, so every distribution needs its own
+# environment: a shared one let the patro's pending publisher claim the core upload on TestPyPI.
+PUBLISH_JOBS = (
+    ("publish", "production", "dist/core/"),
+    ("publish-patro", "production-patro", "dist/patro/"),
+    ("publish-testpypi", "testpypi", "dist/core/"),
+    ("publish-patro-testpypi", "testpypi-patro", "dist/patro/"),
+)
+
+
+def publisher_problems(text: str) -> list[str]:
+    """Check that each distribution uploads from its own job and environment.
+
+    Args:
+        text: The release workflow text.
+
+    Returns:
+        One message per missing or wrong rule.
+    """
+    lines = text.splitlines()
+    found: list[str] = []
+    seen: dict[str, str] = {}
+    for name, environment, directory in PUBLISH_JOBS:
+        block = "\n".join(_job(lines, name))
+        if not block:
+            found.append(f"missing {name} job")
+            continue
+        match = re.search(r"^    environment:\s*(\S+)$", block, re.MULTILINE)
+        actual = match.group(1) if match else ""
+        if actual != environment:
+            found.append(f"{name} must use the {environment} environment")
+        if actual in seen:
+            found.append(f"{name} shares the {actual} environment with {seen[actual]}")
+        seen[actual] = name
+        uploads = re.findall(r"packages-dir:\s*(\S+)", block)
+        if uploads != [directory]:
+            found.append(f"{name} must upload only {directory}")
+        if "id-token: write" not in block or "contents: write" in block:
+            found.append(f"{name} needs id-token: write and not contents: write")
+    return found
 
 
 def _indent(line: str) -> int:
@@ -179,32 +220,33 @@ def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one 
         found.append("the build job must build with scripts/ci.py build-release")
     if 'release-rehearsal "$VERSION" --dist dist' not in build:
         found.append("the build job must check the built files it uploads")
-    publish = "\n".join(_job(lines, "publish"))
-    if "environment: production" not in publish:
-        found.append("publish must use the production environment")
-    if "id-token: write" not in publish or "contents: write" in publish:
-        found.append("publish needs id-token: write and not contents: write")
-    if "action-gh-release" in publish:
-        found.append("publish must not create the GitHub Release; github-release does after verify")
-    if "github.event_name == 'push'" not in publish or "refs/tags/v" not in publish:
-        found.append("publish must run only on a tag push")
-    if "fetch-depth: 0" not in publish:
-        found.append("publish checkout must fetch full history")
-    if "git fetch --no-tags origin main" not in publish:
-        found.append("publish must fetch origin/main")
-    check_at = publish.find("merge-base --is-ancestor")
-    if check_at < 0:
-        found.append("publish must verify the tag is on origin/main")
-    upload_at = publish.find("gh-action-pypi-publish")
-    if check_at >= 0 and upload_at >= 0 and check_at > upload_at:
-        found.append("publish must check main before uploading")
-    if "COMMIT_SHA: ${{ github.sha }}" not in publish:
-        found.append("publish must pass github.sha through env")
-    testpypi = "\n".join(_job(lines, "publish-testpypi"))
-    if "environment: testpypi" not in testpypi:
-        found.append("TestPyPI must use the testpypi environment")
-    if "id-token: write" not in testpypi or "contents: write" in testpypi:
-        found.append("TestPyPI needs id-token: write and not contents: write")
+    for job in ("publish", "publish-patro"):
+        publish = "\n".join(_job(lines, job))
+        if "id-token: write" not in publish or "contents: write" in publish:
+            found.append(f"{job} needs id-token: write and not contents: write")
+        if "action-gh-release" in publish:
+            found.append(
+                f"{job} must not create the GitHub Release; github-release does after verify"
+            )
+        if "github.event_name == 'push'" not in publish or "refs/tags/v" not in publish:
+            found.append(f"{job} must run only on a tag push")
+        if "fetch-depth: 0" not in publish:
+            found.append(f"{job} checkout must fetch full history")
+        if "git fetch --no-tags origin main" not in publish:
+            found.append(f"{job} must fetch origin/main")
+        check_at = publish.find("merge-base --is-ancestor")
+        if check_at < 0:
+            found.append(f"{job} must verify the tag is on origin/main")
+        upload_at = publish.find("gh-action-pypi-publish")
+        if check_at >= 0 and upload_at >= 0 and check_at > upload_at:
+            found.append(f"{job} must check main before uploading")
+        if "COMMIT_SHA: ${{ github.sha }}" not in publish:
+            found.append(f"{job} must pass github.sha through env")
+    if "publish" not in _needs("\n".join(_job(lines, "publish-patro"))):
+        found.append("publish-patro must need publish, so the core exists first")
+    if "publish-testpypi" not in _needs("\n".join(_job(lines, "publish-patro-testpypi"))):
+        found.append("publish-patro-testpypi must need publish-testpypi")
+    found.extend(publisher_problems(text))
     if "default: true" not in text:
         found.append("the dry-run input must default to true")
     preflight = "\n".join(_job(lines, "preflight"))
@@ -310,10 +352,10 @@ def test_verify_job_wrong_needs_is_reported() -> None:
     """A verify job that does not follow publish fails the check."""
     text = WORKFLOW.read_text(encoding="utf-8")
     block = _verify_block(text)
-    bad_block = block.replace("needs: [preflight, publish]", "needs: [preflight]", 1)
+    bad_block = block.replace("needs: [preflight, publish-patro]", "needs: [preflight]", 1)
     assert bad_block != block
     found = verify_problems(text.replace(block, bad_block, 1))
-    assert "verify must need publish" in found
+    assert "verify must need publish-patro" in found
 
 
 def test_verify_job_id_token_is_reported() -> None:
@@ -369,7 +411,7 @@ def test_verify_jobs_run_the_same_steps() -> None:
     normalised = (
         testpypi.replace("  verify-testpypi:", "  verify:", 1)
         .replace("name: verify from TestPyPI", "name: verify from PyPI", 1)
-        .replace("[preflight, publish-testpypi]", "[preflight, publish]", 1)
+        .replace("[preflight, publish-patro-testpypi]", "[preflight, publish-patro]", 1)
         .replace("https://test.pypi.org/simple/", "https://pypi.org/simple/", 1)
     )
     testpypi_only = (
@@ -398,6 +440,35 @@ def test_verify_workflow_negative_control() -> None:
     assert "verify-published must run on windows-latest" in found
     assert "verify-published must run the oldest and newest Python" in found
     assert "verify-published must run scripts/verify_published.py with a wait" in found
+
+
+def test_publishers_have_their_own_environments() -> None:
+    """The shipped workflow uploads each distribution from its own job and environment."""
+    assert publisher_problems(WORKFLOW.read_text(encoding="utf-8")) == []
+
+
+def test_shared_publisher_environment_is_reported() -> None:
+    """Uploading the patro from the core's environment, as the first beta dry run did, fails."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    bad = text.replace("environment: testpypi-patro", "environment: testpypi", 1)
+    assert bad != text
+    found = publisher_problems(bad)
+    assert "publish-patro-testpypi must use the testpypi-patro environment" in found
+    assert any("shares the testpypi environment" in message for message in found)
+
+
+def test_two_uploads_in_one_job_are_reported() -> None:
+    """Moving the patro upload back into the core job fails the check."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    block = _verify_block(text, "publish")
+    bad_block = block + (
+        "\n      - name: Publish nepdate-patro"
+        "\n        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33"
+        "\n        with:"
+        "\n          packages-dir: dist/patro/"
+    )
+    found = publisher_problems(text.replace(block, bad_block, 1))
+    assert "publish must upload only dist/core/" in found
 
 
 def test_release_without_prerelease_flag_is_reported() -> None:

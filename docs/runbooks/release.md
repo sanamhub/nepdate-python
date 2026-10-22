@@ -12,15 +12,17 @@ P0-06; its import name is `nepdate`.
    | Project | PyPI environment | TestPyPI environment |
    |---|---|---|
    | `nepdate-core` | `production` | `testpypi` |
-   | `nepdate-patro` | blank | blank |
+   | `nepdate-patro` | `production-patro` | `testpypi-patro` |
 
-   PyPI refuses a second pending publisher with the same repository, workflow and environment for
-   another project ("A pending trusted publisher matching this configuration has already been
-   registered for a different project name"), so the patro entry leaves the environment blank.
-   The workflow still publishes it from the `production` job; the step under "After the first
-   release" narrows it once the project exists.
-2. In the GitHub repository, create the environments `production` (required reviewer, `v*` tags
-   only) and `testpypi` (`main` and `v*` tags).
+   Each distribution uploads from its own job and environment. PyPI matches a publisher on
+   repository, workflow and environment, so two pending publishers with one shared environment are
+   refused ("A pending trusted publisher matching this configuration has already been registered
+   for a different project name"), and a blank environment matches every job: the first
+   0.1.0-beta.1 dry run used that, and TestPyPI gave the core upload the patro's identity ("400
+   Non-user identities cannot create new projects").
+2. In the GitHub repository, create the environments `production` and `production-patro`
+   (required reviewer, `v*` tags only), and `testpypi` and `testpypi-patro` (`main` and `v*`
+   tags).
 
 ## Before tagging
 
@@ -61,8 +63,9 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-`release.yml` runs preflight, CI and the build, waits for the `production` approval, publishes the
-core and then `nepdate-patro` to PyPI by trusted publishing (with attestations), then calls
+`release.yml` runs preflight, CI and the build, waits for the `production` approval and publishes
+the core, then waits for the `production-patro` approval and publishes `nepdate-patro`, both by
+trusted publishing (with attestations). Then it calls
 `verify-published.yml`, which installs both exact versions from PyPI with pip on Linux, macOS and
 Windows with Python 3.11 and 3.14 and runs the README example and one patro lookup. Only then does
 it create the GitHub Release, from the changelog section plus install and verification notes.
@@ -72,23 +75,12 @@ it create the GitHub Release, from the changelog section plus install and verifi
 1. Both PyPI pages show the version and "Verified details" (attestation).
 2. Add an empty `## [Unreleased]` to the changelog.
 
-## After the first release (mandatory, once)
-
-The `nepdate-patro` publisher was registered with a blank environment, so any job of `release.yml`
-in this repository could publish it. Narrow it as soon as the project exists:
-
-1. PyPI, `nepdate-patro`, Manage, Publishing: delete the publisher with the blank environment and
-   add it again with environment `production`.
-2. TestPyPI, the same with environment `testpypi`.
-3. Check both project pages list the environment. The next release fails at the patro upload if
-   this was done wrong, after the core is already up, so do it before that release, not during it.
-
 ## If only the core was published
 
-The patro upload failed after the core upload. Fix the cause (for example a missing pending
-publisher for `nepdate-patro`), then use "Re-run failed jobs" on the same workflow run. The core
-step has `skip-existing: true`, so it skips the files already on PyPI and only the patro is uploaded
-(ADR-0005). Don't tag again.
+The patro job failed after the core job. Fix the cause (for example a wrong pending publisher for
+`nepdate-patro`), then use "Re-run failed jobs" on the same workflow run: only the patro job runs
+again. The core step also has `skip-existing: true`, so re-running all jobs skips the files already
+on PyPI (ADR-0005). Don't tag again.
 
 The core step needs `skip-existing` because it is not the last upload: a patro failure leaves a
 public core, and the same run must be restartable without a duplicate-file error. The patro step
