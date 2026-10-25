@@ -11,7 +11,7 @@ ADR-0002 §7 set `import nepdate` under 5 ms and `import nepdate_patro` under 10
 reference machine. ADR-0006 already replaced the CI check with a 50 ms ceiling, because a loaded
 runner cannot hold 5 ms.
 
-P6 measured the floor and the package with `-X importtime` on the reference machine, best of five,
+We measured the floor and the package with `-X importtime` on the reference machine, best of five,
 with the CPU load sampled before each run. The bare interpreter is most of the cost:
 
 | Import | Best us | Load, CPU % |
@@ -20,14 +20,14 @@ with the CPU load sampled before each run. The bare interpreter is most of the c
 | `enum` | 3418 | 65.9 |
 | both | 4530 | 68.8 |
 
-Before the P6 changes, seven alternating fresh-process runs gave a median of 22154 us for
+Before the deferral changes, seven alternating fresh-process runs gave a median of 22154 us for
 `import nepdate` (mean load 74.2 %, range 41.9 to 90.8). After deferring the formatting, lenient
 parser and fiscal label tables, the median was 19485 us (mean load 79.4 %, range 55.9 to 91.6).
 Two pairs at about 90 % load were 24454 to 17849 us and 29785 to 20749 us. The package's own module
 self time in those pairs fell from 11808 to 9284 us; `_format` and `_pattern` are no longer imported
 at all, and `_parse` and `_fiscal` build less.
 
-Review then put `_format` and `_pattern` back at import. A call-time `from ._format import ...` in
+Later work put `_format` and `_pattern` back at import. A call-time `from ._format import ...` in
 `__str__` and `long` is a module lookup on every call: on the same machine `str(d)` went from about
 210 to 600 ns and `long(lang=Lang.NE)` (B5) from about 340 to 800 ns, against a 400 ns B5 target.
 Their 1790 us of self time at about 90 % load is back in `import nepdate`, so the after numbers

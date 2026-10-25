@@ -8,8 +8,7 @@
 ## Context
 
 The Go port runs Gremlins on the hand-written core and patro files: 4 workers, a survivor baseline
-per package, and a test-efficacy floor of 99.5 % (`docs/plan/G8-mutation-testing.md` and
-`G9-mutation-scope.md`). The Python suite has 712 tests, 98 % line coverage and a fast path that
+per package, and a test-efficacy floor of 99.5 % (see the Go repository's ADRs). The Python suite has 712 tests, 98 % line coverage and a fast path that
 must stay fast, so line coverage alone does not show whether the tests check behaviour.
 
 For Python there are two practical tools. **mutmut 3.8.0** selects only the tests that cover a
@@ -56,20 +55,18 @@ mutants with the two generated tables excluded, so a full run is minutes, not ho
 ## Results
 
 The first full run on 2026-10-18 with 2 children: 1350 mutants, 1220 killed, 108 survived,
-21 timed out, 1 had no tests, 4.85 mutations per second, 313 s. Test efficacy 91.87 %. The
-raw files and `summary.json` are in `docs/mutation/2026-10-18/`.
+21 timed out, 1 had no tests, 4.85 mutations per second, 313 s. Test efficacy 91.87 %.
 
-After the P8 review, with 4 children: 1350 mutants, 1266 killed, 65 survived, 18 timed out,
+After the survivor fixes, with 4 children: 1350 mutants, 1266 killed, 65 survived, 18 timed out,
 1 had no tests, 8.88 mutations per second. Test efficacy 95.12 %. A second run of the same tree
 took 152 s (1263 killed, 21 timed out: three mutants move between killed and timeout with machine
-load; the survivors are the same 65). The review files replace the first run's in
-`docs/mutation/2026-10-18/`; `summary.json` keeps the first run's counts.
+load; the survivors are the same 65).
 
 ## Consequences
 
 - A full run costs minutes, not a per-PR check. The release job and the weekly job are the
   enforcement points.
-- The floor is a measured number, not a guess, and it is not set until P8-03.
+- The floor is a measured number, not a guess, and it is not set until the survivors are dispositioned.
 - Mutant ids and diffs are tool output. A tool upgrade that changes ids is a deliberate baseline
   update, not a silent pass.
 - Local runs need a WSL copy of the repository. The copy, virtualenv and pip cache are kept off the

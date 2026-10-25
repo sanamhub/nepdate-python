@@ -7,8 +7,8 @@
 
 ## Context
 
-ADR-0001 §1 left the core PyPI distribution name to P0-06. The name `nepdate` is taken by a 2021
-package with no users worth counting (`docs/competitors.md`, "Name"). P5 prepared 0.1.0 with the
+ADR-0001 §1 left the core PyPI distribution name open. The name `nepdate` is taken by a 2021
+package with no users worth counting (`docs/competitors.md`, "Name"). Release preparation for 0.1.0 kept the
 placeholder still in place, and the release cannot register trusted publishers for an unnamed
 project.
 

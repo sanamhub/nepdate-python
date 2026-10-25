@@ -12,7 +12,7 @@ in `docs/API.md`. Nothing checked that a release kept its names, signatures, enu
 exception bases. A renamed method or a changed default is a breaking change that a normal test
 suite may not notice, because the tests usually call the new name.
 
-The P8 review also found a private parameter that no caller needed. A compatibility gate should
+Mutation testing also found a private parameter that no caller needed. A compatibility gate should
 make the difference between private and public changes visible before a release.
 
 ## Decision

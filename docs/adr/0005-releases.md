@@ -6,7 +6,7 @@
 
 ## Decision
 
-- `<core-name>` is the core distribution name chosen in P0-06 (ADR-0001 §1).
+- `<core-name>` is the core distribution name (ADR-0001 §1, ADR-0007).
 - The core and `nepdate-patro` always have the same version and are released together from one tag
   (hub ADR-0004 §3). A data change that touches only the patro still releases both (patch).
 - The version is written in the two `pyproject.toml` files and nowhere else; `nepdate.__version__`
