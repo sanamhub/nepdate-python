@@ -49,7 +49,7 @@ def test_matrix_versions_reads_the_test_job(ci_matrix: Any, tmp_path: Path) -> N
 
 
 def test_matrix_versions_change_with_the_workflow(ci_matrix: Any, tmp_path: Path) -> None:
-    """The negative control: a hardcoded list would return the same versions for both files."""
+    """A hardcoded list would return the same versions for both files."""
     first = _workflow(tmp_path, WORKFLOW)
     second = tmp_path / "second.yml"
     second.write_text(WORKFLOW.replace('python: "3.12"', 'python: "3.99"'), encoding="utf-8")
@@ -70,7 +70,7 @@ def test_matrix_versions_requires_a_test_job(ci_matrix: Any, tmp_path: Path) -> 
 def test_environment_puts_everything_under_the_cache_root(
     ci_matrix: Any, tmp_path: Path, monkeypatch: Any
 ) -> None:
-    """The project environment, Python installs, uv cache and temp files share one D-drive root."""
+    """The project environment, Python installs, uv cache and temp files share one root."""
     monkeypatch.setenv("VIRTUAL_ENV", ".venv")
     env = ci_matrix.environment(tmp_path, "3.14t")
     assert "VIRTUAL_ENV" not in env

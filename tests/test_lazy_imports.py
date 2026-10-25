@@ -4,7 +4,7 @@ The lenient parser's tables load on the first ``parse_lenient`` call. The format
 eager: a call-time ``from ._format import ...`` inside ``__str__`` or ``long`` costs a module
 lookup on every call, which took ``str(d)`` from about 210 to 600 ns on the reference machine.
 
-Negative control: moving ``from ._lenient import ...`` in ``_parse.py`` to module level makes
+Breaking it: moving ``from ._lenient import ...`` in ``_parse.py`` to module level makes
 ``test_import_leaves_the_lenient_parser_unloaded`` fail with ``nepdate._lenient`` named.
 """
 

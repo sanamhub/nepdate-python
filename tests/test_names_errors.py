@@ -1,4 +1,4 @@
-"""Tests for the calendar enums and the one exception type (P1-02)."""
+"""Tests for the calendar enums and the one exception type."""
 
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 # `nepdate` and `nepdate_patro` (Python): public API contract (v0.1)
 
 The complete public surface (`__all__` of each package) for v0.1. Implement exactly this; a new
-public name needs this file changed in the same PR, approved by the human. Behaviour:
+public name needs this file changed in the same PR, approved by the maintainer. Behaviour:
 `shared/spec/`. Conventions: ADR-0003. All types are immutable, hashable and use `__slots__`.
 Distributions: `nepdate-core` (import `nepdate`) and `nepdate-patro` (import `nepdate_patro`).
 

@@ -1,4 +1,4 @@
-"""Hypothesis property tests (P1-05)."""
+"""Hypothesis property tests."""
 
 from __future__ import annotations
 

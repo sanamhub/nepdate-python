@@ -1,4 +1,4 @@
-"""Tests for the month and weekday names and ``to_nepali_digits`` (P3-01)."""
+"""Tests for the month and weekday names and ``to_nepali_digits``."""
 
 from __future__ import annotations
 

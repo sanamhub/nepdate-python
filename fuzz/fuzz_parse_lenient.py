@@ -1,4 +1,4 @@
-"""Fuzz ``NepaliDate.parse_lenient`` with arbitrary bytes (P9-02)."""
+"""Fuzz ``NepaliDate.parse_lenient`` with arbitrary bytes."""
 
 from __future__ import annotations
 

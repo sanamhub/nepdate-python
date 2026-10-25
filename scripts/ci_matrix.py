@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,14 +57,13 @@ class RunResult:
 
 
 def default_cache_root() -> Path:
-    r"""Return the cache root for this platform.
+    """Return the default cache root.
 
     Returns:
-        ``D:\\devcache\\p10`` on Windows, ``/mnt/d/devcache/p10`` elsewhere.
+        ``nepdate-ci-matrix`` in the system temporary directory. ``--cache-root`` overrides it,
+        for example to put the environments on a larger drive.
     """
-    if os.name == "nt":
-        return Path(r"D:\devcache\p10")
-    return Path("/mnt/d/devcache/p10")
+    return Path(tempfile.gettempdir()) / "nepdate-ci-matrix"
 
 
 def matrix_versions(workflow: Path = DEFAULT_WORKFLOW) -> list[str]:

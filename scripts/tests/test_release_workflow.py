@@ -180,7 +180,7 @@ def verify_workflow_problems(text: str) -> list[str]:
 
 
 def problems(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 - one pass, one message per rule
-    """Check the workflow rules that a review keeps missing.
+    """Check the workflow rules that are easy to miss.
 
     Args:
         text: The release workflow text.

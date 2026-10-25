@@ -1,8 +1,8 @@
 # Runbook: release the core and `nepdate-patro` (Python)
 
 Decided in ADR-0005 and ADR-0007. Owner: maintainer. Approver: a second person. One tag releases
-both distributions with the same version. The core distribution is `nepdate-core`, chosen in
-P0-06; its import name is `nepdate`.
+both distributions with the same version. The core distribution is `nepdate-core`
+(ADR-0007); its import name is `nepdate`.
 
 ## One-time setup (before the first release)
 

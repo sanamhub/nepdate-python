@@ -35,19 +35,19 @@ def test_clean_docs_pass(docs_check: Any, tmp_path: Path) -> None:
 
 
 def test_em_dash_is_rejected(docs_check: Any, tmp_path: Path) -> None:
-    """The negative control for the em dash rule."""
+    """An em dash is reported."""
     _doc(tmp_path, "README.md", "# Read me\n\nA dash \u2014 here.\n")
     assert any("em dash" in problem for problem in docs_check.problems(tmp_path))
 
 
 def test_task_id_is_rejected(docs_check: Any, tmp_path: Path) -> None:
-    """The negative control for the task ID rule."""
+    """A task ID is reported."""
     _doc(tmp_path, "CHANGELOG.md", "- Fixed in P4-03.\n")
     assert any("task ID" in problem for problem in docs_check.problems(tmp_path))
 
 
 def test_broken_relative_link_is_rejected(docs_check: Any, tmp_path: Path) -> None:
-    """The negative control for relative link resolution."""
+    """A relative link to a missing file is reported."""
     _doc(tmp_path, "README.md", "See [missing](docs/missing.md).\n")
     assert any("does not resolve" in problem for problem in docs_check.problems(tmp_path))
 

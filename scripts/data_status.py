@@ -2,7 +2,7 @@
 
 The source is ``shared/data/patro/*.json``, not the generated ``_tables.py``. Public holidays are
 the release blocker: fewer than 183 days left fails. Tithi and events ending that soon are
-warnings, as in the hub H1-02 rule and the Rust W4-00 gate. Days are counted from today's UTC
+warnings, as in the hub and the Rust port. Days are counted from today's UTC
 date, the same in every port, so a release near midnight gets one answer everywhere.
 """
 

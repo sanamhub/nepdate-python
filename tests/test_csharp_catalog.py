@@ -1,4 +1,4 @@
-"""One test per C# catalogue row tagged phase 1 (P1-05)."""
+"""One test per C# catalogue row tagged phase 1."""
 
 from __future__ import annotations
 

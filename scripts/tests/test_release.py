@@ -69,14 +69,14 @@ def test_release_check_passes(ci: Any, tmp_path: Path) -> None:
 
 
 def test_core_version_mismatch_fails(ci: Any, tmp_path: Path) -> None:
-    """The negative control for the core version."""
+    """A core version that differs from the tag fails."""
     _release(ci, tmp_path, core_version="0.0.9")
     errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("core pyproject version" in error for error in errors)
 
 
 def test_patro_version_mismatch_fails(ci: Any, tmp_path: Path) -> None:
-    """The negative control for the patro version."""
+    """A patro version that differs from the tag fails."""
     _release(ci, tmp_path, patro_version="0.0.9")
     errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro pyproject version" in error for error in errors)
@@ -92,7 +92,7 @@ def test_wrong_patro_range_fails(ci: Any, tmp_path: Path) -> None:
 def test_mismatched_dependency_name_fails(ci: Any, tmp_path: Path) -> None:
     """A patro dependency on the import name, not the distribution, fails.
 
-    This is the negative control for the rename: a partial switch leaves the patro pointing at
+    A partial rename leaves the patro pointing at
     ``nepdate`` while the core is built as ``nepdate-core``.
     """
     _release(ci, tmp_path, dependency=f"{ci.CORE_MODULE}>=0.1,<0.2")

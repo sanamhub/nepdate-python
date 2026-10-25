@@ -1,4 +1,4 @@
-"""Tests and negative controls for the public API snapshot (P9-03)."""
+"""Tests for the public API snapshot, including the cases it must reject."""
 
 from __future__ import annotations
 

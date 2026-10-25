@@ -1,4 +1,4 @@
-"""Source checks for the P3 formatting and parsing rules, and their negative controls."""
+"""Source checks for the formatting and parsing rules, each with a case that must fail."""
 
 from __future__ import annotations
 

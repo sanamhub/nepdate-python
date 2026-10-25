@@ -28,7 +28,7 @@ appends the sample to `quiet.json` and exits 1 when the all-CPU load is 15 % or 
 stops with exit 3 above 15 % unless `--allow-loaded` is given. Every row records `load_before`,
 `loaded` and the load range while the process ran. A row is loaded when the all-CPU load before it,
 or the load of the CPUs other than the pinned CPU 2 while it runs, reaches 15 %; a row with
-`loaded: true` is not a target verdict (P7). `scripts/tests/test_bench_load_gate.py` covers the
+`loaded: true` is not a target verdict. `scripts/tests/test_bench_load_gate.py` covers the
 gate without the bench group.
 
 Each benchmark function walks all its inputs and returns the result list; pyperf divides by

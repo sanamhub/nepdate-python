@@ -1,4 +1,4 @@
-"""Day arithmetic tests: add_days, days_until, timedelta operators (P2-01)."""
+"""Day arithmetic tests: add_days, days_until, timedelta operators."""
 
 from __future__ import annotations
 

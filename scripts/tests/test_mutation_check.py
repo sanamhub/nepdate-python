@@ -45,7 +45,7 @@ def test_check_passes(ci: Any, mutation_check: Any, tmp_path: Path) -> None:
 
 
 def test_below_floor_is_a_failure(mutation_check: Any, tmp_path: Path) -> None:
-    """The negative control: 80 % is below the 95 % floor."""
+    """80 % is below the 95 % floor."""
     stats, results, equivalents = _files(
         tmp_path, stats={"killed": 80, "survived": 20, "total": 100}
     )

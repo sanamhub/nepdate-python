@@ -66,7 +66,7 @@ def test_generated_calendar_matches_file(codegen: Any) -> None:
 
 
 def test_generate_tables_match_acceptance_counts(codegen: Any) -> None:
-    """The generated tables have the sizes P1-01 promises."""
+    """The generated tables have the sizes ADR-0002 §3 promises."""
     data = _shipped_calendar(codegen)
     lengths = codegen.build_month_lengths(data)
     starts = codegen.build_month_starts(lengths)
@@ -91,7 +91,7 @@ def test_bucket_two_step_bound_holds(codegen: Any) -> None:
 def test_bucket_rejects_bad_month_starts(codegen: Any) -> None:
     """A serial more than two months past its block start raises ValueError.
 
-    Negative control: ``build_bucket`` must reject a table that would need more than two
+    ``build_bucket`` must reject a table that would need more than two
     steps, so the bound check can fail when the generator is wrong.
     """
     with pytest.raises(ValueError):
@@ -136,7 +136,7 @@ def _patro_tables(codegen: Any, days: dict[str, dict[str, Any]] | None = None) -
 
 
 def test_patro_acceptance_counts(codegen: Any) -> None:
-    """The generated patro tables have the sizes P4-01 promises."""
+    """The generated patro tables have the sizes PATRO §3 promises."""
     tables = _patro_tables(codegen)
     assert len(tables["tithi_index"]) == _TITHI_DAYS
     assert len(tables["tithi_names"]) == _TITHI_NAMES
@@ -178,7 +178,7 @@ def test_patro_event_order_and_spans(codegen: Any) -> None:
 
 
 def test_missing_tithi_is_rejected(codegen: Any) -> None:
-    """A gap inside the tithi range raises, as P4-01 requires."""
+    """A gap inside the tithi range raises."""
     days = _shipped_patro(codegen)
     del days["2081-01-01"]
     with pytest.raises(ValueError):
@@ -219,7 +219,7 @@ def test_source_text_escapes_invisible_characters(codegen: Any) -> None:
 def test_patro_generation_escapes_invisible_characters(codegen: Any) -> None:
     """A generated name never contains a raw invisible character.
 
-    Negative control for the source rule: the raw joiner must become an escape.
+    The source rule: the raw joiner must become an escape.
     """
     days = _shipped_patro(codegen)
     days["2081-01-01"]["tithi"]["en"] += _INVISIBLE

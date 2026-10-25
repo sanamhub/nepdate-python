@@ -1,8 +1,6 @@
-## Task IDs
-
-<!-- For example P1-03. -->
-
 ## What changed and why
+
+<!-- Two or three sentences. Name the issue (Closes #12). -->
 
 ## How tested
 
@@ -14,7 +12,7 @@
 
 ## Checklist
 
-- [ ] Tests added for every acceptance criterion
+- [ ] Tests added or updated for every behaviour change
 - [ ] Changelog updated for anything a user would notice
 - [ ] `docs/API.md` unchanged, or updated in this PR
 - [ ] ADR added for a significant decision

@@ -131,7 +131,7 @@ def test_allowlist_covers_every_stdlib_import_of_the_core(ci: Any) -> None:
 def test_outside_flags_the_patro_module_for_the_core(ci: Any) -> None:
     """A core import that loads ``nepdate_patro`` is a gate failure.
 
-    This is the permanent negative control for the core/patro import check.
+    It proves the core/patro import check can fail.
     """
     modules = {"nepdate", "nepdate._date", "nepdate_patro", "nepdate_patro._tables"}
     assert ci._outside(modules, "nepdate", ci.CORE_IMPORT_ALLOWED) == [

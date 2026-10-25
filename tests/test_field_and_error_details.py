@@ -1,4 +1,4 @@
-"""Regression tests for mutation-testing survivors (P8-03)."""
+"""Field values, error kinds and formatting details that the broader tests do not pin."""
 
 from __future__ import annotations
 

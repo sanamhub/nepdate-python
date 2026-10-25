@@ -1,7 +1,7 @@
 # Release runbook
 
 The two distributions, `nepdate-core` and `nepdate-patro`, are released together from one tag
-(ADR-0005). The human tags. The agent runs the checks below and stops.
+(ADR-0005). Run the checks below, then the maintainer tags.
 
 ## Before the tag
 
@@ -12,7 +12,7 @@ uv run python scripts/ci_matrix.py
 ```
 
 The runner reads the workflow file, uses a separate environment for each version under
-`D:\devcache\p10` on Windows (or `/mnt/d/devcache/p10` on WSL), and starts at most two versions at
+`--cache-root` (default `nepdate-ci-matrix` in the system temporary directory), and starts at most two versions at
 a time. A version that uv cannot provide is printed as `skip`, never as passed.
 
 Check the data and the version:

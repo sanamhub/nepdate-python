@@ -1,4 +1,4 @@
-"""The core import must not load ``nepdate_patro`` (P4-02)."""
+"""The core import must not load ``nepdate_patro``."""
 
 from __future__ import annotations
 

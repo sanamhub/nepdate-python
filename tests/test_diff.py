@@ -1,4 +1,4 @@
-"""diff tests (P2-03)."""
+"""diff tests."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ _MAX_SERIAL = _calendar.MONTH_START[-1] - 1
 
 
 def test_diff_table() -> None:
-    """The P2-03 worked examples, computed from shared/data on 2026-10-07."""
+    """Worked examples, computed from shared/data on 2026-10-07."""
     rows = [
         (
             NepaliDate(2081, 4, 15),

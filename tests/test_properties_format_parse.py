@@ -1,4 +1,4 @@
-"""Hypothesis properties for parsing and formatting, each against an independent oracle (P9-01)."""
+"""Hypothesis properties for parsing and formatting, each against an independent oracle."""
 
 from __future__ import annotations
 

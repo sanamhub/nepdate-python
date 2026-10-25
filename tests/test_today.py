@@ -1,4 +1,4 @@
-"""Tests for ``NepaliDate.today`` and its injectable clock (P4-03)."""
+"""Tests for ``NepaliDate.today`` and its injectable clock."""
 
 from __future__ import annotations
 

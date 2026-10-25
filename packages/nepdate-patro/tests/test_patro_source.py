@@ -1,4 +1,4 @@
-"""Source rules for the patro package (P4-04)."""
+"""Source rules for the patro package."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Formatting tests: ``__str__``, ``__repr__``, ``isoformat``, ``short`` and ``long`` (P3-02)."""
+"""Formatting tests: ``__str__``, ``__repr__``, ``isoformat``, ``short`` and ``long``."""
 
 from __future__ import annotations
 

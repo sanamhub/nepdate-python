@@ -105,7 +105,7 @@ def test_committed_docs_have_no_drift() -> None:
 
 
 def test_a_missing_readme_name_is_reported() -> None:
-    """The negative control: one exported name removed from the README fails."""
+    """One exported name removed from the README fails."""
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     missing = readme.replace("`NepaliDate`, ", "", 1)
     assert "README API table or docs link is missing NepaliDate" in problems_for_text(missing)
@@ -131,7 +131,7 @@ def test_a_docs_link_is_an_accepted_fallback() -> None:
 
 
 def test_a_missing_adr_row_is_reported(tmp_path: Path) -> None:
-    """An ADR file without a README row is the ADR negative control."""
+    """An ADR file without a README row is reported."""
     folder = tmp_path / "adr"
     folder.mkdir()
     (folder / "0001-test.md").write_text("# One\n", encoding="utf-8")
