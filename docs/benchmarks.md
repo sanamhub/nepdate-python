@@ -48,8 +48,8 @@ the CPU load every 0.5 s while it runs. The per-process command is:
 .venv\Scripts\python.exe benchmarks\bench.py --only b1 -o benchmarks\results\2026-10-18\b1.json --rigorous --quiet
 ```
 
-`benchmarks/results/2026-10-18/` holds the pyperf JSON, `summary.json`, `probe.json`,
-`import_time.json` and `bytes.json`.
+`benchmarks/results/2026-10-18/` holds `summary.json`, `probe.json`, `import_time.json` and
+`bytes.json`. The per-process pyperf JSON is not committed.
 
 ## B1 to B8
 
@@ -116,14 +116,14 @@ claim. The numbers above still show where each package would land.
 ## Import time
 
 Best of five `-X importtime` runs, with the load sampled before each run. The first table is the
-P5 measurement against the old 5 ms target.
+first measurement against the old 5 ms target.
 
 | Import | Best us | Samples, us | Load, CPU % mean (min to max) |
 |---|---:|---|---|
 | `import nepdate` | 15086 | 46715, 25968, 27548, 15086, 23354 | 69.8 (56.9 to 91.1) |
 | `import nepdate` then `import nepdate_patro` | 8253 | 8745, 11410, 8253, 8890, 11649 | 64.4 (40.6 to 76.1) |
 
-P6 first deferred the formatting, lenient parser and fiscal label tables. The before and after runs below
+Deferring the formatting, lenient parser and fiscal label tables. The before and after runs below
 alternate between a copy of `main` at `31a994f` on `PYTHONPATH` and this branch, seven fresh
 processes each, so load drift affects both sides.
 
@@ -137,7 +137,7 @@ self time in the first pair fell from 11808 to 9284 us: `_format` (1160 us) and 
 are no longer imported by `import nepdate`, and `_parse` (886 to 530 us) and `_fiscal` (999 to
 656 us) build less.
 
-Review restored `_format` and `_pattern` at import: importing them inside `__str__` and `long`
+Later work restored `_format` and `_pattern` at import: importing them inside `__str__` and `long`
 cost a module lookup per call, about 210 to 600 ns for `str(d)` and 340 to 800 ns for B5 on this
 machine. The after row above therefore includes about 1790 us (at about 90 % load) that the merged
 tree pays again; only the lenient parser and the fiscal labels stay deferred.
@@ -155,9 +155,9 @@ at up to 80 % CPU, while the quiet-machine targets stay 5 ms and 10 ms. Until AD
 the 5 ms number in ADR-0002 §7 is still the published target, and the loaded numbers above miss it.
 The gate's 50 ms ceiling passes (ADR-0006).
 
-## P7 quiet window
+## Quiet window
 
-P7 checked the load before measuring anything. The 2026-10-18 session made 19 `--check-load`
+The quiet-window run checked the load before measuring anything. The 2026-10-18 session made 19 `--check-load`
 samples and found no window. The 2026-10-21 session made 17 samples between 06:24:23 and 07:05:59.
 The all-CPU load ranged from 1.9 to 87.9 % (mean 26.7 %); 8 samples were under the 15 % limit. The
 usable window was 06:45:48 to 06:49:12. The attempts are in
@@ -194,12 +194,12 @@ Their self times, in us:
 
 The quiet core 5825 us misses the 5 ms target and meets the proposed 15 ms budget. The patro
 3499 us holds both the 10 ms target and the proposed 20 ms budget. The decision therefore leaves
-ADR-0008 Proposed and records the numbers for the owner; no new ADR was written.
+ADR-0008 Proposed and records the numbers for the maintainer; no new ADR was written.
 
 The B1 to B8 batch started at 11.1 % but did not stay quiet. `b1`, `b3`, `b4`, `b5`, `b7` and
 `b8` crossed the 15 % background limit; `b7` reached 89.2 %. Only `b2` and `b6` are unloaded, so
 the batch is not a verdict. The loaded batch summary is in
-`benchmarks/results/2026-10-21/summary.json`. No P7 B1 to B8 table and no C# column are published,
+`benchmarks/results/2026-10-21/summary.json`. No quiet B1 to B8 table and no C# column are published,
 and the B1 to B8 work and the miss profiles stay pending.
 
 ## Targets
@@ -207,7 +207,7 @@ and the B1 to B8 work and the miss profiles stay pending.
 The ADR-0002 §8 targets are B1 under 550 ns, B2 under 450, B3 under 400, B4 under 350, B5 under
 400, B6 under 1000, B7 under 150 and B8 under 9000. On this loaded machine the measured numbers
 are higher than the prototype numbers in ADR-0002. The table says which targets were met here;
-it is not a quiet-machine result. P5 reports the miss rather than tuning the machine or the code.
+it is not a quiet-machine result. This report states the miss rather than tuning the machine or the code.
 
 A `timeit` check at a lower load gave B7 136.5 ns and B8 19238 ns, so B7 crosses the 150 ns target
 when the machine is quieter and B8 remains about 2.1 times the 9000 ns target. The pyperf numbers

@@ -3,6 +3,9 @@
 Thanks for helping. This repository holds the Python `nepdate` library (distribution
 `nepdate-core`) and the `nepdate-patro` distribution.
 
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md). Report security problems as
+described in [SECURITY.md](SECURITY.md), not in a public issue.
+
 ## Before you start
 
 - Open an issue before a new feature or an API change, so we can agree on it first.
@@ -23,8 +26,8 @@ Thanks for helping. This repository holds the Python `nepdate` library (distribu
 5. Write an ADR in `docs/adr/` for a significant decision.
 6. Use [Conventional Commits](https://www.conventionalcommits.org/), for example
    `feat(nepdate): add serial conversion`.
-7. Follow the writing rules in `.claude/skills/writing-style/SKILL.md` for docs, comments and
-   commit messages.
+7. Commit messages and docs: imperative summary, lower case, no trailing period; the body says
+   why, not what.
 
 ## Generated files
 

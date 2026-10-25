@@ -1,8 +1,8 @@
 """Check the user-facing documentation for the house rules.
 
 The gate covers the files a reader meets before the source: the README, changelog, contribution
-guide, security policy and the top-level pages in ``docs/``. Plans and ADRs keep their task IDs,
-so they are not part of this check.
+guide, security policy and the top-level pages in ``docs/``. ADRs are not part of this
+check.
 """
 
 from __future__ import annotations
