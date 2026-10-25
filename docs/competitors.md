@@ -131,7 +131,7 @@ Options (considered before the first release):
    `nepdate-patro` then changes its dependency from `nepdate-bs` to `nepdate` in the same
    release.
 
-On 2026-10-18 the owner chose neither: the core is published as `nepdate-core` and the import name
+On 2026-10-18 the maintainer chose neither: the core is published as `nepdate-core` and the import name
 stays `nepdate` (ADR-0007). The options above are kept as history.
 
 The import name stays `nepdate` either way. Installing both this and the old package would clash

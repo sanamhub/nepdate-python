@@ -1,4 +1,4 @@
-"""Fuzz ``NepaliDate.format`` and ``__format__`` with arbitrary patterns (P9-02)."""
+"""Fuzz ``NepaliDate.format`` and ``__format__`` with arbitrary patterns."""
 
 from __future__ import annotations
 

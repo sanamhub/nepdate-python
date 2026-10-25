@@ -444,7 +444,7 @@ def install_versions(core: Path, patro: Path, version: str, root: Path) -> list[
     """
     core_name = _distribution_name(root, "core")
     patro_name = _distribution_name(root, "patro")
-    with tempfile.TemporaryDirectory(prefix="p10-install-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="nepdate-install-") as tmp:
         venv = Path(tmp) / "venv"
         for command in (
             ["uv", "venv", str(venv)],
@@ -549,7 +549,7 @@ def rehearse(version: str, root: Path = ROOT, dist: Path | None = None) -> list[
         except RehearsalError as exc:
             return [str(exc)]
         return check_artifacts(artifacts, version, root)
-    with tempfile.TemporaryDirectory(prefix="p10-rehearsal-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="nepdate-rehearsal-") as tmp:
         try:
             artifacts = build_artifacts(root, Path(tmp) / "dist")
         except RehearsalError as exc:

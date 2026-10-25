@@ -1,4 +1,4 @@
-"""Tests for the P7 load gate in ``benchmarks/run.py``."""
+"""Tests for the load gate in ``benchmarks/run.py``."""
 
 from __future__ import annotations
 
@@ -100,7 +100,7 @@ def test_loaded_machine_stops_before_importing_the_benchmarks(
 def test_allow_loaded_goes_on_to_the_benchmarks(
     gated: Any, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Negative control: past the gate, ``run.py`` imports the benchmarks."""
+    """Past the gate, ``run.py`` imports the benchmarks, so the gate is what stops it."""
     monkeypatch.setattr(gated, "_load_sample", lambda: _sample(cpu=40.0))
     with pytest.raises(ImportError):
         gated.main(["--date", "d", "--allow-loaded"])

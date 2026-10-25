@@ -1,4 +1,4 @@
-"""Generate and check the committed public API snapshot (P9-03).
+"""Generate and check the committed public API snapshot.
 
 The snapshot is generated with ``inspect`` from ``nepdate.__all__`` and
 ``nepdate_patro.__all__``. It records names, signatures, enum members, class attributes and

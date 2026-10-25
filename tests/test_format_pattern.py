@@ -1,4 +1,4 @@
-"""Pattern formatting tests: ``format`` and ``__format__`` (P3-03, FORMATTING §5)."""
+"""Pattern formatting tests: ``format`` and ``__format__`` (FORMATTING §5)."""
 
 from __future__ import annotations
 

@@ -2,7 +2,7 @@
 
 The tests are checked by mutmut 3.8.0: it changes one expression at a time and reruns the tests
 that cover the changed function. A surviving mutant is either a test gap or a documented
-equivalent. The raw baseline is in [`mutation/2026-10-18/`](mutation/2026-10-18/).
+equivalent.
 
 ## Local run
 
@@ -23,7 +23,7 @@ otherwise keeps the tests on the unmutated package. The patro copy gives its mut
 `nepdate_patro` name that the tests import.
 
 At most 4 children. A full run took 193 s with 4 children on 2026-10-18, after the weekday
-refactor and the new property tests. The weekday rows from the P8 run are gone. The timeout count
+refactor and the new property tests. The weekday survivors of the first run are gone. The timeout count
 moves with machine load; the survivor set is stable.
 
 ## Floor and dispositions
@@ -33,7 +33,7 @@ The floor is **95.00 %** of killed over killed plus survived, rounded down from 
 all 1344 mutants is 93.97 %.
 `scripts/mutation_check.py` fails below the floor or when a survivor is missing from
 [`mutation/equivalent.md`](mutation/equivalent.md), or when a disposition is stale. ADR-0009
-records the P8 run; the current run is the one in `mutation/2026-10-18/`.
+records the earlier runs; the counts above are the current baseline.
 
 `equivalent.md` has one section, **Equivalent**: the mutant cannot change observable behaviour,
 and each row has a proof. An example is `hash(None)` for a value type: collisions are allowed and

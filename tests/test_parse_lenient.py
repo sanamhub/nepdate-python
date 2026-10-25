@@ -1,4 +1,4 @@
-"""Lenient parse tests: PARSING §2, the vectors and the no-guessing rules (P3-05)."""
+"""Lenient parse tests: PARSING §2, the vectors and the no-guessing rules."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 from nepdate import NepaliDate
 from nepdate._errors import ErrorKind, NepDateError
 
-_PARSE_ROWS = 69  # shared/spec/vectors/parse.tsv data rows (the plan's 57 is stale).
+_PARSE_ROWS = 69  # shared/spec/vectors/parse.tsv data rows.
 _ERROR_KINDS = {
     "InvalidCharacter": ErrorKind.INVALID_CHARACTER,
     "WrongGroupCount": ErrorKind.WRONG_GROUP_COUNT,

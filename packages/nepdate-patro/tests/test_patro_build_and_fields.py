@@ -1,4 +1,4 @@
-"""Regression tests for patro mutation-testing survivors (P8-03)."""
+"""The patro table builder and the ``CalendarInfo`` fields, checked value by value."""
 
 from __future__ import annotations
 

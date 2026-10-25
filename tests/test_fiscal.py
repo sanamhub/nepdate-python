@@ -1,4 +1,4 @@
-"""Fiscal year and quarter tests (P2-04)."""
+"""Fiscal year and quarter tests."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def test_fiscal_year_golden(vector_reader: Callable[..., list[dict[str, str]]]) 
 
 
 def test_fiscal_year_label() -> None:
-    """The P2-04 acceptance example."""
+    """The fiscal year label in both languages."""
     assert FiscalYear(2082).label() == "2082/83"
     assert FiscalYear(2082).label(Lang.NE) == "२०८२/८३"
 

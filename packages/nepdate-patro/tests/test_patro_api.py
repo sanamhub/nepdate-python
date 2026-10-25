@@ -1,4 +1,4 @@
-"""Public API checks for ``nepdate_patro`` (P4-02)."""
+"""Public API checks for ``nepdate_patro``."""
 
 from __future__ import annotations
 

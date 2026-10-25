@@ -1,4 +1,4 @@
-"""Dense ``DAY_INFO`` against a slow lookup over the compact tables (P4-02)."""
+"""Dense ``DAY_INFO`` against a slow lookup over the compact tables."""
 
 from __future__ import annotations
 

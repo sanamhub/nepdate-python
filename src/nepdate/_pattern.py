@@ -1,7 +1,7 @@
 """The hand-written pattern formatter of FORMATTING §5: one left-to-right pass, no ``re``.
 
-The plan's ``functools.lru_cache`` is not used: ``functools`` is outside ``CORE_IMPORT_ALLOWED``
-and a module-level cache would be mutable state (AGENTS.md §2). The scanner runs once per call.
+``functools.lru_cache`` is not used: ``functools`` is outside ``CORE_IMPORT_ALLOWED`` and a
+module-level cache would be mutable state. The scanner runs once per call.
 """
 
 from __future__ import annotations

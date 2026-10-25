@@ -1,4 +1,4 @@
-"""Strict parse tests: PARSING §1, the vectors and the ASCII fast path (P3-04)."""
+"""Strict parse tests: PARSING §1, the vectors and the ASCII fast path."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from nepdate import NepaliDate
 from nepdate._errors import ErrorKind, NepDateError
 from nepdate._parse import _fast_parse, _scan_strict
 
-_PARSE_ROWS = 69  # shared/spec/vectors/parse.tsv data rows (the plan's 57 is stale).
+_PARSE_ROWS = 69  # shared/spec/vectors/parse.tsv data rows.
 _ERROR_KINDS = {
     "InvalidCharacter": ErrorKind.INVALID_CHARACTER,
     "WrongGroupCount": ErrorKind.WRONG_GROUP_COUNT,

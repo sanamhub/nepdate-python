@@ -1,4 +1,4 @@
-"""Shared decoding and atheris setup for the three fuzz targets (P9-02)."""
+"""Shared decoding and atheris setup for the three fuzz targets."""
 
 from __future__ import annotations
 

@@ -7,13 +7,13 @@
 
 ## Context
 
-P10 added a data freshness rule, a release rehearsal and a local CI matrix. ADR-0005 described
+Release rehearsal work added a data freshness rule, a release rehearsal and a local CI matrix. ADR-0005 described
 the release checks before they existed and was not edited, since accepted ADRs are immutable.
 
 The patro sdist should carry the `shared/data/patro/*.json` files that `_tables.py` is generated
 from. That data lives in the workspace root, outside the patro project. `uv_build` cannot include
 files outside the project, and a `source-include` pattern that matches nothing builds an sdist
-without the data and without an error. The first P10 version worked around this by copying the
+without the data and without an error. An earlier version worked around this by copying the
 repository to a temporary folder and editing the patro `pyproject.toml` before the build, so a
 plain `uv build` and the release build gave different sdists.
 
@@ -29,7 +29,7 @@ plain `uv build` and the release build gave different sdists.
 2. Data freshness: `scripts/data_status.py` reads `shared/data/patro/*.json` and counts days from
    today's UTC date (`--today` overrides it). Public holidays with fewer than 183 days left fail
    the release; tithi and events with fewer than 183 days left print a warning. A missing patro
-   folder is a failure, not a skipped check. This is the same rule as hub H1-02 and Rust W4-00,
+   folder is a failure, not a skipped check. This is the same rule as the hub and the Rust port,
    and every port uses the UTC date so a release near midnight gets one answer.
 3. `scripts/ci.py release-check X.Y.Z` runs in the preflight job without building: both
    `pyproject.toml` versions, the patro dependency range, the dated changelog section and the

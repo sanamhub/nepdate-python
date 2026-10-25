@@ -1,4 +1,4 @@
-"""Exhaustive round-trip over every supported serial (P1-05)."""
+"""Exhaustive round-trip over every supported serial."""
 
 from __future__ import annotations
 

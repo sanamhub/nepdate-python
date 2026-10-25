@@ -1,4 +1,4 @@
-"""Conversion tests for NepaliDate (P1-04)."""
+"""Conversion tests for NepaliDate."""
 
 from __future__ import annotations
 

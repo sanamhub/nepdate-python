@@ -1,7 +1,7 @@
 # Mutation survivor dispositions
 
-Run: 2026-10-18 (P9-04), mutmut 3.8.0, `src/nepdate` and the staged `nepdate_patro`, 4
-children. The raw run and counts are in `2026-10-18/`.
+Run: 2026-10-18, mutmut 3.8.0, `src/nepdate` and the staged `nepdate_patro`, 4
+children. The counts are in [`../mutation.md`](../mutation.md).
 
 Every survivor here is equivalent: the mutant cannot change observable behaviour, and the proof
 says why. A survivor that a test could detect gets that test instead of a row. "Hard to test" and

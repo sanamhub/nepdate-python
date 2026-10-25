@@ -108,6 +108,7 @@ The complete signatures, defaults and exceptions are in the
 
 | Page | What it covers |
 |---|---|
+| [Guides](https://nepdate.com/docs/python/) | Install, usage and examples on nepdate.com |
 | [API](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) | The complete public surface |
 | [Benchmarks](https://github.com/sanamhub/nepdate-python/blob/main/docs/benchmarks.md) | B1 to B8 against the other Python packages and C# NepDate |
 | [Competitors](https://github.com/sanamhub/nepdate-python/blob/main/docs/competitors.md) | The Python packages in the benchmark |

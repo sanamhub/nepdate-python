@@ -1,4 +1,4 @@
-"""Construction and accessor tests for NepaliDate (P1-03)."""
+"""Construction and accessor tests for NepaliDate."""
 
 from __future__ import annotations
 

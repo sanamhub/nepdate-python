@@ -7,7 +7,7 @@
 
 ## Context
 
-ADR-0004 lists seven CI gates. P5 added two more, widened gate 3 to run the documentation
+ADR-0004 lists seven CI gates. Release preparation added two more, widened gate 3 to run the documentation
 examples, and found that gate 5 as written in ADR-0004 (core import under 5 ms, patro under 10 ms)
 is not what `scripts/ci.py` enforces. The script uses a 50 ms ceiling for each, because a loaded
 CI runner cannot hold a 5 ms bound without flaking. ADR-0004 is Accepted and is not edited, so the

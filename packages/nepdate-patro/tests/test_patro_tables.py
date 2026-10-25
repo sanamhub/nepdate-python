@@ -1,4 +1,4 @@
-"""Compact table checks for ``nepdate_patro`` (P4-01 and P4-02)."""
+"""Compact table checks for ``nepdate_patro``."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ _ALL_NAMES = 753
 
 
 def test_table_counts() -> None:
-    """The generated tables have the sizes PATRO §3 and P4-01 promise."""
+    """The generated tables have the sizes PATRO §3 promises."""
     assert len(_tables.TITHI_INDEX) == _TITHI_DAYS
     assert len(_tables.TITHI_NAMES) == _TITHI_NAMES
     assert len(_tables.HOLIDAYS) == _HOLIDAYS

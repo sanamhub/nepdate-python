@@ -16,7 +16,7 @@ other port. Hub ADR-0004 requires a core unit and a separate patro unit in every
 
    | | Core | Patro |
    |---|---|---|
-   | Distribution (PyPI) | decided in P0-06: `nepdate`, or `nepdate-bs` while `nepdate` is taken (`docs/competitors.md`, "Name") | `nepdate-patro` |
+   | Distribution (PyPI) | decided before the first release: `nepdate`, or `nepdate-bs` while `nepdate` is taken (`docs/competitors.md`, "Name") | `nepdate-patro` |
    | Import name | `nepdate` | `nepdate_patro` |
    | Directory | repository root: `pyproject.toml`, `src/nepdate/` | `packages/nepdate-patro/`: own `pyproject.toml`, `src/nepdate_patro/` |
    | Depends on | nothing (except `tzdata` on Windows, §4) | the core at the same minor version |
@@ -25,7 +25,7 @@ other port. Hub ADR-0004 requires a core unit and a separate patro unit in every
    (`[tool.uv.workspace] members = ["packages/nepdate-patro"]`). The patro project declares the
    core as `"<core-name>>=0.1,<0.2"` (moved to the next minor in every minor release) and
    `[tool.uv.sources] <core-name> = { workspace = true }`, so development uses the local core.
-   `<core-name>` is the core distribution name from P0-06.
+   `<core-name>` is the core distribution name (ADR-0007).
 2. **Why not `nepdate.patro`:** `nepdate` is a regular package (it has `__init__.py`), so every
    `nepdate.*` module must come from the one distribution that owns that directory. A subpackage
    shipped by a second distribution would need `nepdate` to be a namespace package, which means

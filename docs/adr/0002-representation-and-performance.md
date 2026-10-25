@@ -25,8 +25,8 @@ free-threaded build and an sdist that needs Rust. `npdatetime` shows the cost: 2
 Prototype code (not library code) in the session scratch folder, CPython 3.13.15 and 3.11.15 on
 the reference machine of `BENCHMARK.md` §1, pinned to logical CPU 2, `timeit` minimum of 5 repeats,
 over the 64 dates of `BENCHMARK.md` §2, on 2026-10-07 and 2026-10-08. Numbers are ns per operation
-and include about 5 to 15 ns of loop overhead. They are design inputs; P5-02 publishes the real
-numbers with `pyperf`.
+and include about 5 to 15 ns of loop overhead. They are design inputs; `docs/benchmarks.md`
+publishes the real numbers, measured with `pyperf`.
 
 | What | 3.13 ns/op | 3.11 ns/op |
 |---|---:|---:|
@@ -103,7 +103,7 @@ slots `_o` only, 120.3 for a tuple subclass. A prebuilt B7 result retains 8.3 by
 5. **Strict parse:** a fast path for ASCII input that splits into exactly three groups of 1 to 4
    ASCII digits on one separator; anything else goes to the PARSING §1 scanner, which alone
    produces errors. The fast path must accept only inputs the scanner accepts with the same result
-   (property test in P3-04).
+   (a property test checks it).
 6. **Patro (`nepdate_patro`, separate distribution, ADR-0001):** the generated
    `nepdate_patro/_tables.py` holds the compact tables of PATRO §3, keyed by `datetime.date` ordinal
    (`NepaliDate.to_ordinal()`, public API only): `TITHI_FIRST` + `TITHI_INDEX: bytes` into 32 tithi
@@ -116,7 +116,7 @@ slots `_o` only, 120.3 for a tuple subclass. A prebuilt B7 result retains 8.3 by
    infos), paid only by `import nepdate_patro`.
 7. **Import cost:** `import nepdate` under 5 ms and `import nepdate_patro` (with the core already
    imported) under 10 ms, both checked by ADR-0004 gate 5. `import nepdate` never loads the patro.
-8. **Targets** (CPython 3.13, reference machine, P5-02 measures them with `pyperf`; each is the
+8. **Targets** (CPython 3.13, reference machine, measured with `pyperf`; each is the
    prototype number plus about 15 %):
 
    | ID | Operation | Target ns/op | Prototype ns/op | C# NepDate ns/op |

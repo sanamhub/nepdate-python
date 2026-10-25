@@ -1,4 +1,4 @@
-"""Golden vector tests: month boundaries and the C# dates table (P1-05)."""
+"""Golden vector tests: month boundaries and the C# dates table."""
 
 from __future__ import annotations
 

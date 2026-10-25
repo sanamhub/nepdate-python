@@ -1,4 +1,4 @@
-"""Month and year arithmetic tests: add_months, add_years (P2-02)."""
+"""Month and year arithmetic tests: add_months, add_years."""
 
 from __future__ import annotations
 

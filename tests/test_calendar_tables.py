@@ -1,4 +1,4 @@
-"""Acceptance checks for the generated calendar tables (P1-01)."""
+"""Acceptance checks for the generated calendar tables."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ _MAX_MONTH_LENGTH = 32
 
 
 def test_table_lengths() -> None:
-    """Every table has the size ADR-0002 §3 and P1-01 promise."""
+    """Every table has the size ADR-0002 §3 promises."""
     assert len(_calendar.MONTH_LENGTHS) == _MONTHS
     assert len(_calendar.MONTH_START) == _MONTH_BOUNDARIES
     assert len(_calendar.YEAR_START) == _YEARS

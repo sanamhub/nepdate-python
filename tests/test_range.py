@@ -1,4 +1,4 @@
-"""DateRange tests (P2-05)."""
+"""DateRange tests."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from nepdate._errors import ErrorKind, NepDateError
 
 
 def test_month_contains() -> None:
-    """The P2-05 acceptance example."""
+    """A date is in its own month's range."""
     assert NepaliDate(2081, 4, 15) in DateRange.month(2081, 4)
 
 
