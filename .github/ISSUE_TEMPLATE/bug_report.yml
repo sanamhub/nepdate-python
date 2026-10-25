@@ -1,0 +1,47 @@
+name: Bug report
+description: The library returns a wrong result or raises an exception you didn't expect.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: input
+    attributes:
+      label: Input
+      description: The call and its arguments, as a short Python snippet.
+      placeholder: NepaliDate(2081, 4, 15).to_date()
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: The result, or the exception with its message.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: nepdate-core or nepdate-patro version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: The output of python --version.
+      placeholder: Python 3.13.1
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04
+    validations:
+      required: true
