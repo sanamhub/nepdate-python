@@ -16,6 +16,7 @@ jobs:
       actions: write
     uses: sanamhub/nepdate/.github/workflows/shared-sync.yml@827791325bf9c16258e5619dce5ecbd8e55e63e1 # main 2026-10-30
     with:
-      regenerate: uv run python scripts/codegen.py
+      # The hub runner has no uv; codegen uses only the standard library.
+      regenerate: python3 scripts/codegen.py
     secrets:
       SYNC_APP_PRIVATE_KEY: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
