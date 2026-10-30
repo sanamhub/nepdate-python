@@ -13,7 +13,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: sanamhub/nepdate/.github/workflows/shared-sync.yml@52106eb68bdc63a51a4b3bfb1b5673faffc98c2c # main 2026-10-16
+      actions: write
+    uses: sanamhub/nepdate/.github/workflows/shared-sync.yml@827791325bf9c16258e5619dce5ecbd8e55e63e1 # main 2026-10-30
     with:
       regenerate: uv run python scripts/codegen.py
     secrets:
