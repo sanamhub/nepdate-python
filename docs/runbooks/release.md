@@ -70,6 +70,14 @@ trusted publishing (with attestations). Then it calls
 Windows with Python 3.11 and 3.14 and runs the README example and one patro lookup. Only then does
 it create the GitHub Release, from the changelog section plus install and verification notes.
 
+The same workflow runs on a schedule. Every Monday one Linux runner installs the newest version
+from PyPI (`latest`, resolved the way a plain install resolves it) with pip, uv and poetry, one
+entry per manager, and checks it; every day a metadata-only run confirms that PyPI still lists the
+version and answers for every file, with no download. A failed scheduled run opens or updates one
+issue labelled `published-check`, titled `Published nepdate-core <version> does not install or
+run`; create that label once on the repository. A green scheduled run says nothing and opens
+nothing.
+
 ## After releasing
 
 1. Both PyPI pages show the version and "Verified details" (attestation).
