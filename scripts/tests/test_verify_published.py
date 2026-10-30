@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -68,3 +69,109 @@ def test_check_program_uses_the_readme_date(verify_published: Any) -> None:
     """The program converts the README date and reads its tithi."""
     assert "NepaliDate(2080, 5, 15)" in verify_published.CHECK
     assert "from nepdate_patro import info" in verify_published.CHECK
+
+
+def test_latest_reads_info_version(verify_published: Any) -> None:
+    """PyPI's info.version is the version a plain install gets."""
+    payload = json.dumps({"info": {"version": "0.4.2"}})
+    assert verify_published.parse_latest(payload) == "0.4.2"
+
+
+def test_latest_keeps_the_pep_440_spelling(verify_published: Any) -> None:
+    """A pre-release keeps PyPI's spelling and is not rewritten to semver."""
+    payload = json.dumps({"info": {"version": "0.1.0b1"}})
+    assert verify_published.parse_latest(payload) == "0.1.0b1"
+
+
+def test_latest_rejects_a_response_without_a_version(verify_published: Any) -> None:
+    """A registry answer without info.version fails instead of installing nothing."""
+    with pytest.raises(RuntimeError, match=r"info\.version"):
+        verify_published.parse_latest(json.dumps({"info": {}}))
+
+
+def _release(files: list[dict[str, Any]]) -> str:
+    """Return a PyPI JSON body that lists one version with the given files.
+
+    Args:
+        files: The release file entries.
+
+    Returns:
+        The JSON text.
+    """
+    return json.dumps({"info": {"version": "0.1.0b1"}, "releases": {"0.1.0b1": files}})
+
+
+def _files(*names: str, yanked: bool = False) -> list[dict[str, Any]]:
+    """Return release file entries for the given file names.
+
+    Args:
+        names: The file names under the files host.
+        yanked: Whether every entry is yanked.
+
+    Returns:
+        The release file entries.
+    """
+    return [
+        {
+            "packagetype": "bdist_wheel" if name.endswith(".whl") else "sdist",
+            "url": f"https://files.example/{name}",
+            "yanked": yanked,
+        }
+        for name in names
+    ]
+
+
+def test_metadata_heads_the_wheel_and_sdist_of_both_packages(verify_published: Any) -> None:
+    """The daily check asks for every file of both distributions and downloads none."""
+    payloads = {
+        verify_published.package_json(verify_published.CORE_DIST): _release(
+            _files("nepdate_core-0.1.0b1-py3-none-any.whl", "nepdate_core-0.1.0b1.tar.gz")
+        ),
+        verify_published.package_json(verify_published.PATRO_DIST): _release(
+            _files("nepdate_patro-0.1.0b1-py3-none-any.whl", "nepdate_patro-0.1.0b1.tar.gz")
+        ),
+    }
+    heads: list[str] = []
+
+    def head(url: str) -> int:
+        heads.append(url)
+        return 200
+
+    lines = verify_published.check_metadata("0.1.0b1", get=payloads.__getitem__, head=head)
+    assert heads == [
+        "https://files.example/nepdate_core-0.1.0b1-py3-none-any.whl",
+        "https://files.example/nepdate_core-0.1.0b1.tar.gz",
+        "https://files.example/nepdate_patro-0.1.0b1-py3-none-any.whl",
+        "https://files.example/nepdate_patro-0.1.0b1.tar.gz",
+    ]
+    assert len(lines) == len(payloads)
+    assert "nepdate-core 0.1.0b1 is listed" in lines[0]
+    assert "nepdate-patro 0.1.0b1 is listed" in lines[1]
+
+
+def test_metadata_rejects_a_version_that_is_not_listed(verify_published: Any) -> None:
+    """A version missing from releases fails the daily check."""
+    with pytest.raises(RuntimeError, match=r"does not list nepdate-core 0\.1\.0b1"):
+        verify_published.check_metadata(
+            "0.1.0b1", get=lambda _: json.dumps({"releases": {}}), head=lambda _: 200
+        )
+
+
+def test_metadata_rejects_a_yanked_version(verify_published: Any) -> None:
+    """A version whose files are all yanked fails the daily check."""
+    with pytest.raises(RuntimeError, match="yanked"):
+        verify_published.check_metadata(
+            "0.1.0b1",
+            get=lambda _: _release(_files("nepdate_core-0.1.0b1.tar.gz", yanked=True)),
+            head=lambda _: 200,
+        )
+
+
+def test_metadata_rejects_a_file_that_does_not_answer(verify_published: Any) -> None:
+    """A file URL that answers 404 fails the daily check before a user finds it."""
+    with pytest.raises(RuntimeError, match="answered 404"):
+        verify_published.check_metadata(
+            "0.1.0b1",
+            get=lambda _: _release(_files("nepdate_core-0.1.0b1.tar.gz")),
+            head=lambda _: 404,
+        )

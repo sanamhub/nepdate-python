@@ -1,18 +1,25 @@
 name: verify-published
 
-# Installs a released version from a package index with pip, in a fresh venv outside the checkout,
-# on every runner OS and on the oldest and newest supported Python, then runs one conversion and one
+# Installs a released version from PyPI with pip, in a fresh environment outside the checkout, on
+# every runner OS and on the oldest and newest supported Python, then runs one conversion and one
 # patro lookup (scripts/verify_published.py). release.yml calls it after each upload; it can also be
-# run by hand for any version already on PyPI.
+# run by hand for any version already on PyPI, or with latest.
 #
-# Called, not triggered: a release created with GITHUB_TOKEN fires no release event.
+# Scheduled runs keep the published packages honest after the release page goes quiet. Every Monday
+# one Linux runner installs the newest version from PyPI with pip, uv and poetry, one entry per
+# manager, and checks it; every day a metadata-only check confirms that PyPI still lists the
+# version and answers for every file, without downloading one. The weekly runs of the ports are an
+# hour apart, so one registry outage is one bad hour, not eight failures at once. A failure opens
+# or updates one issue labelled published-check. The check jobs read PyPI and nothing else; only
+# the report job writes.
 
 on:
   workflow_call:
     inputs:
       version:
-        description: "PyPI version, for example 0.1.0b1"
-        required: true
+        description: "PyPI version, for example 0.1.0b1, or latest"
+        required: false
+        default: latest
         type: string
       index-url:
         description: "Index to install from"
@@ -27,8 +34,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "PyPI version, for example 0.1.0b1"
-        required: true
+        description: "PyPI version, for example 0.1.0b1, or latest"
+        required: false
+        default: latest
         type: string
       index-url:
         description: "Index to install from"
@@ -40,13 +48,46 @@ on:
         required: false
         default: ""
         type: string
+  schedule:
+    # The weekly install check, Monday 07:41 UTC.
+    - cron: "41 7 * * 1"
+    # The daily metadata check, which downloads no package file.
+    - cron: "37 3 * * *"
 
 permissions:
   contents: read
 
 jobs:
+  # One place resolves latest, so every job of a run checks the same version.
+  resolve:
+    name: resolve the version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Resolve
+        id: resolve
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION:-latest}"
+          if [ "$version" = latest ]; then
+            version="$(uv run --no-project --python 3.14 scripts/verify_published.py latest --resolve)"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: \`$version\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # A release or a manual run: the same check on every runner OS.
   verify:
-    name: verify (${{ matrix.os }}, ${{ matrix.python }})
+    name: verify ${{ needs.resolve.outputs.version }}
+    if: github.event_name != 'schedule'
+    needs: resolve
     strategy:
       fail-fast: false
       matrix:
@@ -60,14 +101,166 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - name: Install both versions with pip and run the check
+        id: check
         # A new upload can take minutes to reach the simple index, so the script retries the
-        # install for up to 15 minutes. The inputs go through env, never into the script text.
+        # install for up to 15 minutes. The values go through env, never into the script text.
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ needs.resolve.outputs.version }}
           INDEX_URL: ${{ inputs.index-url }}
           EXTRA_INDEX_URL: ${{ inputs.extra-index-url }}
           PYTHON: ${{ matrix.python }}
         shell: bash
-        run: >-
-          uv run --no-project --python "$PYTHON" scripts/verify_published.py "$VERSION"
-          --index-url "$INDEX_URL" --extra-index-url "$EXTRA_INDEX_URL" --wait-seconds 900
+        run: |
+          set -o pipefail
+          uv run --no-project --python "$PYTHON" scripts/verify_published.py "$VERSION" \
+            --index-url "$INDEX_URL" --extra-index-url "$EXTRA_INDEX_URL" --wait-seconds 900 \
+            2>&1 | tee verify.log
+      - name: Step summary
+        if: always()
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "### verify-published"
+            echo
+            echo "- Version: \`$VERSION\`"
+            echo "- Result: **$OUTCOME**"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the failing output
+        if: failure()
+        run: tail -n 40 verify.log > failure.txt || true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: failure-verify-${{ matrix.os }}-${{ matrix.python }}
+          path: failure.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The weekly check: Linux only, one install per manager, and the newest version from PyPI.
+  weekly:
+    name: weekly ${{ needs.resolve.outputs.version }}
+    if: github.event_name == 'schedule' && github.event.schedule == '41 7 * * 1'
+    needs: resolve
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        manager: [pip, uv, poetry]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Install Poetry
+        if: matrix.manager == 'poetry'
+        env:
+          POETRY_VENV: ${{ runner.temp }}/poetry-venv
+        run: |
+          set -euo pipefail
+          uv venv --python 3.14 "$POETRY_VENV"
+          uv pip install --python "$POETRY_VENV/bin/python" poetry
+          echo "$POETRY_VENV/bin" >> "$GITHUB_PATH"
+      - name: Install with ${{ matrix.manager }} and run the check
+        id: check
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          MANAGER: ${{ matrix.manager }}
+          PYTHON: "3.14"
+        run: |
+          set -o pipefail
+          uv run --no-project --python "$PYTHON" scripts/verify_published.py "$VERSION" \
+            --manager "$MANAGER" 2>&1 | tee verify.log
+      - name: Step summary
+        if: always()
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          MANAGER: ${{ matrix.manager }}
+          OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "### verify-published (weekly, $MANAGER)"
+            echo
+            echo "- Version: \`$VERSION\`"
+            echo "- Result: **$OUTCOME**"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the failing output
+        if: failure()
+        run: tail -n 40 verify.log > failure.txt || true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: failure-weekly-${{ matrix.manager }}
+          path: failure.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The daily check: PyPI still lists the version and answers for every file, with no download.
+  metadata:
+    name: metadata ${{ needs.resolve.outputs.version }}
+    if: github.event_name == 'schedule' && github.event.schedule == '37 3 * * *'
+    needs: resolve
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Check the PyPI listing and file URLs
+        id: check
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          set -o pipefail
+          uv run --no-project --python 3.14 scripts/verify_published.py "$VERSION" \
+            --metadata 2>&1 | tee metadata.log
+      - name: Step summary
+        if: always()
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "### verify-published (metadata)"
+            echo
+            echo "- Version: \`$VERSION\`"
+            echo "- Result: **$OUTCOME**"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the failing output
+        if: failure()
+        run: tail -n 40 metadata.log > failure.txt || true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: failure-metadata
+          path: failure.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The only job with write access. It reads the artifacts the check jobs kept and opens or updates
+  # one issue; it never installs anything.
+  report:
+    name: report
+    if: failure() && github.event_name == 'schedule'
+    needs: [resolve, verify, weekly, metadata]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: failure-*
+          path: failures
+      - name: Open or update the issue
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/published-issue.sh nepdate-core "${VERSION:-latest}" failures

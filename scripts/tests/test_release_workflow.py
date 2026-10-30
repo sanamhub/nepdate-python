@@ -174,8 +174,13 @@ def verify_workflow_problems(text: str) -> list[str]:
         found.append("verify-published must run the oldest and newest Python")
     if "scripts/verify_published.py" not in text or "--wait-seconds" not in text:
         found.append("verify-published must run scripts/verify_published.py with a wait")
-    if "VERSION: ${{ inputs.version }}" not in text:
-        found.append("verify-published must pass the version through env")
+    if "INPUT_VERSION: ${{ inputs.version }}" not in text:
+        found.append("verify-published must pass the input version through env")
+    if "VERSION: ${{ needs.resolve.outputs.version }}" not in text:
+        found.append("verify-published must pass the resolved version through env")
+    for cron in ('cron: "41 7 * * 1"', 'cron: "37 3 * * *"'):
+        if cron not in text:
+            found.append("verify-published must keep the weekly and daily schedules")
     return found
 
 

@@ -7,6 +7,11 @@ The two distributions share this file and a version number (ADR-0005). The forma
 
 ## [Unreleased]
 
+### Changed
+
+- The published-package check also runs weekly on Linux with pip, uv and poetry, and daily for
+  PyPI metadata, and reports a failure through one `published-check` issue.
+
 ## [0.1.0-beta.1] - 2026-10-22
 
 First public pre-release. The API may still change before 0.1.0. On PyPI the version is `0.1.0b1`;
