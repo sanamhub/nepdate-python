@@ -31,7 +31,7 @@ install it with `pip install --pre nepdate-core nepdate-patro`.
   human-written dates with month names, era markers or Devanagari digits.
 - `NepaliDate.today(tz=None)`, which reads the clock in Nepal time by default.
 - The `nepdate-patro` distribution (BS 2077 to 2084): `Tithi`, `Event` and `CalendarInfo`,
-  `info` for one day, `coverage` for the data range, and `public_holidays` for the 294
+  `info` for one day, `coverage` for the data range, and `public_holidays` for the
   gazetted dates.
 - The core distribution is `nepdate-core` on PyPI, because `nepdate` there belongs to an
   unrelated project; the import name is `nepdate` (ADR-0007).

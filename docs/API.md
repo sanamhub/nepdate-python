@@ -130,8 +130,8 @@ class Event: np: str; en: str
 class CalendarInfo: tithi: Tithi | None; is_public_holiday: bool; events: tuple[Event, ...]
 def info(d: NepaliDate) -> CalendarInfo: ...     # PATRO §2; never raises; empty outside coverage;
                                                  # returns a shared prebuilt object (ADR-0002 §6)
-def coverage() -> DateRange: ...                 # 2077-01-01..2084-08-20 with today's data
-def public_holidays() -> Iterator[NepaliDate]: ...  # ascending, 294 dates with today's data
+def coverage() -> DateRange: ...                 # the patro summary's first_day..last_day range
+def public_holidays() -> Iterator[NepaliDate]: ...  # ascending, all gazetted holidays
 ```
 
 The core `nepdate` package has no patro names and never imports `nepdate_patro`.

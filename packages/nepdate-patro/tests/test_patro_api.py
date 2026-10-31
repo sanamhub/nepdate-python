@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 import nepdate_patro
@@ -15,8 +17,6 @@ from nepdate_patro import (
     info,
     public_holidays,
 )
-
-_HOLIDAYS = 294
 
 
 def test_public_surface() -> None:
@@ -102,23 +102,23 @@ def test_info_returns_the_same_object() -> None:
     assert info(tithi_only) is info(tithi_only)
 
 
-def test_coverage() -> None:
-    """Coverage is the DateRange 2077-01-01 through 2084-08-20."""
+def test_coverage(patro_summary: dict[str, Any]) -> None:
+    """Coverage is the range the shared summary names."""
     result = coverage()
     assert isinstance(result, DateRange)
     assert (result.start, result.end) == (
-        NepaliDate(2077, 1, 1),
-        NepaliDate(2084, 8, 20),
+        NepaliDate(*_parse_bs(patro_summary["first_day"])),
+        NepaliDate(*_parse_bs(patro_summary["last_day"])),
     )
 
 
-def test_public_holidays() -> None:
-    """The iterator yields 294 holidays in ascending order."""
+def test_public_holidays(patro_summary: dict[str, Any]) -> None:
+    """The iterator yields every holiday of the summary in ascending order."""
     holidays = list(public_holidays())
-    assert len(holidays) == _HOLIDAYS
+    assert len(holidays) == patro_summary["holidays"]
     assert holidays == sorted(holidays)
-    assert holidays[0] == NepaliDate(2077, 1, 1)
-    assert holidays[-1] == NepaliDate(2084, 8, 18)
+    assert holidays[0] >= coverage().start
+    assert holidays[-1] <= coverage().end
     assert len(set(holidays)) == len(holidays)
 
 

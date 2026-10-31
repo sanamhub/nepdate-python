@@ -2,36 +2,51 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from nepdate import NepaliDate
 from nepdate_patro import _tables
 
-_TITHI_DAYS = 2190
-_TITHI_NAMES = 32
-_HOLIDAYS = 294
-_EVENT_DAYS = 1671
-_EVENT_IDS = 3032
-_EVENT_NAMES = 721
-_ALL_NAMES = 753
+
+def _ordinal(text: str) -> int:
+    """Convert a canonical BS date to its proleptic Gregorian ordinal.
+
+    Args:
+        text: The date text.
+
+    Returns:
+        The ordinal.
+    """
+    year, month, day = (int(part) for part in text.split("-"))
+    return NepaliDate(year, month, day).to_ordinal()
 
 
-def test_table_counts() -> None:
-    """The generated tables have the sizes PATRO §3 promises."""
-    assert len(_tables.TITHI_INDEX) == _TITHI_DAYS
-    assert len(_tables.TITHI_NAMES) == _TITHI_NAMES
-    assert len(_tables.HOLIDAYS) == _HOLIDAYS
-    assert len(_tables.EVENT_DAYS) == _EVENT_DAYS
-    assert len(_tables.EVENT_IDS) == _EVENT_IDS
-    assert len(_tables.EVENT_SPANS) == _EVENT_DAYS
-    assert len(_tables.NAMES) == _EVENT_NAMES
-    assert len(set(_tables.TITHI_NAMES) | set(_tables.NAMES)) == _ALL_NAMES
+def test_table_counts(patro_summary: dict[str, Any]) -> None:
+    """The generated tables have the counts of the shared summary."""
+    assert len(_tables.TITHI_INDEX) == patro_summary["tithi_days"]
+    assert len(_tables.TITHI_NAMES) == patro_summary["tithi_names"]
+    assert len(_tables.HOLIDAYS) == patro_summary["holidays"]
+    assert len(_tables.EVENT_DAYS) == patro_summary["event_days"]
+    assert len(_tables.EVENT_IDS) == patro_summary["events"]
+    assert len(_tables.EVENT_SPANS) == patro_summary["event_days"]
+    assert len(_tables.NAMES) == patro_summary["event_names"]
+    assert len(set(_tables.TITHI_NAMES) | set(_tables.NAMES)) == patro_summary["names"]
 
 
-def test_tithi_index_covers_the_whole_range() -> None:
-    """The tithi index is one entry per day from 2078-01-02 through 2083-12-30."""
-    assert NepaliDate(2078, 1, 2).to_ordinal() == _tables.TITHI_FIRST
-    assert (
-        _tables.TITHI_FIRST + len(_tables.TITHI_INDEX) - 1 == NepaliDate(2083, 12, 30).to_ordinal()
+def test_name_bytes(patro_summary: dict[str, Any]) -> None:
+    """The distinct name pool has the UTF-8 size the summary records."""
+    names = set(_tables.TITHI_NAMES) | set(_tables.NAMES)
+    name_bytes = sum(len(np.encode("utf-8")) + len(en.encode("utf-8")) for np, en in names)
+    assert name_bytes == patro_summary["name_bytes"]
+
+
+def test_tithi_index_covers_the_whole_range(patro_summary: dict[str, Any]) -> None:
+    """The tithi index is one entry per day of the summary's tithi range."""
+    assert _ordinal(patro_summary["tithi_first_day"]) == _tables.TITHI_FIRST
+    assert _tables.TITHI_FIRST + len(_tables.TITHI_INDEX) - 1 == _ordinal(
+        patro_summary["tithi_last_day"]
     )
+    assert len(_tables.TITHI_INDEX) == patro_summary["tithi_days"]
     assert max(_tables.TITHI_INDEX) < len(_tables.TITHI_NAMES)
 
 
@@ -60,10 +75,11 @@ def test_names_are_non_empty() -> None:
             assert en
 
 
-def test_coverage_ordinals() -> None:
-    """Coverage is 2077-01-01 through 2084-08-20 (PATRO §2)."""
-    assert NepaliDate(2077, 1, 1).to_ordinal() == _tables.COVERAGE_FIRST
-    assert NepaliDate(2084, 8, 20).to_ordinal() == _tables.COVERAGE_LAST
+def test_coverage_ordinals(patro_summary: dict[str, Any]) -> None:
+    """Coverage is the range and day span of the summary (PATRO §2)."""
+    assert _ordinal(patro_summary["first_day"]) == _tables.COVERAGE_FIRST
+    assert _ordinal(patro_summary["last_day"]) == _tables.COVERAGE_LAST
+    assert patro_summary["days"] == _tables.COVERAGE_LAST - _tables.COVERAGE_FIRST + 1
     assert _tables.HOLIDAYS[0] >= _tables.COVERAGE_FIRST
     assert _tables.HOLIDAYS[-1] <= _tables.COVERAGE_LAST
     assert _tables.EVENT_DAYS[0] >= _tables.COVERAGE_FIRST

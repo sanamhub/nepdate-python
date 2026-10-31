@@ -17,13 +17,6 @@ _YEARS = 300
 _TOTAL_DAYS = 109212
 _BUCKETS = 3413
 _OFFSET = 673243
-_TITHI_DAYS = 2190
-_TITHI_NAMES = 32
-_HOLIDAYS = 294
-_EVENT_DAYS = 1671
-_EVENT_IDS = 3032
-_EVENT_NAMES = 721
-_ALL_NAMES = 753
 _INVISIBLE = "\N{ZERO WIDTH NON-JOINER}"
 
 
@@ -38,6 +31,31 @@ def _shipped_calendar(codegen: Any) -> dict[str, Any]:
     """
     raw = json.loads(codegen.CALENDAR_JSON.read_text(encoding="utf-8"))
     return cast(dict[str, Any], raw)
+
+
+def _summary(codegen: Any) -> dict[str, Any]:
+    """Read the shared patro summary through the codegen module's path.
+
+    Args:
+        codegen: The loaded codegen module.
+
+    Returns:
+        The parsed summary.
+    """
+    return cast(dict[str, Any], json.loads(codegen.PATRO_SUMMARY.read_text(encoding="utf-8")))
+
+
+def _ordinal(text: str) -> int:
+    """Convert a canonical BS date to its proleptic Gregorian ordinal.
+
+    Args:
+        text: The date text.
+
+    Returns:
+        The ordinal.
+    """
+    year, month, day = (int(part) for part in text.split("-"))
+    return NepaliDate(year, month, day).to_ordinal()
 
 
 def test_validate_accepts_shipped_data(codegen: Any) -> None:
@@ -136,24 +154,69 @@ def _patro_tables(codegen: Any, days: dict[str, dict[str, Any]] | None = None) -
 
 
 def test_patro_acceptance_counts(codegen: Any) -> None:
-    """The generated patro tables have the sizes PATRO §3 promises."""
+    """The generated patro tables have the counts of the shared summary."""
+    summary = _summary(codegen)
     tables = _patro_tables(codegen)
-    assert len(tables["tithi_index"]) == _TITHI_DAYS
-    assert len(tables["tithi_names"]) == _TITHI_NAMES
-    assert len(tables["holidays"]) == _HOLIDAYS
-    assert len(tables["event_days"]) == _EVENT_DAYS
-    assert len(tables["event_ids"]) == _EVENT_IDS
-    assert len(tables["names"]) == _EVENT_NAMES
-    assert len(set(tables["tithi_names"]) | set(tables["names"])) == _ALL_NAMES
+    assert len(tables["tithi_index"]) == summary["tithi_days"]
+    assert len(tables["tithi_names"]) == summary["tithi_names"]
+    assert len(tables["holidays"]) == summary["holidays"]
+    assert len(tables["event_days"]) == summary["event_days"]
+    assert len(tables["event_ids"]) == summary["events"]
+    assert len(tables["names"]) == summary["event_names"]
+    assert len(set(tables["tithi_names"]) | set(tables["names"])) == summary["names"]
+
+
+def test_patro_name_bytes_match_the_summary(codegen: Any) -> None:
+    """The distinct name pool has the UTF-8 size the summary records."""
+    summary = _summary(codegen)
+    tables = _patro_tables(codegen)
+    names = set(tables["tithi_names"]) | set(tables["names"])
+    name_bytes = sum(len(np.encode("utf-8")) + len(en.encode("utf-8")) for np, en in names)
+    assert name_bytes == summary["name_bytes"]
 
 
 def test_patro_coverage_and_tithi_range(codegen: Any) -> None:
-    """Coverage and tithi range are the ordinals of the dates PATRO §2 and §3 name."""
+    """Coverage and tithi range are the ordinals of the dates the summary names."""
+    summary = _summary(codegen)
     tables = _patro_tables(codegen)
-    assert tables["coverage_first"] == NepaliDate(2077, 1, 1).to_ordinal()
-    assert tables["coverage_last"] == NepaliDate(2084, 8, 20).to_ordinal()
-    assert tables["tithi_first"] == NepaliDate(2078, 1, 2).to_ordinal()
-    assert tables["tithi_first"] + _TITHI_DAYS - 1 == NepaliDate(2083, 12, 30).to_ordinal()
+    assert tables["coverage_first"] == _ordinal(summary["first_day"])
+    assert tables["coverage_last"] == _ordinal(summary["last_day"])
+    assert tables["coverage_last"] - tables["coverage_first"] + 1 == summary["days"]
+    assert tables["coverage_first"] - _OFFSET == summary["first_serial"]
+    assert tables["coverage_last"] - _OFFSET == summary["last_serial"]
+    assert tables["tithi_first"] == _ordinal(summary["tithi_first_day"])
+    assert tables["tithi_first"] - _OFFSET == summary["tithi_first_serial"]
+    assert tables["tithi_first"] + summary["tithi_days"] - 1 == _ordinal(summary["tithi_last_day"])
+
+
+def test_validate_patro_summary_accepts_shipped_data(codegen: Any) -> None:
+    """The shipped data passes the summary check without raising."""
+    days = _shipped_patro(codegen)
+    tables = _patro_tables(codegen, days)
+    codegen.validate_patro_summary(days, tables, _shipped_calendar(codegen), _summary(codegen))
+
+
+def test_validate_patro_summary_rejects_a_wrong_count(codegen: Any) -> None:
+    """A summary count that disagrees with the data is named with both values."""
+    days = _shipped_patro(codegen)
+    tables = _patro_tables(codegen, days)
+    summary = _summary(codegen)
+    summary["names"] += 1
+    with pytest.raises(ValueError) as caught:
+        codegen.validate_patro_summary(days, tables, _shipped_calendar(codegen), summary)
+    message = str(caught.value)
+    assert "names" in message
+    assert str(summary["names"]) in message
+    assert str(summary["names"] - 1) in message
+
+
+def test_missing_patro_summary_fails(
+    codegen: Any, tmp_path: Path, monkeypatch: Any, capsys: Any
+) -> None:
+    """Codegen exits non-zero and asks for a resync when the summary is absent."""
+    monkeypatch.setattr(codegen, "PATRO_SUMMARY", tmp_path / "patro-summary.json")
+    assert codegen.main([]) == 1
+    assert "resync" in capsys.readouterr().err
 
 
 def test_patro_event_order_and_spans(codegen: Any) -> None:

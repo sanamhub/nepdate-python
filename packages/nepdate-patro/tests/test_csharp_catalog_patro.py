@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -12,6 +13,19 @@ from nepdate import ErrorKind, NepaliDate, NepDateError
 from nepdate_patro import CalendarInfo, Tithi, _tables, coverage, info, public_holidays
 
 _PHASE_4_ROWS = 40
+
+
+def _ordinal(text: str) -> int:
+    """Convert a canonical BS date to its proleptic Gregorian ordinal.
+
+    Args:
+        text: The date text.
+
+    Returns:
+        The ordinal.
+    """
+    year, month, day = (int(part) for part in text.split("-"))
+    return NepaliDate(year, month, day).to_ordinal()
 
 
 def _test_name(catalog_id: str) -> str:
@@ -97,25 +111,32 @@ def test_calendardatatests_calendaroffsets_monthstart_isstrictlymonotonic() -> N
 
 
 def test_calendardatatests_calendaroffsets_totaldays_matchesexpectedcount() -> None:
-    """C# CalendarOffsets has no Python equivalent; coverage is 2793 days instead."""
+    """C# CalendarOffsets has no Python equivalent; coverage comes from the patro summary."""
     pytest.skip("n/a: C# CalendarOffsets internal")
 
 
-def test_calendardatatests_tithidata_dayoffsets_isstrictlysorted() -> None:
+def test_calendardatatests_tithidata_dayoffsets_isstrictlysorted(
+    patro_summary: dict[str, Any],
+) -> None:
     """The dense tithi index covers one contiguous day range."""
-    assert len(_tables.TITHI_INDEX) == 2190
-    last = NepaliDate(2083, 12, 30).to_ordinal()
+    assert len(_tables.TITHI_INDEX) == patro_summary["tithi_days"]
+    last = _ordinal(patro_summary["tithi_last_day"])
     assert _tables.TITHI_FIRST + len(_tables.TITHI_INDEX) - 1 == last
 
 
 def test_calendardatatests_tithidata_allpoolids_areinrange() -> None:
-    """Every tithi index points into the 32-name table."""
+    """Every tithi index points into the table of tithi names."""
     assert max(_tables.TITHI_INDEX) < len(_tables.TITHI_NAMES)
 
 
-def test_calendardatatests_tithidata_entrycount_matches2190() -> None:
-    """The tithi index has 2190 entries."""
-    assert len(_tables.TITHI_INDEX) == 2190
+def test_calendardatatests_tithidata_entrycount_matches2190(
+    patro_summary: dict[str, Any],
+) -> None:
+    """The tithi index has the summary's tithi day count.
+
+    The test id is the C# suite's name; the count is read from the shared summary.
+    """
+    assert len(_tables.TITHI_INDEX) == patro_summary["tithi_days"]
 
 
 def test_calendardatatests_eventdata_dayoffsets_isstrictlysorted() -> None:
@@ -143,9 +164,14 @@ def test_calendardatatests_eventdata_allentries_areinrange() -> None:
     assert all(index < len(_tables.NAMES) for index in _tables.EVENT_IDS)
 
 
-def test_calendardatatests_eventdata_daycount_matches1671() -> None:
-    """There are 1671 event days."""
-    assert len(_tables.EVENT_DAYS) == 1671
+def test_calendardatatests_eventdata_daycount_matches1671(
+    patro_summary: dict[str, Any],
+) -> None:
+    """There are the summary's event days.
+
+    The test id is the C# suite's name; the count is read from the shared summary.
+    """
+    assert len(_tables.EVENT_DAYS) == patro_summary["event_days"]
 
 
 def test_calendardatatests_holidaydata_dayoffsets_isstrictlysorted() -> None:
@@ -153,9 +179,14 @@ def test_calendardatatests_holidaydata_dayoffsets_isstrictlysorted() -> None:
     assert list(_tables.HOLIDAYS) == sorted(set(_tables.HOLIDAYS))
 
 
-def test_calendardatatests_holidaydata_count_matches294() -> None:
-    """There are 294 public holidays."""
-    assert len(_tables.HOLIDAYS) == 294
+def test_calendardatatests_holidaydata_count_matches294(
+    patro_summary: dict[str, Any],
+) -> None:
+    """There are the summary's public holidays.
+
+    The test id is the C# suite's name; the count is read from the shared summary.
+    """
+    assert len(_tables.HOLIDAYS) == patro_summary["holidays"]
 
 
 def test_calendardatatests_calendaroffsets_getoffset_baseyear_month1_day1_returnszero() -> None:
@@ -298,9 +329,14 @@ def test_calendardatatests_alleventoffsets_areinbounds() -> None:
     )
 
 
-def test_calendardatatests_holidaycount_viaapi_matches294() -> None:
-    """The API yields the same 294 holidays as the table."""
-    assert len(list(public_holidays())) == 294
+def test_calendardatatests_holidaycount_viaapi_matches294(
+    patro_summary: dict[str, Any],
+) -> None:
+    """The API yields the summary's holidays.
+
+    The test id is the C# suite's name; the count is read from the shared summary.
+    """
+    assert len(list(public_holidays())) == patro_summary["holidays"]
 
 
 def test_calendardatatests_calendarinfo_eventarrays_arenevernull() -> None:
