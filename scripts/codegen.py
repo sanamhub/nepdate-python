@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CALENDAR_JSON = ROOT / "shared" / "data" / "calendar" / "bs-calendar.json"
 CALENDAR_PY = ROOT / "src" / "nepdate" / "_calendar.py"
 PATRO_DIR = ROOT / "shared" / "data" / "patro"
+PATRO_SUMMARY = ROOT / "shared" / "spec" / "vectors" / "patro-summary.json"
 PATRO_TABLES_PY = ROOT / "packages" / "nepdate-patro" / "src" / "nepdate_patro" / "_tables.py"
 ROOT_LICENSE = ROOT / "LICENSE"
 ROOT_NOTICE = ROOT / "shared" / "data" / "NOTICE"
@@ -35,6 +36,7 @@ INDENT = "    "
 _DATE_PARTS = 3
 _MIN_PART_WIDTH = 2
 _MAX_TITHI_NAMES = 256
+PATRO_SUMMARY_SCHEMA = 1
 
 
 def load_calendar(path: Path | None = None) -> dict[str, Any]:
@@ -402,6 +404,53 @@ def load_patro(directory: Path | None = None) -> dict[str, dict[str, Any]]:
     return days
 
 
+def _path_text(path: Path) -> str:
+    """Render a path for an error message, relative to the repository when possible.
+
+    Args:
+        path: The path to render.
+
+    Returns:
+        The repository-relative POSIX path, or the full path when it lies outside the
+        repository.
+    """
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def load_patro_summary(path: Path | None = None) -> dict[str, Any]:
+    """Read the hub's patro summary, the counts every port reads.
+
+    Args:
+        path: The summary JSON file. Defaults to the shared copy.
+
+    Returns:
+        The parsed summary object.
+
+    Raises:
+        ValueError: The file is missing, is not valid JSON, or is not a schema 1 object.
+    """
+    if path is None:
+        path = PATRO_SUMMARY
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ValueError(
+            f"{_path_text(path)} is missing; resync shared/ from the hub before running codegen"
+        ) from exc
+    try:
+        summary = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{_path_text(path)} is not valid JSON: {exc}") from exc
+    if not isinstance(summary, dict):
+        raise ValueError(f"{_path_text(path)} must contain a JSON object")
+    if summary.get("schema") != PATRO_SUMMARY_SCHEMA:
+        raise ValueError(f"{_path_text(path)} has an unsupported schema")
+    return summary
+
+
 def _date_parts(text: str) -> tuple[int, int, int]:
     """Split a canonical ``YYYY-MM-DD`` BS date.
 
@@ -575,6 +624,84 @@ def build_patro_tables(days: dict[str, dict[str, Any]], calendar: dict[str, Any]
     }
 
 
+def patro_counts(
+    days: dict[str, dict[str, Any]],
+    tables: dict[str, Any],
+    calendar: dict[str, Any],
+) -> dict[str, Any]:
+    """Derive every field of the patro summary from the loaded days and the built tables.
+
+    Args:
+        days: The parsed patro day map.
+        tables: The output of :func:`build_patro_tables`.
+        calendar: The validated calendar JSON.
+
+    Returns:
+        The summary fields keyed to their values. ``first_serial`` and ``last_serial`` are
+        ALGORITHM serials, so ``days`` is the span from one to the other inclusive.
+    """
+    offset = build_ordinal_offset(calendar)
+    first_day = min(days)
+    last_day = max(days)
+    tithi_days = [text for text, info in days.items() if "tithi" in info]
+    names = set(tables["tithi_names"]) | set(tables["names"])
+    name_bytes = sum(len(np.encode("utf-8")) + len(en.encode("utf-8")) for np, en in names)
+    first_serial = tables["coverage_first"] - offset
+    last_serial = tables["coverage_last"] - offset
+    return {
+        "first_year": int(first_day[:4]),
+        "last_year": int(last_day[:4]),
+        "first_day": first_day,
+        "last_day": last_day,
+        "first_serial": first_serial,
+        "last_serial": last_serial,
+        "days": last_serial - first_serial + 1,
+        "tithi_first_day": min(tithi_days),
+        "tithi_last_day": max(tithi_days),
+        "tithi_first_serial": tables["tithi_first"] - offset,
+        "tithi_days": len(tables["tithi_index"]),
+        "tithi_names": len(tables["tithi_names"]),
+        "holidays": len(tables["holidays"]),
+        "event_days": len(tables["event_days"]),
+        "events": len(tables["event_ids"]),
+        "event_names": len(tables["names"]),
+        "names": len(names),
+        "name_bytes": name_bytes,
+    }
+
+
+def validate_patro_summary(
+    days: dict[str, dict[str, Any]],
+    tables: dict[str, Any],
+    calendar: dict[str, Any],
+    summary: dict[str, Any],
+) -> None:
+    """Check the built patro tables against the hub's summary file.
+
+    The generator pins no count of its own: every value comes from the data. This check keeps
+    the data and the summary in step, so a stale summary fails instead of being copied.
+
+    Args:
+        days: The parsed patro day map.
+        tables: The output of :func:`build_patro_tables`.
+        calendar: The validated calendar JSON.
+        summary: The parsed patro summary.
+
+    Raises:
+        ValueError: A summary field is missing or differs from the data.
+    """
+    derived = patro_counts(days, tables, calendar)
+    missing = [field for field in derived if field not in summary]
+    if missing:
+        raise ValueError(f"patro summary is missing {', '.join(missing)}")
+    for field, actual in derived.items():
+        expected = summary[field]
+        if expected != actual:
+            raise ValueError(
+                f"patro summary {field} is {expected!r}, but the data gives {actual!r}"
+            )
+
+
 def source_text(text: str) -> str:
     r"""Render a string as a Python source literal.
 
@@ -726,21 +853,25 @@ def generate_patro_py(tables: dict[str, Any]) -> str:
 
 
 def generated_files(
-    data: dict[str, Any], patro_days: dict[str, dict[str, Any]]
+    data: dict[str, Any],
+    patro_days: dict[str, dict[str, Any]],
+    summary: dict[str, Any],
 ) -> dict[Path, bytes]:
     """Map every generated file path to the bytes it should hold.
 
     Args:
         data: The validated calendar JSON.
         patro_days: The loaded patro day map.
+        summary: The parsed patro summary.
 
     Returns:
         Paths keyed to their generated content.
 
     Raises:
-        ValueError: The patro tables cannot be built.
+        ValueError: The patro tables cannot be built or disagree with the summary.
     """
     tables = build_patro_tables(patro_days, data)
+    validate_patro_summary(patro_days, tables, data, summary)
     return {
         CALENDAR_PY: generate_calendar_py(data).encode("utf-8"),
         PATRO_TABLES_PY: generate_patro_py(tables).encode("utf-8"),
@@ -773,7 +904,8 @@ def main(argv: list[str] | None = None) -> int:
         data = load_calendar()
         validate_calendar(data)
         patro_days = load_patro()
-        files = generated_files(data, patro_days)
+        summary = load_patro_summary()
+        files = generated_files(data, patro_days, summary)
     except (OSError, ValueError) as exc:
         print(f"codegen: {exc}", file=sys.stderr)
         return 1

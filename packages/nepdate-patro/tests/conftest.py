@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
@@ -26,3 +28,17 @@ def _repo_root() -> Path:
 def repo_root() -> Path:
     """Return the repository root directory."""
     return _repo_root()
+
+
+@pytest.fixture(scope="session")
+def patro_summary(repo_root: Path) -> dict[str, Any]:
+    """Return the patro counts from ``shared/spec/vectors/patro-summary.json``.
+
+    Args:
+        repo_root: The repository root directory.
+
+    Returns:
+        The parsed summary.
+    """
+    path = repo_root / "shared" / "spec" / "vectors" / "patro-summary.json"
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))

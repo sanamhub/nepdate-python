@@ -23,8 +23,6 @@ PyPI). The data is informational, not an official calendar.
 ['New Year', 'Mesh Sankranti', 'Bisket Jatra']
 >>> coverage().start
 NepaliDate(2077, 1, 1)
->>> len(list(public_holidays()))
-294
 
 ```
 
