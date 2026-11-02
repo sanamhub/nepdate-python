@@ -94,6 +94,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python: ["3.11", "3.14"]
     runs-on: ${{ matrix.os }}
+    # Windows runners default to PowerShell; every run: block here is bash.
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
