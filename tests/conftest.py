@@ -42,11 +42,13 @@ def vectors_path(*parts: str) -> Path:
     return _repo_root().joinpath("shared", "spec", "vectors", *parts)
 
 
-def read_vectors(*parts: str) -> list[dict[str, str]]:
+def read_vectors(*parts: str, quoting: int = csv.QUOTE_MINIMAL) -> list[dict[str, str]]:
     """Read a TSV or CSV vector file into a list of row dictionaries.
 
     Args:
         parts: Path components below the vectors directory.
+        quoting: The ``csv`` quoting mode. Pass ``csv.QUOTE_NONE`` for a file whose fields
+            hold literal JSON text, where a leading quote is data and not a quoting mark.
 
     Returns:
         One dictionary per data row, keyed by the header row.
@@ -54,7 +56,9 @@ def read_vectors(*parts: str) -> list[dict[str, str]]:
     path = vectors_path(*parts)
     delimiter = "\t" if path.suffix == ".tsv" else ","
     with path.open(encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle, delimiter=delimiter))
+        # A line starting with '#' is a comment in every vector file; the header follows them.
+        lines = [line for line in handle if not line.startswith("#")]
+    return list(csv.DictReader(lines, delimiter=delimiter, quoting=quoting))
 
 
 @pytest.fixture(scope="session")

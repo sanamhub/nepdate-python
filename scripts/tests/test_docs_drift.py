@@ -149,9 +149,9 @@ def test_a_missing_adr_row_is_reported(tmp_path: Path) -> None:
 
 
 def test_an_api_name_must_be_declared() -> None:
-    """A name missing from the API code blocks is reported."""
+    """Renaming every declaration of a class removes it from the API code blocks."""
     text = (ROOT / "docs" / "API.md").read_text(encoding="utf-8")
-    stripped = text.replace("class NepaliDate:", "class RenamedDate:", 1)
+    stripped = text.replace("class NepaliDate:", "class RenamedDate:")
     assert "NepaliDate" not in _api_names(stripped)
 
 

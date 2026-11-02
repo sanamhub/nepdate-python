@@ -6,7 +6,7 @@ from collections.abc import Callable
 
 from nepdate import Lang, NepaliDate, to_nepali_digits
 
-_ROWS = 451
+_ROWS = 452
 _D04_SKIPPED = 7
 _MMM_RUN = 3
 
@@ -121,12 +121,13 @@ def test_custom_pattern_tokens() -> None:
 
 
 def test_pattern_literals_and_escapes() -> None:
-    """Quotes and backslashes write literals; a trailing backslash writes nothing."""
+    """Quotes and backslashes write literals; a trailing backslash writes one backslash."""
     date = NepaliDate(2081, 4, 5)
     assert date.format("yyyy'T'MM") == "2081T04"
     assert date.format("yyyy'BS") == "2081BS"
     assert date.format("yyyy\\-MM\\-dd") == "2081-04-05"
-    assert date.format("yyyy\\") == "2081"
+    assert date.format("yyyy\\") == "2081\\"
+    assert date.format("\\") == "\\"
     assert date.format("'2'yy") == "281"
 
 
