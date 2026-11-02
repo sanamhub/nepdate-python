@@ -17,7 +17,7 @@ newer. Part of the NepDate family: the shared data and spec live in the hub
 [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate); the C# original is
 [NepDate](https://github.com/RajuPrasai/NepDate).
 
-> **Status:** 0.1.0-beta.1 (`0.1.0b1` on PyPI), the first public pre-release. The API is listed in
+> **Status:** 0.1.0-rc.1 (`0.1.0rc1` on PyPI), a release candidate. The API is listed in
 > [docs/API.md](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) and may still
 > change before 0.1.0. Patro data (tithi, holidays, events) is informational, not an official
 > calendar.
@@ -37,7 +37,7 @@ newer. Part of the NepDate family: the shared data and spec live in the hub
 pip install --pre nepdate-core
 ```
 
-`--pre` is needed while only pre-releases exist; pin `nepdate-core==0.1.0b1` to stay on this one.
+`--pre` is needed while only pre-releases exist; pin `nepdate-core==0.1.0rc1` to stay on this one.
 
 ## Quick start
 

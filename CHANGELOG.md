@@ -7,6 +7,8 @@ The two distributions share this file and a version number (ADR-0005). The forma
 
 ## [Unreleased]
 
+## [0.1.0-rc.1] - 2026-11-03
+
 ### Changed
 
 - The published-package check also runs weekly on Linux with pip, uv and poetry, and daily for
