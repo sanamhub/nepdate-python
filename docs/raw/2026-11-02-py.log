@@ -1,23 +1,23 @@
 load before: 6, 24, 37
 Traceback (most recent call last):
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\bench.py", line 21, in <module>
+  File "benchmarks\bench.py", line 21, in <module>
     from .inputs import DATES_AD, DATES_BS, DATES_PATRO, DATES_TEXT
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\inputs.py", line 14, in <module>
+  File "benchmarks\inputs.py", line 14, in <module>
     from nepdate_patro._tables import COVERAGE_FIRST, COVERAGE_LAST
 ModuleNotFoundError: No module named 'nepdate_patro'
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\run.py", line 322, in <module>
+  File "benchmarks\run.py", line 322, in <module>
     raise SystemExit(main())
                      ^^^^^^
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\run.py", line 287, in main
+  File "benchmarks\run.py", line 287, in main
     from benchmarks import bench  # noqa: PLC0415 - --check-load must not import competitors
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\bench.py", line 23, in <module>
+  File "benchmarks\bench.py", line 23, in <module>
     from inputs import DATES_AD, DATES_BS, DATES_PATRO, DATES_TEXT
-  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\inputs.py", line 14, in <module>
+  File "benchmarks\inputs.py", line 14, in <module>
     from nepdate_patro._tables import COVERAGE_FIRST, COVERAGE_LAST
 ModuleNotFoundError: No module named 'nepdate_patro'
 load after: 15, 40, 18
