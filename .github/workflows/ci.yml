@@ -61,7 +61,36 @@ jobs:
           python-version: "3.15"
       - run: uv run --locked python scripts/ci.py
 
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.12"
+      - name: Read the core and patro version
+        id: version
+        run: |
+          set -euo pipefail
+          # Assigned first: a failing command inside echo's argument would not stop the step.
+          if ! version="$(uv run --locked python scripts/ci.py version)"; then
+            echo "$version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Fails when shared/ differs from the hub at the commit in shared/VERSION, and when the
+  # distributions' version is on another MAJOR.MINOR line (ADR-0007).
   shared-check:
+    needs: version
     permissions:
       contents: read
-    uses: sanamhub/nepdate/.github/workflows/shared-check.yml@52106eb68bdc63a51a4b3bfb1b5673faffc98c2c # main 2026-10-16
+    uses: sanamhub/nepdate/.github/workflows/shared-check.yml@f636b7d476bc5959eb5689a950b73c8943860eef # main 2026-11-01
+    with:
+      sdk: python
+      version: ${{ needs.version.outputs.version }}

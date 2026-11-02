@@ -799,11 +799,39 @@ def _release_today(options: list[str]) -> datetime.date | None:
     return datetime.date.fromisoformat(options[1])
 
 
+def _print_version() -> int:
+    """Print the version the two distributions declare, after checking they agree (hub ADR-0007).
+
+    Returns:
+        0 on success, 1 when a pyproject has no version or the two disagree.
+    """
+    try:
+        core = _project_table(ROOT / "pyproject.toml").get("version")
+        patro = _project_table(ROOT / "packages" / "nepdate-patro" / "pyproject.toml").get(
+            "version"
+        )
+    except (OSError, KeyError, tomllib.TOMLDecodeError) as exc:
+        print(f"version: {exc}", file=sys.stderr)
+        return 1
+    if not isinstance(core, str) or not isinstance(patro, str):
+        print("version: a pyproject has no [project] version", file=sys.stderr)
+        return 1
+    if core != patro:
+        print(f"version: core is {core} but patro is {patro}", file=sys.stderr)
+        return 1
+    try:
+        print(versions.to_semver(core))
+    except ValueError as exc:
+        print(f"version: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch per command
     """Run a release helper command.
 
     Args:
-        argv: ``release-check VERSION [--today DATE]``, ``release-notes VERSION``,
+        argv: ``version``, ``release-check VERSION [--today DATE]``, ``release-notes VERSION``,
             ``pypi-version VERSION``, ``data-status``, ``release-rehearsal [VERSION]``,
             ``build-release`` or ``sort-dist``.
 
@@ -811,6 +839,8 @@ def _run_command(argv: list[str]) -> int:  # noqa: PLR0911, PLR0912 - one branch
         0 on success, 1 on a release inconsistency, 2 on an unknown or bad command.
     """
     command, *rest = argv
+    if command == "version" and not rest:
+        return _print_version()
     if command == "release-check" and rest:
         try:
             today = _release_today(rest[1:])
