@@ -77,7 +77,12 @@ jobs:
         id: version
         run: |
           set -euo pipefail
-          echo "version=$(uv run --locked python scripts/ci.py version)" >> "$GITHUB_OUTPUT"
+          # Assigned first: a failing command inside echo's argument would not stop the step.
+          if ! version="$(uv run --locked python scripts/ci.py version)"; then
+            echo "$version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
   # Fails when shared/ differs from the hub at the commit in shared/VERSION, and when the
   # distributions' version is on another MAJOR.MINOR line (ADR-0007).
