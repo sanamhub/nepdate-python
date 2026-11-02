@@ -13,15 +13,9 @@ import json
 import os
 import sys
 
-import bikram
-import bikram_sambat
 import nepali_datetime
-import nepkit
-import npdatetime
-import pyBSDate
 import pyperf
 from nepali.date_converter import converter
-from nepali_calendar_utils import NepaliDateConverter
 
 try:
     from .inputs import DATES_AD, DATES_BS, DATES_PATRO, DATES_TEXT
@@ -36,13 +30,7 @@ QUESTIONABLE_FIRST = 2087
 QUESTIONABLE_LAST = 2090
 PACKAGES = (
     "nepali-datetime",
-    "npdatetime",
     "nepali",
-    "bikram-sambat",
-    "bikram",
-    "pyBSDate",
-    "nepali-calendar-utils",
-    "nepkit",
 )
 _DATES = tuple(NepaliDate(y, m, d) for y, m, d in DATES_BS)
 _PATRO_DATES = tuple(NepaliDate(y, m, d) for y, m, d in DATES_PATRO)
@@ -69,17 +57,6 @@ def _b2_nepali_datetime(index: int) -> tuple[int, int, int]:
     return _date_tuple(nepali_datetime.date.from_datetime_date(DATES_AD[index]))
 
 
-def _b1_npdatetime(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    return npdatetime.NepaliDate(y, m, d).to_gregorian()
-
-
-def _b2_npdatetime(index: int) -> tuple[int, int, int]:
-    ad = DATES_AD[index]
-    value = npdatetime.NepaliDate.from_gregorian(ad.year, ad.month, ad.day)
-    return (value.year, value.month, value.day)
-
-
 def _b1_nepali(index: int) -> tuple[int, int, int]:
     y, m, d = DATES_BS[index]
     return converter.nepali_to_english(y, m, d)
@@ -90,72 +67,11 @@ def _b2_nepali(index: int) -> tuple[int, int, int]:
     return converter.english_to_nepali(ad.year, ad.month, ad.day)
 
 
-def _b1_bikram_sambat(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    return _date_tuple(bikram_sambat.conversion.bs_to_ad(y, m, d))
-
-
-def _b2_bikram_sambat(index: int) -> tuple[int, int, int]:
-    return bikram_sambat.conversion.ad_to_bs(DATES_AD[index])
-
-
-def _b1_bikram(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    return _date_tuple(bikram.convert_bs_to_ad(bikram.samwat(y, m, d)))
-
-
-def _b2_bikram(index: int) -> tuple[int, int, int]:
-    return _date_tuple(bikram.convert_ad_to_bs(DATES_AD[index]))
-
-
-def _b1_pybsdate(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    return pyBSDate.convert_BS_to_AD(y, m, d)
-
-
-def _b2_pybsdate(index: int) -> tuple[int, int, int]:
-    ad = DATES_AD[index]
-    return pyBSDate.convert_AD_to_BS(ad.year, ad.month, ad.day)
-
-
-def _b1_nepali_calendar_utils(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    value = NepaliDateConverter.convert_nepali_to_english(y, m, d)
-    return (value.year, value.month, value.day_of_month)
-
-
-def _b2_nepali_calendar_utils(index: int) -> tuple[int, int, int]:
-    ad = DATES_AD[index]
-    value = NepaliDateConverter.convert_english_to_nepali(ad.year, ad.month, ad.day)
-    return (value.year, value.month, value.day_of_month)
-
-
-def _b1_nepkit(index: int) -> tuple[int, int, int]:
-    y, m, d = DATES_BS[index]
-    return _date_tuple(nepkit.bs_to_ad(nepkit.BSDate(y, m, d)))
-
-
-def _b2_nepkit(index: int) -> tuple[int, int, int]:
-    return _date_tuple(nepkit.ad_to_bs(DATES_AD[index]))
-
-
 _CALL = {
     ("nepali-datetime", "b1"): _b1_nepali_datetime,
     ("nepali-datetime", "b2"): _b2_nepali_datetime,
-    ("npdatetime", "b1"): _b1_npdatetime,
-    ("npdatetime", "b2"): _b2_npdatetime,
     ("nepali", "b1"): _b1_nepali,
     ("nepali", "b2"): _b2_nepali,
-    ("bikram-sambat", "b1"): _b1_bikram_sambat,
-    ("bikram-sambat", "b2"): _b2_bikram_sambat,
-    ("bikram", "b1"): _b1_bikram,
-    ("bikram", "b2"): _b2_bikram,
-    ("pyBSDate", "b1"): _b1_pybsdate,
-    ("pyBSDate", "b2"): _b2_pybsdate,
-    ("nepali-calendar-utils", "b1"): _b1_nepali_calendar_utils,
-    ("nepali-calendar-utils", "b2"): _b2_nepali_calendar_utils,
-    ("nepkit", "b1"): _b1_nepkit,
-    ("nepkit", "b2"): _b2_nepkit,
 }
 
 

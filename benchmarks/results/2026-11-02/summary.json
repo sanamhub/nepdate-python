@@ -1,0 +1,606 @@
+{
+  "date": "2026-11-02",
+  "generated": "2026-11-02T20:10:44+05:45",
+  "python": "3.12.13 (main, Jul 23 2026, 14:44:57) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "win32",
+  "affinity": 2,
+  "load_limit": 15.0,
+  "quiet_before": {
+    "cpu_percent": 6.5,
+    "cpu2_percent": 3.1,
+    "background_percent": 6.7,
+    "memory_percent": 61.0,
+    "processes": 461
+  },
+  "quiet": false,
+  "command": "uv run --group bench python benchmarks/run.py --date 2026-11-02",
+  "probe": {
+    "nepali-datetime": {
+      "b1": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              18
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 64,
+        "matches": 62,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              5
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    },
+    "nepali": {
+      "b1": {
+        "supported": 64,
+        "matches": 61,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              2086,
+              7,
+              23
+            ],
+            "theirs": [
+              2029,
+              11,
+              9
+            ],
+            "ours": [
+              2029,
+              11,
+              8
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2088,
+              1,
+              4
+            ],
+            "theirs": [
+              2031,
+              4,
+              17
+            ],
+            "ours": [
+              2031,
+              4,
+              19
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2089,
+              6,
+              10
+            ],
+            "theirs": [
+              2032,
+              9,
+              26
+            ],
+            "ours": [
+              2032,
+              9,
+              27
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      },
+      "b2": {
+        "supported": 63,
+        "matches": 60,
+        "agrees": false,
+        "misses": [
+          {
+            "input": [
+              1943,
+              4,
+              14
+            ],
+            "theirs": null,
+            "ours": [
+              2000,
+              1,
+              1
+            ],
+            "bs_year": 2000,
+            "questionable": false
+          },
+          {
+            "input": [
+              2029,
+              11,
+              8
+            ],
+            "theirs": [
+              2086,
+              7,
+              22
+            ],
+            "ours": [
+              2086,
+              7,
+              23
+            ],
+            "bs_year": 2086,
+            "questionable": false
+          },
+          {
+            "input": [
+              2031,
+              4,
+              19
+            ],
+            "theirs": [
+              2088,
+              1,
+              6
+            ],
+            "ours": [
+              2088,
+              1,
+              4
+            ],
+            "bs_year": 2088,
+            "questionable": true
+          },
+          {
+            "input": [
+              2032,
+              9,
+              27
+            ],
+            "theirs": [
+              2089,
+              6,
+              11
+            ],
+            "ours": [
+              2089,
+              6,
+              10
+            ],
+            "bs_year": 2089,
+            "questionable": true
+          }
+        ]
+      }
+    }
+  },
+  "benchmarks": [
+    {
+      "key": "b1",
+      "name": "b1 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 671.2,
+      "stdev_ns": 8.26,
+      "elapsed_s": 40.6,
+      "last_line": "b1 nepdate: Mean +- std dev: 671 ns +- 8 ns",
+      "load_before": {
+        "cpu_percent": 13.4,
+        "cpu2_percent": 9.4,
+        "background_percent": 13.7,
+        "memory_percent": 61.0,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.8,
+        "cpu_mean": 13.8,
+        "cpu_median": 14.0,
+        "cpu_max": 22.4,
+        "cpu2_max": 100.0,
+        "background_max": 17.2,
+        "memory_mean": 61.0,
+        "processes": 466,
+        "samples": 81
+      }
+    },
+    {
+      "key": "b2",
+      "name": "b2 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 569.87,
+      "stdev_ns": 24.48,
+      "elapsed_s": 36.6,
+      "last_line": "b2 nepdate: Mean +- std dev: 570 ns +- 24 ns",
+      "load_before": {
+        "cpu_percent": 6.8,
+        "cpu2_percent": 3.1,
+        "background_percent": 7.0,
+        "memory_percent": 60.8,
+        "processes": 462
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.6,
+        "cpu_mean": 14.5,
+        "cpu_median": 13.3,
+        "cpu_max": 28.8,
+        "cpu2_max": 100.0,
+        "background_max": 24.0,
+        "memory_mean": 61.0,
+        "processes": 467,
+        "samples": 73
+      }
+    },
+    {
+      "key": "b3",
+      "name": "b3 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 517.52,
+      "stdev_ns": 6.93,
+      "elapsed_s": 33.6,
+      "last_line": "b3 nepdate: Mean +- std dev: 518 ns +- 7 ns",
+      "load_before": {
+        "cpu_percent": 7.6,
+        "cpu2_percent": 6.2,
+        "background_percent": 7.7,
+        "memory_percent": 61.2,
+        "processes": 463
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.2,
+        "cpu_mean": 12.7,
+        "cpu_median": 12.5,
+        "cpu_max": 23.1,
+        "cpu2_max": 100.0,
+        "background_max": 19.4,
+        "memory_mean": 61.2,
+        "processes": 467,
+        "samples": 67
+      }
+    },
+    {
+      "key": "b4",
+      "name": "b4 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 472.77,
+      "stdev_ns": 9.17,
+      "elapsed_s": 32.1,
+      "last_line": "b4 nepdate: Mean +- std dev: 473 ns +- 9 ns",
+      "load_before": {
+        "cpu_percent": 4.8,
+        "cpu2_percent": 0.0,
+        "background_percent": 5.1,
+        "memory_percent": 60.9,
+        "processes": 462
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 9.1,
+        "cpu_mean": 14.0,
+        "cpu_median": 12.1,
+        "cpu_max": 26.7,
+        "cpu2_max": 100.0,
+        "background_max": 23.4,
+        "memory_mean": 61.1,
+        "processes": 466,
+        "samples": 64
+      }
+    },
+    {
+      "key": "b5",
+      "name": "b5 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 476.4,
+      "stdev_ns": 10.67,
+      "elapsed_s": 32.6,
+      "last_line": "b5 nepdate: Mean +- std dev: 476 ns +- 11 ns",
+      "load_before": {
+        "cpu_percent": 6.8,
+        "cpu2_percent": 6.2,
+        "background_percent": 6.9,
+        "memory_percent": 61.1,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.5,
+        "cpu_mean": 14.8,
+        "cpu_median": 13.6,
+        "cpu_max": 27.3,
+        "cpu2_max": 100.0,
+        "background_max": 23.9,
+        "memory_mean": 61.2,
+        "processes": 466,
+        "samples": 65
+      }
+    },
+    {
+      "key": "b6",
+      "name": "b6 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 1261.36,
+      "stdev_ns": 21.38,
+      "elapsed_s": 39.1,
+      "last_line": "b6 nepdate: Mean +- std dev: 1.26 us +- 0.02 us",
+      "load_before": {
+        "cpu_percent": 9.0,
+        "cpu2_percent": 3.1,
+        "background_percent": 9.3,
+        "memory_percent": 61.1,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.8,
+        "cpu_mean": 15.5,
+        "cpu_median": 14.2,
+        "cpu_max": 33.1,
+        "cpu2_max": 100.0,
+        "background_max": 28.8,
+        "memory_mean": 61.2,
+        "processes": 469,
+        "samples": 78
+      }
+    },
+    {
+      "key": "b7",
+      "name": "b7 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 130.58,
+      "stdev_ns": 2.1,
+      "elapsed_s": 34.6,
+      "last_line": "b7 nepdate: Mean +- std dev: 131 ns +- 2 ns",
+      "load_before": {
+        "cpu_percent": 32.1,
+        "cpu2_percent": 43.8,
+        "background_percent": 31.4,
+        "memory_percent": 60.5,
+        "processes": 460
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 7.2,
+        "cpu_mean": 13.5,
+        "cpu_median": 12.6,
+        "cpu_max": 31.2,
+        "cpu2_max": 100.0,
+        "background_max": 28.6,
+        "memory_mean": 60.4,
+        "processes": 465,
+        "samples": 69
+      }
+    },
+    {
+      "key": "b8",
+      "name": "b8 nepdate",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 17178.66,
+      "stdev_ns": 171.35,
+      "elapsed_s": 35.1,
+      "last_line": "b8 nepdate: Mean +- std dev: 17.2 us +- 0.2 us",
+      "load_before": {
+        "cpu_percent": 7.8,
+        "cpu2_percent": 3.1,
+        "background_percent": 8.1,
+        "memory_percent": 60.1,
+        "processes": 460
+      },
+      "loaded": false,
+      "load": {
+        "cpu_min": 7.8,
+        "cpu_mean": 12.1,
+        "cpu_median": 11.7,
+        "cpu_max": 18.7,
+        "cpu2_max": 100.0,
+        "background_max": 14.8,
+        "memory_mean": 60.2,
+        "processes": 465,
+        "samples": 70
+      }
+    },
+    {
+      "key": "b1:nepali-datetime",
+      "name": "b1 nepali-datetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 2043.93,
+      "stdev_ns": 18.46,
+      "elapsed_s": 33.6,
+      "last_line": "b1 nepali-datetime: Mean +- std dev: 2.04 us +- 0.02 us",
+      "load_before": {
+        "cpu_percent": 7.2,
+        "cpu2_percent": 3.1,
+        "background_percent": 7.5,
+        "memory_percent": 60.2,
+        "processes": 461
+      },
+      "loaded": false,
+      "load": {
+        "cpu_min": 8.4,
+        "cpu_mean": 11.9,
+        "cpu_median": 11.5,
+        "cpu_max": 19.3,
+        "cpu2_max": 100.0,
+        "background_max": 13.9,
+        "memory_mean": 60.3,
+        "processes": 465,
+        "samples": 67
+      }
+    },
+    {
+      "key": "b1:nepali",
+      "name": "b1 nepali",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 12457.04,
+      "stdev_ns": 129.56,
+      "elapsed_s": 28.6,
+      "last_line": "b1 nepali: Mean +- std dev: 12.5 us +- 0.1 us",
+      "load_before": {
+        "cpu_percent": 2.7,
+        "cpu2_percent": 0.0,
+        "background_percent": 2.9,
+        "memory_percent": 60.1,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 9.0,
+        "cpu_mean": 13.3,
+        "cpu_median": 12.5,
+        "cpu_max": 23.3,
+        "cpu2_max": 96.9,
+        "background_max": 19.0,
+        "memory_mean": 60.3,
+        "processes": 466,
+        "samples": 57
+      }
+    },
+    {
+      "key": "b2:nepali-datetime",
+      "name": "b2 nepali-datetime",
+      "runs": 120,
+      "inner_loops": 64,
+      "ns_op": 6613.95,
+      "stdev_ns": 78.42,
+      "elapsed_s": 29.6,
+      "last_line": "b2 nepali-datetime: Mean +- std dev: 6.61 us +- 0.08 us",
+      "load_before": {
+        "cpu_percent": 5.1,
+        "cpu2_percent": 9.4,
+        "background_percent": 4.8,
+        "memory_percent": 60.2,
+        "processes": 461
+      },
+      "loaded": false,
+      "load": {
+        "cpu_min": 9.1,
+        "cpu_mean": 12.4,
+        "cpu_median": 12.2,
+        "cpu_max": 16.7,
+        "cpu2_max": 100.0,
+        "background_max": 12.6,
+        "memory_mean": 60.3,
+        "processes": 465,
+        "samples": 59
+      }
+    },
+    {
+      "key": "b2:nepali",
+      "name": "b2 nepali",
+      "runs": 120,
+      "inner_loops": 63,
+      "ns_op": 6545.16,
+      "stdev_ns": 72.03,
+      "elapsed_s": 29.1,
+      "last_line": "b2 nepali: Mean +- std dev: 6.55 us +- 0.07 us",
+      "load_before": {
+        "cpu_percent": 5.0,
+        "cpu2_percent": 9.4,
+        "background_percent": 4.7,
+        "memory_percent": 60.2,
+        "processes": 461
+      },
+      "loaded": true,
+      "load": {
+        "cpu_min": 8.7,
+        "cpu_mean": 12.8,
+        "cpu_median": 12.1,
+        "cpu_max": 22.3,
+        "cpu2_max": 100.0,
+        "background_max": 17.6,
+        "memory_mean": 60.3,
+        "processes": 465,
+        "samples": 58
+      }
+    }
+  ]
+}

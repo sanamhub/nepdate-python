@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
-PROBE = ROOT / "benchmarks" / "results" / "2026-10-18" / "probe.json"
+PROBE = ROOT / "benchmarks" / "results" / "2026-11-02" / "probe.json"
 COMPETITORS = ROOT / "docs" / "competitors.md"
 DIRECTIONS = {"b1": "BS to AD", "b2": "AD to BS"}
 TABLE_CELLS = 8
