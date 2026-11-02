@@ -1,0 +1,23 @@
+{
+  "limit": 15.0,
+  "attempts": [
+    {
+      "at": "2026-11-02T20:02:55+05:45",
+      "cpu_percent": 8.6,
+      "cpu2_percent": 3.1,
+      "background_percent": 9.0,
+      "memory_percent": 61.6,
+      "processes": 462,
+      "quiet": true
+    },
+    {
+      "at": "2026-11-02T20:03:53+05:45",
+      "cpu_percent": 6.5,
+      "cpu2_percent": 3.1,
+      "background_percent": 6.7,
+      "memory_percent": 61.0,
+      "processes": 461,
+      "quiet": true
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+load before: 6, 24, 37
+Traceback (most recent call last):
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\bench.py", line 21, in <module>
+    from .inputs import DATES_AD, DATES_BS, DATES_PATRO, DATES_TEXT
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\inputs.py", line 14, in <module>
+    from nepdate_patro._tables import COVERAGE_FIRST, COVERAGE_LAST
+ModuleNotFoundError: No module named 'nepdate_patro'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\run.py", line 322, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\run.py", line 287, in main
+    from benchmarks import bench  # noqa: PLC0415 - --check-load must not import competitors
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\bench.py", line 23, in <module>
+    from inputs import DATES_AD, DATES_BS, DATES_PATRO, DATES_TEXT
+  File "E:\github\sanamhub\worktrees\bench-top-libs\nepdate-python\benchmarks\inputs.py", line 14, in <module>
+    from nepdate_patro._tables import COVERAGE_FIRST, COVERAGE_LAST
+ModuleNotFoundError: No module named 'nepdate_patro'
+load after: 15, 40, 18
+exit: 1
+run2 load before: 1, 4, 14
+run: 1/12 b1
+run: b1 671.2 ns/op, CPU 13.8%
+run: 2/12 b2
+run: b2 569.87 ns/op, CPU 14.5%
+run: 3/12 b3
+run: b3 517.52 ns/op, CPU 12.7%
+run: 4/12 b4
+run: b4 472.77 ns/op, CPU 14.0%
+run: 5/12 b5
+run: b5 476.4 ns/op, CPU 14.8%
+run: 6/12 b6
+run: b6 1261.36 ns/op, CPU 15.5%
+run: 7/12 b7
+run: b7 130.58 ns/op, CPU 13.5%
+run: 8/12 b8
+run: b8 17178.66 ns/op, CPU 12.1%
+run: 9/12 b1:nepali-datetime
+run: b1:nepali-datetime 2043.93 ns/op, CPU 11.9%
+run: 10/12 b1:nepali
+run: b1:nepali 12457.04 ns/op, CPU 13.3%
+run: 11/12 b2:nepali-datetime
+run: b2:nepali-datetime 6613.95 ns/op, CPU 12.4%
+run: 12/12 b2:nepali
+run: b2:nepali 6545.16 ns/op, CPU 12.8%
+run2 load after: 5, 23, 5
+run2 exit: 0
