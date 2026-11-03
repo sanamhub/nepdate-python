@@ -1,6 +1,6 @@
 [project]
 name = "nepdate-core"
-version = "0.1.0rc1"
+version = "0.2.0rc1"
 description = "Bikram Sambat (Nepali calendar) for Python, dependency-free and typed"
 readme = "README.md"
 requires-python = ">=3.11"

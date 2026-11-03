@@ -7,6 +7,8 @@ The two distributions share this file and a version number (ADR-0005). The forma
 
 ## [Unreleased]
 
+## [0.2.0-rc.1] - 2026-11-03
+
 ### Added
 
 - `NepaliDate.year_length`, the number of days in the BS year of a date, 364 through 367. It is
