@@ -10,7 +10,7 @@ pip install --pre nepdate-patro
 ```
 
 `nepdate-patro` depends on the core package, so `nepdate-core` arrives with it. The import name is
-`nepdate_patro`. `--pre` is needed while only pre-releases exist (0.1.0-rc.1 is `0.1.0rc1` on
+`nepdate_patro`. `--pre` is needed while only pre-releases exist (0.2.0-rc.1 is `0.2.0rc1` on
 PyPI). The data is informational, not an official calendar.
 
 ```python
