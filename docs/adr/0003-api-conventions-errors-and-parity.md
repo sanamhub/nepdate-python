@@ -34,7 +34,6 @@
 | D-05, D-06 | `parse` (strict), `parse_lenient` |
 | D-07 | `days_until() -> int`, `-` returns `timedelta` in the C# direction |
 | D-08 | `FiscalYear` with `start`, `end`, `quarter_range` |
-| D-09 | `DateRange`: the full range surface, including the set operations and the day helpers |
 | D-11 | `isoformat()` is `"YYYY-MM-DD"`, `to_json()` is the quoted string, the `YYYYMMDD` integer is kept |
 | D-12 | `year_length` |
 | D-13 | separate distribution `nepdate-patro`, import `nepdate_patro` (ADR-0001 §1) |
@@ -42,7 +41,7 @@
 
 D-09, D-10 and D-14 were removed by the hub on 2026-11-02. Their APIs are back in every port:
 the full range surface (D-09), ordered batch conversion in both directions (D-10), and the
-relative date predicates with an explicit zone (D-14). D-10 and D-14 have no Python-specific
+relative date predicates with an explicit zone (D-14). None of the three has a Python-specific
 mapping left to record, so their rows are gone.
 
 A Python-only deviation is not allowed; propose it to the hub.
