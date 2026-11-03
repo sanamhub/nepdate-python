@@ -1053,7 +1053,7 @@ dev = [
     { name = "ruff" },
 ]
 fuzz = [
-    { name = "atheris", marker = "sys_platform == 'linux'" },
+    { name = "atheris", marker = "python_full_version >= '3.12' and sys_platform == 'linux'" },
 ]
 mutation = [
     { name = "hypothesis" },
@@ -1081,7 +1081,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=5.0.0" },
     { name = "ruff", specifier = ">=0.8.0" },
 ]
-fuzz = [{ name = "atheris", marker = "sys_platform == 'linux'", specifier = "==3.1.0" }]
+fuzz = [{ name = "atheris", marker = "python_full_version >= '3.12' and sys_platform == 'linux'", specifier = "==3.1.0" }]
 mutation = [
     { name = "hypothesis", specifier = "==6.170.1" },
     { name = "mutmut", specifier = "==3.8.0" },

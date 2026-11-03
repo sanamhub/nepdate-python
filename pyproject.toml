@@ -61,7 +61,9 @@ mutation = [
     "pytest-cov==7.1.0",
 ]
 fuzz = [
-    "atheris==3.1.0 ; sys_platform == 'linux'",
+    # atheris 3.1.0 ships wheels for CPython 3.12 and newer only, so the 3.11 resolution leaves it
+    # out; the fuzz workflow pins 3.12.
+    "atheris==3.1.0 ; sys_platform == 'linux' and python_version >= '3.12'",
 ]
 release = [
     "twine==7.0.0",
