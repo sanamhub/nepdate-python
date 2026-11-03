@@ -1,0 +1,316 @@
+Resolved 65 packages in 1ms
+Checked 20 packages in 0.76ms
+128 files already formatted
+All checks passed!
+Success: no issues found in 44 source files
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\github\sanamhub\worktrees\nepdate-python-mutation
+configfile: pyproject.toml
+plugins: hypothesis-6.170.1, cov-7.1.0
+collected 1003 items
+
+tests\test_bulk.py ....                                                  [  0%]
+tests\test_calendar_tables.py ....                                       [  0%]
+tests\test_conftest.py ....                                              [  1%]
+tests\test_construction.py .........                                     [  2%]
+tests\test_conversion.py ............                                    [  3%]
+tests\test_core_smoke.py ..                                              [  3%]
+tests\test_csharp_catalog.py ......ss..............................sssss [  7%]
+ss................................s..........sssss....sss..............s [ 14%]
+s....................................................................sss [ 22%]
+s....sssss.............................................................. [ 29%]
+................................s....................................... [ 36%]
+........................................................................ [ 43%]
+..........s.............................                                 [ 47%]
+tests\test_days.py ..........                                            [ 48%]
+tests\test_diff.py ...                                                   [ 48%]
+tests\test_exhaustive.py ..                                              [ 49%]
+tests\test_field_and_error_details.py .................................. [ 52%]
+....................................                                     [ 56%]
+tests\test_fiscal.py .......                                             [ 56%]
+tests\test_format.py ..........                                          [ 57%]
+tests\test_format_matrix.py ..                                           [ 58%]
+tests\test_format_pattern.py ..........                                  [ 59%]
+tests\test_lazy_imports.py ...                                           [ 59%]
+tests\test_months.py ........                                            [ 60%]
+tests\test_mutation_survivors.py ............                            [ 61%]
+tests\test_names_digits.py .......                                       [ 62%]
+tests\test_names_errors.py ......                                        [ 62%]
+tests\test_parse.py ........                                             [ 63%]
+tests\test_parse_lenient.py .............                                [ 64%]
+tests\test_properties.py ..                                              [ 64%]
+tests\test_properties_format_parse.py ..........                         [ 65%]
+tests\test_range.py .........                                            [ 66%]
+tests\test_range_days.py ....                                            [ 67%]
+tests\test_range_ops.py ..........                                       [ 68%]
+tests\test_range_vectors.py ....                                         [ 68%]
+tests\test_relative_days.py ........                                     [ 69%]
+tests\test_serialization.py ........                                     [ 70%]
+tests\test_source_hygiene.py ..........                                  [ 71%]
+tests\test_today.py .....                                                [ 71%]
+tests\test_try_parse.py ....                                             [ 72%]
+tests\test_vectors.py ..                                                 [ 72%]
+tests\test_year_length.py .....                                          [ 72%]
+tests\test_ymd_int.py ....                                               [ 73%]
+packages\nepdate-patro\tests\test_csharp_catalog_patro.py ...sss........ [ 74%]
+..sss......................                                              [ 77%]
+packages\nepdate-patro\tests\test_import_separation.py .                 [ 77%]
+packages\nepdate-patro\tests\test_patro_api.py ...........               [ 78%]
+packages\nepdate-patro\tests\test_patro_build_and_fields.py ......       [ 79%]
+packages\nepdate-patro\tests\test_patro_dense.py ..                      [ 79%]
+packages\nepdate-patro\tests\test_patro_smoke.py .                       [ 79%]
+packages\nepdate-patro\tests\test_patro_source.py ....                   [ 79%]
+packages\nepdate-patro\tests\test_patro_tables.py .......                [ 80%]
+scripts\tests\test_api_snapshot.py .............                         [ 81%]
+scripts\tests\test_bench_load_gate.py ..........                         [ 82%]
+scripts\tests\test_benchmark_inputs.py .....                             [ 83%]
+scripts\tests\test_ci.py ...........                                     [ 84%]
+scripts\tests\test_ci_matrix.py ..........                               [ 85%]
+scripts\tests\test_codegen.py .....................                      [ 87%]
+scripts\tests\test_competitor_probe.py ..                                [ 87%]
+scripts\tests\test_data_status.py ........                               [ 88%]
+scripts\tests\test_docs_check.py ......                                  [ 89%]
+scripts\tests\test_docs_drift.py ......                                  [ 89%]
+scripts\tests\test_fuzz_workflow.py ....                                 [ 90%]
+scripts\tests\test_mutation_check.py ........                            [ 90%]
+scripts\tests\test_public_docs.py ..                                     [ 91%]
+scripts\tests\test_rehearsal.py ...............                          [ 92%]
+scripts\tests\test_release.py ....................                       [ 94%]
+scripts\tests\test_release_workflow.py ................                  [ 96%]
+scripts\tests\test_verify_published.py .............                     [ 97%]
+scripts\tests\test_versions.py .....................                     [ 99%]
+README.md .                                                              [ 99%]
+packages\nepdate-patro\README.md .                                       [ 99%]
+src\nepdate\_date.py .                                                   [ 99%]
+src\nepdate\_range.py .                                                  [ 99%]
+packages\nepdate-patro\src\nepdate_patro\__init__.py .                   [100%]
+
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.12.13-final-0 _______________
+
+Name                                                   Stmts   Miss  Cover
+--------------------------------------------------------------------------
+packages\nepdate-patro\src\nepdate_patro\__init__.py     115      5    96%
+packages\nepdate-patro\src\nepdate_patro\_tables.py       10      0   100%
+src\nepdate\__init__.py                                    8      0   100%
+src\nepdate\_bulk.py                                      15      0   100%
+src\nepdate\_calendar.py                                  10      0   100%
+src\nepdate\_date.py                                     261      1    99%
+src\nepdate\_diff.py                                      29      0   100%
+src\nepdate\_errors.py                                    20      0   100%
+src\nepdate\_fiscal.py                                    57      2    96%
+src\nepdate\_format.py                                    54      0   100%
+src\nepdate\_lenient.py                                   92      0   100%
+src\nepdate\_names.py                                     77      0   100%
+src\nepdate\_parse.py                                     64      0   100%
+src\nepdate\_pattern.py                                   81      0   100%
+src\nepdate\_range.py                                    156      0   100%
+--------------------------------------------------------------------------
+TOTAL                                                   1049      8    99%
+====================== 966 passed, 37 skipped in 20.20s =======================
+Name                       Stmts   Miss  Cover
+----------------------------------------------
+src\nepdate\__init__.py        8      0   100%
+src\nepdate\_bulk.py          15      0   100%
+src\nepdate\_calendar.py      10      0   100%
+src\nepdate\_date.py         261      1    99%
+src\nepdate\_diff.py          29      0   100%
+src\nepdate\_errors.py        20      0   100%
+src\nepdate\_fiscal.py        57      2    96%
+src\nepdate\_format.py        54      0   100%
+src\nepdate\_lenient.py       92      0   100%
+src\nepdate\_names.py         77      0   100%
+src\nepdate\_parse.py         64      0   100%
+src\nepdate\_pattern.py       81      0   100%
+src\nepdate\_range.py        156      0   100%
+----------------------------------------------
+TOTAL                        924      3    99%
+Name                                                   Stmts   Miss  Cover
+--------------------------------------------------------------------------
+packages\nepdate-patro\src\nepdate_patro\__init__.py     115      5    96%
+packages\nepdate-patro\src\nepdate_patro\_tables.py       10      0   100%
+--------------------------------------------------------------------------
+TOTAL                                                    125      5    96%
+[nepdate-core] Building source distribution...
+[nepdate-patro] Building source distribution...
+[nepdate-core] Building wheel from source distribution...
+[nepdate-patro] Building wheel from source distribution...
+Successfully built dist\nepdate_core-0.2.0rc1.tar.gz
+Successfully built dist\nepdate_core-0.2.0rc1-py3-none-any.whl
+Successfully built dist\nepdate_patro-0.2.0rc1.tar.gz
+Successfully built dist\nepdate_patro-0.2.0rc1-py3-none-any.whl
+Using CPython 3.12.13
+Creating virtual environment at: C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv
+Activate with: C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv\Scripts\activate
+Using Python 3.12.13 environment at: C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv
+Resolved 10 packages in 254ms
+Prepared 1 package in 14ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 10 packages in 1.39s
+ + colorama==0.4.6
+ + hypothesis==6.170.14
+ + iniconfig==2.3.1
+ + nepdate-core==0.2.0rc1 (from file:///E:/github/sanamhub/worktrees/nepdate-python-mutation/dist/nepdate_core-0.2.0rc1-py3-none-any.whl)
+ + packaging==26.3
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==9.2.0
+ + sortedcontainers==2.4.0
+ + tzdata==2026.6
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.2.0, pluggy-1.7.0
+rootdir: E:\github\sanamhub\worktrees\nepdate-python-mutation
+configfile: pyproject.toml
+plugins: hypothesis-6.170.14
+collected 734 items
+
+tests\test_bulk.py ....                                                  [  0%]
+tests\test_calendar_tables.py ....                                       [  1%]
+tests\test_conftest.py ....                                              [  1%]
+tests\test_construction.py .........                                     [  2%]
+tests\test_conversion.py ............                                    [  4%]
+tests\test_core_smoke.py ..                                              [  4%]
+tests\test_csharp_catalog.py ......ss..............................sssss [ 10%]
+ss................................s..........sssss....sss..............s [ 20%]
+s....................................................................sss [ 30%]
+s....sssss.............................................................. [ 40%]
+................................s....................................... [ 49%]
+........................................................................ [ 59%]
+..........s.............................                                 [ 65%]
+tests\test_days.py ..........                                            [ 66%]
+tests\test_diff.py ...                                                   [ 66%]
+tests\test_exhaustive.py ..                                              [ 67%]
+tests\test_field_and_error_details.py .................................. [ 71%]
+....................................                                     [ 76%]
+tests\test_fiscal.py .......                                             [ 77%]
+tests\test_format.py ..........                                          [ 79%]
+tests\test_format_matrix.py ..                                           [ 79%]
+tests\test_format_pattern.py ..........                                  [ 80%]
+tests\test_lazy_imports.py ...                                           [ 81%]
+tests\test_months.py ........                                            [ 82%]
+tests\test_mutation_survivors.py ............                            [ 83%]
+tests\test_names_digits.py .......                                       [ 84%]
+tests\test_names_errors.py ......                                        [ 85%]
+tests\test_parse.py ........                                             [ 86%]
+tests\test_parse_lenient.py .............                                [ 88%]
+tests\test_properties.py ..                                              [ 88%]
+tests\test_properties_format_parse.py ..........                         [ 90%]
+tests\test_range.py .........                                            [ 91%]
+tests\test_range_days.py ....                                            [ 91%]
+tests\test_range_ops.py ..........                                       [ 93%]
+tests\test_range_vectors.py ....                                         [ 93%]
+tests\test_relative_days.py ........                                     [ 94%]
+tests\test_serialization.py ........                                     [ 95%]
+tests\test_source_hygiene.py ..........                                  [ 97%]
+tests\test_today.py .....                                                [ 97%]
+tests\test_try_parse.py ....                                             [ 98%]
+tests\test_vectors.py ..                                                 [ 98%]
+tests\test_year_length.py .....                                          [ 99%]
+tests\test_ymd_int.py ....                                               [100%]
+
+======================= 703 passed, 31 skipped in 5.75s =======================
+Using CPython 3.12.13
+Creating virtual environment at: C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv
+Activate with: C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv\Scripts\activate
+Using Python 3.12.13 environment at: C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv
+Resolved 11 packages in 5ms
+Prepared 1 package in 12ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 11 packages in 1.28s
+ + colorama==0.4.6
+ + hypothesis==6.170.14
+ + iniconfig==2.3.1
+ + nepdate-core==0.2.0rc1 (from file:///E:/github/sanamhub/worktrees/nepdate-python-mutation/dist/nepdate_core-0.2.0rc1-py3-none-any.whl)
+ + nepdate-patro==0.2.0rc1 (from file:///E:/github/sanamhub/worktrees/nepdate-python-mutation/dist/nepdate_patro-0.2.0rc1-py3-none-any.whl)
+ + packaging==26.3
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==9.2.0
+ + sortedcontainers==2.4.0
+ + tzdata==2026.6
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.2.0, pluggy-1.7.0
+rootdir: E:\github\sanamhub\worktrees\nepdate-python-mutation
+configfile: pyproject.toml
+plugins: hypothesis-6.170.14
+collected 73 items
+
+packages\nepdate-patro\tests\test_csharp_catalog_patro.py ...sss........ [ 19%]
+..sss......................                                              [ 56%]
+packages\nepdate-patro\tests\test_import_separation.py .                 [ 57%]
+packages\nepdate-patro\tests\test_patro_api.py ...........               [ 72%]
+packages\nepdate-patro\tests\test_patro_build_and_fields.py ......       [ 80%]
+packages\nepdate-patro\tests\test_patro_dense.py ..                      [ 83%]
+packages\nepdate-patro\tests\test_patro_smoke.py .                       [ 84%]
+packages\nepdate-patro\tests\test_patro_source.py ....                   [ 90%]
+packages\nepdate-patro\tests\test_patro_tables.py .......                [100%]
+
+======================== 67 passed, 6 skipped in 1.60s ========================
+docs: user-facing docs pass
+Using CPython 3.12.13
+Creating virtual environment at: C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv
+Activate with: C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv\Scripts\activate
+Using Python 3.12.13 environment at: C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv
+Resolved 3 packages in 2ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 3 packages in 926ms
+ + nepdate-core==0.2.0rc1 (from file:///E:/github/sanamhub/worktrees/nepdate-python-mutation/dist/nepdate_core-0.2.0rc1-py3-none-any.whl)
+ + nepdate-patro==0.2.0rc1 (from file:///E:/github/sanamhub/worktrees/nepdate-python-mutation/dist/nepdate_patro-0.2.0rc1-py3-none-any.whl)
+ + tzdata==2026.6
+consumer: one conversion and one patro lookup passed
+api: 208 items, snapshot matches
++ uv sync --all-packages
+--- gate 1: ruff ---
++ uv run ruff format --check
++ uv run ruff check
+--- gate 2: mypy ---
++ uv run mypy --strict src packages/nepdate-patro/src scripts
+--- gate 3: pytest ---
++ uv run pytest tests packages/nepdate-patro/tests scripts/tests README.md packages/nepdate-patro/README.md --doctest-glob=README.md --import-mode=importlib --doctest-modules src/nepdate/_date.py src/nepdate/_range.py packages/nepdate-patro/src/nepdate_patro/__init__.py --cov=nepdate --cov=nepdate_patro --cov-report=term
++ uv run coverage report --include=*/nepdate/* --fail-under=90
++ uv run coverage report --include=*/nepdate_patro/* --fail-under=90
+--- gate 4: codegen ---
++ uv run python scripts/codegen.py --check
+--- gate 5: import-time ---
++ uv run python -c import sys; pass; base = set(sys.modules); import nepdate; print(' '.join(sorted(set(sys.modules) - base)))
++ uv run python -c import sys; pass; base = set(sys.modules); import __future__, _datetime, datetime, enum, operator; print(' '.join(sorted(set(sys.modules) - base)))
++ uv run python -c import sys; import nepdate; base = set(sys.modules); import nepdate_patro; print(' '.join(sorted(set(sys.modules) - base)))
++ uv run python -X importtime -c import nepdate
++ uv run python -X importtime -c import nepdate
++ uv run python -X importtime -c import nepdate
++ uv run python -X importtime -c import nepdate; import nepdate_patro
++ uv run python -X importtime -c import nepdate; import nepdate_patro
++ uv run python -X importtime -c import nepdate; import nepdate_patro
+ci: import nepdate 8227 us, nepdate_patro 4644 us (not a benchmark)
+--- gate 6: core alone ---
++ uv build --all-packages --out-dir E:\github\sanamhub\worktrees\nepdate-python-mutation\dist
++ uv venv C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv
++ uv pip install --python C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv E:\github\sanamhub\worktrees\nepdate-python-mutation\dist\nepdate_core-0.2.0rc1-py3-none-any.whl pytest hypothesis
++ C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv\Scripts\python.exe -m pytest tests -o addopts=
++ C:\Users\sanam\AppData\Local\Temp\tmp3iajf00v\venv\Scripts\python.exe -c import nepdate_patro
+--- gate 7: patro alone ---
++ uv venv C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv
++ uv pip install --python C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv E:\github\sanamhub\worktrees\nepdate-python-mutation\dist\nepdate_core-0.2.0rc1-py3-none-any.whl E:\github\sanamhub\worktrees\nepdate-python-mutation\dist\nepdate_patro-0.2.0rc1-py3-none-any.whl pytest hypothesis
++ C:\Users\sanam\AppData\Local\Temp\tmpj6k3pesp\venv\Scripts\python.exe -m pytest packages/nepdate-patro/tests -o addopts=
+--- gate 8: docs ---
++ uv run python scripts/docs_check.py
+--- gate 9: consumer ---
++ uv venv C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv
++ uv pip install --python C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv E:\github\sanamhub\worktrees\nepdate-python-mutation\dist\nepdate_core-0.2.0rc1-py3-none-any.whl E:\github\sanamhub\worktrees\nepdate-python-mutation\dist\nepdate_patro-0.2.0rc1-py3-none-any.whl
++ C:\Users\sanam\AppData\Local\Temp\tmpum_2gh8i\consumer\venv\Scripts\python.exe -c from nepdate import NepaliDate
+from nepdate_patro import info
+d = NepaliDate(2080, 5, 15)
+assert d.to_date().isoformat() == '2023-09-01'
+assert info(d).tithi.label() == 'Dwitiya'
+print('consumer: one conversion and one patro lookup passed')
+
+--- gate 10: api ---
++ uv run python scripts/api_snapshot.py --check
+ci: 10/10 gates passed

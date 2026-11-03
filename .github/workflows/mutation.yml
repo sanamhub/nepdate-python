@@ -1,8 +1,21 @@
 name: mutation
 
+# The weekly run catches test rot. A pull request that changes the library, its tests or the
+# triage files also runs it, so a survivor is caught in review instead of at the release tag.
 on:
   schedule:
     - cron: "0 3 * * 1"
+  pull_request:
+    paths:
+      - "src/nepdate/**"
+      - "packages/nepdate-patro/src/**"
+      - "tests/**"
+      - "packages/nepdate-patro/tests/**"
+      - "scripts/mutation_check.py"
+      - "docs/mutation/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/mutation.yml"
   workflow_dispatch:
 
 permissions:

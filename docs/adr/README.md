@@ -18,3 +18,4 @@ ADR.
 | [0010](0010-api-compatibility-gate.md) | API compatibility gate | Accepted |
 | [0011](0011-release-gates.md) | Release gates and the patro build backend | Accepted |
 | [0012](0012-one-environment-per-distribution.md) | One publishing environment per distribution | Accepted |
+| [0013](0013-mutation-on-library-pull-requests.md) | Mutation testing on library pull requests | Accepted |

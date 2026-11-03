@@ -8,7 +8,7 @@ from collections.abc import Callable
 
 import pytest
 
-from nepdate import DateRange, FiscalYear, Lang, NepaliDate, Overflow, Quarter
+from nepdate import DateRange, FiscalYear, Lang, NepaliDate, Overflow, Quarter, to_english_dates
 from nepdate._calendar import MONTH_NUM, MONTH_START_ORD, MONTH_YEAR
 from nepdate._date import _from_serial, _now
 from nepdate._errors import ErrorKind, NepDateError
@@ -274,6 +274,11 @@ _RAISERS: tuple[Callable[[], object], ...] = (
     lambda: NepaliDate.parse_lenient("15 Shrawan 80"),
     lambda: NepaliDate.parse_lenient("100 Shrawan 2080"),
     lambda: NepaliDate.parse_lenient("15/04/80"),
+    lambda: NepaliDate.from_json("abc"),
+    lambda: NepaliDate.from_json('"'),
+    lambda: DateRange.month(2080, 1).dates_with_interval(0),
+    lambda: DateRange.from_day_count(NepaliDate(2080, 1, 1), 0),
+    lambda: to_english_dates([1]),  # type: ignore[list-item]
     lambda: delattr(NepaliDate(2080, 1, 1).diff(NepaliDate(2080, 1, 2)), "days"),
 )
 
