@@ -51,5 +51,7 @@ A new survivor needs a killing test or an equivalence proof. "Hard to test" is n
 
 - `release.yml` has a `mutation` job; the PyPI and TestPyPI publish jobs need it, so a release
   below the floor cannot publish.
-- `.github/workflows/mutation.yml` runs weekly and by manual dispatch. There is no pull-request
-  trigger, and `scripts/ci.py` stays at 9 gates.
+- `.github/workflows/mutation.yml` runs weekly, by manual dispatch, and on a pull request that
+  changes the library source, its tests, the checker or the triage files (ADR-0013). The path
+  filter keeps it off documentation-only and config-only pull requests, and `scripts/ci.py` stays
+  at 9 gates.

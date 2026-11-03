@@ -1,7 +1,8 @@
 # Mutation survivor dispositions
 
-Run: 2026-10-18, mutmut 3.8.0, `src/nepdate` and the staged `nepdate_patro`, 4
-children. The counts are in [`../mutation.md`](../mutation.md).
+Run: 2026-11-03, mutmut 3.8.0, `src/nepdate` and the staged `nepdate_patro`. The survivors
+added after the 0.2 API landed are here with their proofs; the counts are in
+[`../mutation.md`](../mutation.md).
 
 Every survivor here is equivalent: the mutant cannot change observable behaviour, and the proof
 says why. A survivor that a test could detect gets that test instead of a row. "Hard to test" and
@@ -11,7 +12,7 @@ Error wording is not API. Callers match on `NepDateError.kind` (docs/API.md), so
 only rewords a message is equivalent. A mutant that blanks a message is not:
 `test_every_error_carries_a_message` kills it.
 
-## Equivalent (59)
+## Equivalent (77)
 
 | Mutant | Change | Proof |
 |---|---|---|
@@ -50,8 +51,26 @@ only rewords a message is equivalent. A mutant that blanks a message is not:
 | `nepdate._lenient.x__month_form__mutmut_23` | `raise NepDateError(ErrorKind.AMBIGUOUS, "the day has more than two digits")` -> `raise NepDateError(ErrorKind.AMBIGUOUS, "THE DAY HAS MORE THAN TWO DIGITS")` | Only the message wording changes, and the message is still present. Errors are matched on `kind` (docs/API.md); the wording is not API. |
 | `nepdate._lenient.x__numeric_form__mutmut_11` | `raise NepDateError(ErrorKind.AMBIGUOUS, "no four-digit year first or last")` -> `raise NepDateError(ErrorKind.AMBIGUOUS, "XXno four-digit year first or lastXX")` | Only the message wording changes, and the message is still present. Errors are matched on `kind` (docs/API.md); the wording is not API. |
 | `nepdate._lenient.x__numeric_form__mutmut_12` | `raise NepDateError(ErrorKind.AMBIGUOUS, "no four-digit year first or last")` -> `raise NepDateError(ErrorKind.AMBIGUOUS, "NO FOUR-DIGIT YEAR FIRST OR LAST")` | Only the message wording changes, and the message is still present. Errors are matched on `kind` (docs/API.md); the wording is not API. |
-| `nepdate._pattern.x_format_pattern__mutmut_92` | `if end < 0:` -> `if end <= 0:` | `end` comes from `find` starting at `index + 1`, so it is -1 or at least 1; `< 0`, `<= 0` and `< 1` agree. |
-| `nepdate._pattern.x_format_pattern__mutmut_93` | `if end < 0:` -> `if end < 1:` | `end` comes from `find` starting at `index + 1`, so it is -1 or at least 1; `< 0`, `<= 0` and `< 1` agree. |
+| `nepdate._pattern.x_format_pattern__mutmut_95` | `if end < 0:` -> `if end <= 0:` | `end` comes from `find` starting at `index + 1`, so it is -1 or at least 1; `< 0`, `<= 0` and `< 1` agree. |
+| `nepdate._pattern.x_format_pattern__mutmut_96` | `if end < 0:` -> `if end < 1:` | `end` comes from `find` starting at `index + 1`, so it is -1 or at least 1; `< 0`, `<= 0` and `< 1` agree. |
+| `nepdate._bulk.x_to_english_dates__mutmut_6` | `type(item).__name__` -> `type(None).__name__` | Only the type name in the message changes; the error is still a TypeError whose message is present, and the wording is not API. |
+| `nepdate._date.x__trunc_div__mutmut_7` | `n < 0` -> `n <= 0` | The two differ only at n = 0, where -0 equals 0. |
+| `nepdate._date.x__trunc_div__mutmut_8` | `n < 0` -> `n < 1` | The two differ only at n = 0, where -0 equals 0. |
+| `nepdate._date.xǁNepaliDateǁfrom_json__mutmut_15` | message wrapped in `XX` | Only the message wording changes, and the message is still present. The kind is unchanged. |
+| `nepdate._date.xǁNepaliDateǁfrom_json__mutmut_16` | message lower-cased | Only the message wording changes, and the message is still present. The kind is unchanged. |
+| `nepdate._date.xǁNepaliDateǁfrom_json__mutmut_17` | message upper-cased | Only the message wording changes, and the message is still present. The kind is unchanged. |
+| `nepdate._date.xǁNepaliDateǁto_json__mutmut_4` | `Lang.EN` -> `None` | The formatter tests `lang is Lang.NE`; None takes the English branch, so the text is the same. |
+| `nepdate._range.xǁDateRangeǁ__hash____mutmut_1` | `return hash((self._start, self._end))` -> `return hash(None)` | Hash collisions are allowed; equal ranges still hash equal. |
+| `nepdate._range.xǁDateRangeǁcurrent_calendar_year__mutmut_2` | `NepaliDate.today(tz)` -> `NepaliDate.today(None)` | None is the documented default and means Nepal time, so the clock is read in the same zone. |
+| `nepdate._range.xǁDateRangeǁcurrent_fiscal_year__mutmut_2` | `NepaliDate.today(tz)` -> `NepaliDate.today(None)` | None is the documented default and means Nepal time, so the clock is read in the same zone. |
+| `nepdate._range.xǁDateRangeǁintersect__mutmut_4` | `self._start > other._start` -> `>=` | Both pick the same date when the two starts are equal. |
+| `nepdate._range.xǁDateRangeǁintersect__mutmut_8` | `self._end < other._end` -> `<=` | Both pick the same date when the two ends are equal. |
+| `nepdate._range.xǁDateRangeǁsplit_by_fiscal_quarter__mutmut_10` | `quarter.start > self._start` -> `>=` | Both pick the same date when the two starts are equal. |
+| `nepdate._range.xǁDateRangeǁsplit_by_fiscal_quarter__mutmut_14` | `quarter.end < self._end` -> `<=` | Both pick the same date when the two ends are equal. |
+| `nepdate._range.xǁDateRangeǁsplit_by_month__mutmut_13` | `piece.start > self._start` -> `>=` | Both pick the same date when the two starts are equal. |
+| `nepdate._range.xǁDateRangeǁsplit_by_month__mutmut_17` | `piece.end < self._end` -> `<=` | Both pick the same date when the two ends are equal. |
+| `nepdate._range.xǁDateRangeǁunion__mutmut_4` | `self._start < other._start` -> `<=` | Both pick the same date when the two starts are equal. |
+| `nepdate._range.xǁDateRangeǁunion__mutmut_8` | `self._end > other._end` -> `>=` | Both pick the same date when the two ends are equal. |
 | `nepdate._parse.x_parse_strict__mutmut_1` | `fast = _fast_parse(s, date_type)` -> `fast = None` | The scanner is authoritative and the fast-path equivalence property covers it; only speed changes. |
 | `nepdate._parse.x__digit_value__mutmut_10` | `return -1` -> `return -2` | The caller tests < 0, so -1 and -2 take the same branch. |
 | `nepdate._parse.x__scan_strict__mutmut_7` | `in_group = False` -> `in_group = None` | `in_group` is read only as `not in_group`; None and False are both falsy. |
@@ -74,3 +93,4 @@ only rewords a message is equivalent. A mutant that blanks a message is not:
 | `nepdate._date.xǁNepaliDateǁ__add____mutmut_8` | `raise NepDateError(ErrorKind.OUT_OF_RANGE, "timedelta must be a whole number of days")` -> `raise NepDateError(ErrorKind.OUT_OF_RANGE, "TIMEDELTA MUST BE A WHOLE NUMBER OF DAYS")` | Only the message wording changes, and the message is still present. Errors are matched on `kind` (docs/API.md); the wording is not API. |
 | `nepdate._date.xǁNepaliDateǁ__hash____mutmut_1` | `return hash(self._o)` -> `return hash(None)` | Hash collisions are allowed; equal values still hash equal. |
 | `nepdate._date.x__from_serial__mutmut_7` | `if n >= MONTH_START_ORD[i + 1]:` -> `if n > MONTH_START_ORD[i + 1]:` | When `n` equals `MONTH_START_ORD[i + 1]`, the identical second test still advances `i`. Two advances are needed only when `n >= MONTH_START_ORD[i + 2] > MONTH_START_ORD[i + 1]`, where `>` and `>=` agree. |
+| `nepdate._range.xǁDateRangeǁsplit_by_fiscal_quarter__mutmut_23` | `current = quarter.end.add_days(1)` -> `current = quarter.end.add_days(2)` | `current` only selects the quarter that contains it. Two days after a quarter end is still inside the next quarter, whose range is then clipped to this range's start, so the extra day changes no piece. |
