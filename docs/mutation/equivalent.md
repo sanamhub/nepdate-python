@@ -12,7 +12,7 @@ Error wording is not API. Callers match on `NepDateError.kind` (docs/API.md), so
 only rewords a message is equivalent. A mutant that blanks a message is not:
 `test_every_error_carries_a_message` kills it.
 
-## Equivalent (76)
+## Equivalent (77)
 
 | Mutant | Change | Proof |
 |---|---|---|
@@ -93,3 +93,4 @@ only rewords a message is equivalent. A mutant that blanks a message is not:
 | `nepdate._date.xǁNepaliDateǁ__add____mutmut_8` | `raise NepDateError(ErrorKind.OUT_OF_RANGE, "timedelta must be a whole number of days")` -> `raise NepDateError(ErrorKind.OUT_OF_RANGE, "TIMEDELTA MUST BE A WHOLE NUMBER OF DAYS")` | Only the message wording changes, and the message is still present. Errors are matched on `kind` (docs/API.md); the wording is not API. |
 | `nepdate._date.xǁNepaliDateǁ__hash____mutmut_1` | `return hash(self._o)` -> `return hash(None)` | Hash collisions are allowed; equal values still hash equal. |
 | `nepdate._date.x__from_serial__mutmut_7` | `if n >= MONTH_START_ORD[i + 1]:` -> `if n > MONTH_START_ORD[i + 1]:` | When `n` equals `MONTH_START_ORD[i + 1]`, the identical second test still advances `i`. Two advances are needed only when `n >= MONTH_START_ORD[i + 2] > MONTH_START_ORD[i + 1]`, where `>` and `>=` agree. |
+| `nepdate._range.xǁDateRangeǁsplit_by_fiscal_quarter__mutmut_23` | `current = quarter.end.add_days(1)` -> `current = quarter.end.add_days(2)` | `current` only selects the quarter that contains it. Two days after a quarter end is still inside the next quarter, whose range is then clipped to this range's start, so the extra day changes no piece. |
