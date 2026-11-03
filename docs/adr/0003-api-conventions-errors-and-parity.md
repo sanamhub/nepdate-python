@@ -1,7 +1,7 @@
 # ADR-0003: API conventions, errors and parity mapping
 
 - Status: Accepted
-- Date: 2026-09-25 (amended 2026-10-07 for hub ADR-0004)
+- Date: 2026-09-25 (amended 2026-10-07 for hub ADR-0004, and 2026-11-03 for the full v1 API)
 - Deciders: Sanam Pakuwal
 
 ## Decision
@@ -32,14 +32,16 @@
 | D-02, D-03 | `add_months(n, Overflow)`, `add_days(n)`, integers only; `timedelta` with a non-whole day raises |
 | D-04 | `Month.short_label()` returns `Asa` / `Aso` |
 | D-05, D-06 | `parse` (strict), `parse_lenient` |
-| D-07 | `days_until() -> int` |
+| D-07 | `days_until() -> int`, `-` returns `timedelta` in the C# direction |
 | D-08 | `FiscalYear` with `start`, `end`, `quarter_range` |
-| D-09 | `DateRange`: `len`, `in`, iteration only |
-| D-10 | not ported |
-| D-11 | `isoformat()` is `"YYYY-MM-DD"` |
-| D-12 | `month_length`; year length via `len(DateRange.year(y))` |
+| D-11 | `isoformat()` is `"YYYY-MM-DD"`, `to_json()` is the quoted string, the `YYYYMMDD` integer is kept |
+| D-12 | `year_length` |
 | D-13 | separate distribution `nepdate-patro`, import `nepdate_patro` (ADR-0001 §1) |
-| D-14 | not ported; `today()` and `add_days(±1)` |
 | D-15 | `lang` parameter on every formatter |
+
+D-09, D-10 and D-14 were removed by the hub on 2026-11-02. Their APIs are back in every port:
+the full range surface (D-09), ordered batch conversion in both directions (D-10), and the
+relative date predicates with an explicit zone (D-14). None of the three has a Python-specific
+mapping left to record, so their rows are gone.
 
 A Python-only deviation is not allowed; propose it to the hub.

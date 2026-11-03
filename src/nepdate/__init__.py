@@ -6,6 +6,7 @@ tithi, holiday or event data; that lives in the separate ``nepdate-patro`` distr
 (``nepdate_patro``).
 """
 
+from ._bulk import to_english_dates, to_nepali_dates
 from ._date import MAX, MIN, NepaliDate
 from ._diff import DateDiff
 from ._errors import ErrorKind, NepDateError
@@ -38,5 +39,7 @@ __all__ = [
     "Quarter",
     "Separator",
     "Weekday",
+    "to_english_dates",
+    "to_nepali_dates",
     "to_nepali_digits",
 ]

@@ -88,8 +88,8 @@ def format_pattern(  # noqa: PLR0912, PLR0915 - one-pass scanner by design
     while index < length:
         char = pattern[index]
         if char == "\\":
-            if index + 1 < length:
-                append(pattern[index + 1])
+            # A backslash escapes the next character; one at the very end is a literal backslash.
+            append(pattern[index + 1] if index + 1 < length else "\\")
             index += 2
             continue
         if char == "'":

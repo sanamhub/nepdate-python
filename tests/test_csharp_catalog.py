@@ -39,6 +39,12 @@ _MONTH_NUMBERS = tuple(range(1, 13))
 _DISPLAY_LENGTH = 10
 _MIN_MONTH_LENGTH = 29
 _MAX_MONTH_LENGTH = 32
+_RANGE_TWO_PARTS = 2
+_RANGE_FOUR_PARTS = 4
+_FOUR_WORKING_DAYS = 4
+_TEN_DAY_RANGE = 10
+_SIX_OVERLAP_DAYS = 6
+_THREE_MONTH_PARTS = 3
 
 
 def _test_name(catalog_id: str) -> str:
@@ -420,23 +426,25 @@ def test_nepalidateconstructiontests_constructor_englishdate_convertscorrectly()
 
 
 def test_nepalidateconstructiontests_tryparse_validstring_returnstruewithcorrectdate() -> None:
-    """TryParse is C#-only."""
-    pytest.skip("n/a: C# TryParse")
+    """``try_parse`` returns the date of a valid string."""
+    date = NepaliDate.try_parse("2080/05/15")
+    assert date is not None
+    assert (date.year, date.month, date.day) == (2080, 5, 15)
 
 
 def test_nepalidateconstructiontests_tryparse_invalidstring_returnsfalsewithdefault_1() -> None:
-    """TryParse is C#-only."""
-    pytest.skip("n/a: C# TryParse")
+    """``try_parse`` returns None for empty text (D-01: there is no default date)."""
+    assert NepaliDate.try_parse("") is None
 
 
 def test_nepalidateconstructiontests_tryparse_invalidstring_returnsfalsewithdefault_2() -> None:
-    """TryParse is C#-only."""
-    pytest.skip("n/a: C# TryParse")
+    """``try_parse`` returns None for non-numeric text (D-01: there is no default date)."""
+    assert NepaliDate.try_parse("invalid") is None
 
 
 def test_nepalidateconstructiontests_tryparse_invalidstring_returnsfalsewithdefault_3() -> None:
-    """TryParse is C#-only."""
-    pytest.skip("n/a: C# TryParse")
+    """``try_parse`` returns None when a group is missing (D-01: there is no default date)."""
+    assert NepaliDate.try_parse("2080/5") is None
 
 
 # --- Core/NepaliDatePropertiesTests.cs ---
@@ -1423,200 +1431,270 @@ def test_nepalidaterangeextendedtests_forcalendaryear_lengthisreasonable() -> No
 
 
 def test_nepalidaterangeextendedtests_currentmonth_startisfirstdayofcurrentmonth() -> None:
-    """The current month starts on day 1 of today's month. (built from today(), as the other ports do)."""
+    """The current month range starts on day 1 of today's month."""
     today = NepaliDate.today()
-    assert DateRange.month(today.year, today.month).start == NepaliDate(today.year, today.month, 1)
+    start = DateRange.current_month().start
+    assert (start.year, start.month, start.day) == (today.year, today.month, 1)
 
 
 def test_nepalidaterangeextendedtests_currentmonth_endislastdayofcurrentmonth() -> None:
-    """The current month ends on the last day of today's month. (built from today(), as the other ports do)."""
+    """The current month range ends on the last day of today's month."""
     today = NepaliDate.today()
-    assert DateRange.month(today.year, today.month).end == today.last_of_month()
+    assert DateRange.current_month().end == today.last_of_month()
 
 
 def test_nepalidaterangeextendedtests_currentmonth_containstoday() -> None:
-    """The current month contains today. (built from today(), as the other ports do)."""
-    today = NepaliDate.today()
-    assert today in DateRange.month(today.year, today.month)
+    """The current month range contains today."""
+    assert NepaliDate.today() in DateRange.current_month()
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_containstoday() -> None:
-    """The current fiscal year contains today. (built from today(), as the other ports do)."""
-    today = NepaliDate.today()
-    assert today in today.fiscal_year().range()
+    """The current fiscal year range contains today."""
+    assert NepaliDate.today() in DateRange.current_fiscal_year()
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_startisshrawan() -> None:
-    """The current fiscal year starts on 1 Shrawan. (built from today(), as the other ports do)."""
-    start = NepaliDate.today().fiscal_year().range().start
+    """The current fiscal year starts on 1 Shrawan."""
+    start = DateRange.current_fiscal_year().start
     assert (start.month, start.day) == (Month.SHRAWAN, 1)
 
 
 def test_nepalidaterangeextendedtests_currentfiscalyear_endisashadh() -> None:
-    """The current fiscal year ends in Ashadh. (built from today(), as the other ports do)."""
-    assert NepaliDate.today().fiscal_year().range().end.month == Month.ASHAD
+    """The current fiscal year ends on the last day of Ashad."""
+    end = DateRange.current_fiscal_year().end
+    assert end.month == Month.ASHAD
+    assert end.day == end.month_length
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_containstoday() -> None:
-    """The current calendar year contains today. (built from today(), as the other ports do)."""
-    today = NepaliDate.today()
-    assert today in DateRange.year(today.year)
+    """The current calendar year range contains today."""
+    assert NepaliDate.today() in DateRange.current_calendar_year()
 
 
 def test_nepalidaterangeextendedtests_currentcalendaryear_startisbaishakh1() -> None:
-    """The current calendar year starts on 1 Baishakh. (built from today(), as the other ports do)."""
-    today = NepaliDate.today()
-    assert DateRange.year(today.year).start == NepaliDate(today.year, Month.BAISHAKH, 1)
+    """The current calendar year starts on 1 Baishakh."""
+    start = DateRange.current_calendar_year().start
+    assert (start.month, start.day) == (Month.BAISHAKH, 1)
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_emptyrange_returnsemptyarray() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built, so there is no split to return (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_rangewithinonequarter_returnssinglerange() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A range inside one fiscal quarter is one piece with the same bounds."""
+    parts = DateRange(NepaliDate(2080, 5, 1), NepaliDate(2080, 5, 20)).split_by_fiscal_quarter()
+    assert len(parts) == 1
+    assert parts[0].start == NepaliDate(2080, 5, 1)
+    assert parts[0].end == NepaliDate(2080, 5, 20)
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_rangespanningtwoquarters_returnstworanges() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A range across the Ashoj to Kartik boundary is two pieces, clipped at the ends."""
+    parts = DateRange(NepaliDate(2080, 5, 1), NepaliDate(2080, 8, 1)).split_by_fiscal_quarter()
+    assert len(parts) == _RANGE_TWO_PARTS
+    assert parts[0].start == NepaliDate(2080, 5, 1)
+    assert parts[0].end.month == Month.ASHOJ
+    assert parts[0].end.day == NepaliDate(2080, 6, 1).month_length
+    assert parts[1].start == NepaliDate(2080, 7, 1)
+    assert parts[1].end == NepaliDate(2080, 8, 1)
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_fullfiscalyear_returnsfourranges() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A whole fiscal year is four quarters, each starting on the first of its first month."""
+    parts = FiscalYear(2080).range().split_by_fiscal_quarter()
+    assert len(parts) == _RANGE_FOUR_PARTS
+    assert parts[0].start == NepaliDate(2080, 4, 1)
+    assert parts[0].end.month == Month.ASHOJ
+    assert parts[1].start == NepaliDate(2080, 7, 1)
+    assert parts[1].end.month == Month.POUSH
+    assert parts[2].start == NepaliDate(2080, 10, 1)
+    assert parts[2].end.month == Month.CHAITRA
+    assert parts[3].start == NepaliDate(2081, 1, 1)
+    assert parts[3].end.month == Month.ASHAD
 
 
 def test_nepalidaterangeextendedtests_splitbyfiscalquarter_rangeinq4months_singlerange() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A range in Baishakh to Ashad is one Q4 piece with the same bounds."""
+    parts = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 3, 30)).split_by_fiscal_quarter()
+    assert len(parts) == 1
+    assert parts[0].start == NepaliDate(2080, 1, 1)
+    assert parts[0].end == NepaliDate(2080, 3, 30)
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_zero_throwsargumentoutofrangeexception() -> (
     None
 ):
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A zero interval is refused instead of looping (NR24)."""
+    rng = DateRange.from_day_count(NepaliDate(2080, 1, 1), 10)
+    with pytest.raises(NepDateError):
+        rng.dates_with_interval(0)
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_negativeinterval_throwsargumentoutofrangeexception() -> (
     None
 ):
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A negative interval is refused (NR24)."""
+    rng = DateRange.from_day_count(NepaliDate(2080, 1, 1), 10)
+    with pytest.raises(NepDateError):
+        rng.dates_with_interval(-1)
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_intervalofone_yieldseveryday() -> None:
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A five-day range with interval one yields all five dates in order."""
+    dates = DateRange.from_day_count(NepaliDate(2080, 5, 1), 5).dates_with_interval(1)
+    assert dates == [NepaliDate(2080, 5, day) for day in range(1, 6)]
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_intervaloftwo_yieldsodddays() -> None:
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A seven-day range with interval two yields the four odd days."""
+    dates = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 7)).dates_with_interval(2)
+    assert dates == [
+        NepaliDate(2080, 1, 1),
+        NepaliDate(2080, 1, 3),
+        NepaliDate(2080, 1, 5),
+        NepaliDate(2080, 1, 7),
+    ]
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_intervallargerthanrange_yieldsonlystartdate() -> (
     None
 ):
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An interval larger than the range yields only the start date."""
+    dates = DateRange.from_day_count(NepaliDate(2080, 5, 1), 3).dates_with_interval(10)
+    assert dates == [NepaliDate(2080, 5, 1)]
 
 
 def test_nepalidaterangeextendedtests_dateswithinterval_emptyrange_yieldsnothing() -> None:
-    """DatesWithInterval is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built, so there is nothing to step through (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_weekenddays_includesundaytrue_returnsbothsaturdayandsunday() -> (
     None
 ):
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Saturday and Sunday are the weekend, in date order."""
+    weekends = DateRange(NepaliDate(2080, 5, 14), NepaliDate(2080, 5, 18)).weekend_days(
+        include_sunday=True
+    )
+    assert weekends == [NepaliDate(2080, 5, 16), NepaliDate(2080, 5, 17)]
 
 
 def test_nepalidaterangeextendedtests_weekenddays_includesundayfalse_returnsonlysaturday() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Without Sunday, only Saturday is a weekend day."""
+    weekends = DateRange(NepaliDate(2080, 5, 14), NepaliDate(2080, 5, 18)).weekend_days(
+        include_sunday=False
+    )
+    assert weekends == [NepaliDate(2080, 5, 16)]
 
 
 def test_nepalidaterangeextendedtests_weekenddays_rangewithnoweekend_returnsempty() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A Monday to Friday range has no weekend day."""
+    rng = DateRange(NepaliDate(2080, 5, 11), NepaliDate(2080, 5, 15))
+    assert rng.weekend_days(include_sunday=True) == []
 
 
 def test_nepalidaterangeextendedtests_weekenddays_emptyrange_returnsempty() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built, so it has no weekend days (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_workingdays_excludesundayfalse_excludesonlysaturday() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """By default only Saturday is a non-working day."""
+    rng = DateRange(NepaliDate(2080, 5, 14), NepaliDate(2080, 5, 18))
+    working = rng.working_days(exclude_sunday=False)
+    assert len(working) == _FOUR_WORKING_DAYS
+    assert NepaliDate(2080, 5, 16) not in working
+    assert NepaliDate(2080, 5, 17) in working
 
 
 def test_nepalidaterangeextendedtests_workingdays_excludesundaytrue_excludesbothsatandsun() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """With the Sunday flag both weekend days are excluded."""
+    rng = DateRange(NepaliDate(2080, 5, 14), NepaliDate(2080, 5, 18))
+    working = rng.working_days(exclude_sunday=True)
+    assert working == [
+        NepaliDate(2080, 5, 14),
+        NepaliDate(2080, 5, 15),
+        NepaliDate(2080, 5, 18),
+    ]
 
 
 def test_nepalidaterangeextendedtests_workingdays_emptyrange_returnsempty() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built, so it has no working days (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_fromdaycount_zerodays_throwsargumentoutofrangeexception() -> (
     None
 ):
-    """FromDayCount is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A day count of zero is refused (NR08)."""
+    with pytest.raises(NepDateError):
+        DateRange.from_day_count(NepaliDate(2080, 5, 1), 0)
 
 
 def test_nepalidaterangeextendedtests_fromdaycount_negativedays_throwsargumentoutofrangeexception() -> (
     None
 ):
-    """FromDayCount is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A negative day count is refused (NR08)."""
+    with pytest.raises(NepDateError):
+        DateRange.from_day_count(NepaliDate(2080, 5, 1), -5)
 
 
 def test_nepalidaterangeextendedtests_intersect_nonoverlappingranges_returnsemptyrange() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Disjoint ranges have no intersection, so the port returns None (D-01)."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 25))
+    assert first.intersect(second) is None
 
 
 def test_nepalidaterangeextendedtests_intersect_adjacentranges_returnsemptyrange() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Adjacent ranges share no date, so the port returns None (D-01, D-16)."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 11), NepaliDate(2080, 1, 20))
+    assert first.intersect(second) is None
 
 
 def test_nepalidaterangeextendedtests_intersect_onerangefullyinsideother_returnsinnerrange() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """The intersection of a range and its inner range is the inner range."""
+    outer = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 30))
+    inner = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert outer.intersect(inner) == inner
 
 
 def test_nepalidaterangeextendedtests_union_leftrangeisempty_returnsrightrange() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built; a range unioned with itself is itself (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
+    actual = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert actual.union(actual) == actual
 
 
 def test_nepalidaterangeextendedtests_union_rightrangeisempty_returnsleftrange() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """An empty range cannot be built; a range unioned with itself is itself (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
+    actual = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert actual.union(actual) == actual
 
 
 def test_nepalidaterangeextendedtests_union_nonoverlappingranges_spansentiregap() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """The union of two ranges with a gap is the smallest covering range."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 20), NepaliDate(2080, 1, 30))
+    assert first.union(second) == DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 30))
 
 
 def test_nepalidaterangeextendedtests_contains_exactstartdate_returnstrue() -> None:
@@ -1644,135 +1722,182 @@ def test_nepalidaterangeextendedtests_contains_onedayafterend_returnsfalse() -> 
 
 
 def test_nepalidaterangeextendedtests_contains_emptyrange_containsnothing() -> None:
-    """There is no empty DateRange."""
-    pytest.skip("n/a: D-09, no empty DateRange (start > end raises)")
+    """An empty range cannot be built, so it contains nothing (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_isadjacentto_gapbetweenranges_returnsfalse() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A one-day gap means the ranges are not adjacent."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 12), NepaliDate(2080, 1, 20))
+    assert first.is_adjacent_to(second) is False
 
 
 def test_nepalidaterangeextendedtests_isadjacentto_overlappingranges_returnsfalse() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Overlapping ranges are not adjacent."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert first.is_adjacent_to(second) is False
 
 
 def test_nepalidaterangeextendedtests_isadjacentto_emptyrange_returnsfalse() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A separated range is not adjacent in either direction; an empty range is refused (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 12))
+    actual = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    other = DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 20))
+    assert actual.is_adjacent_to(other) is False
+    assert other.is_adjacent_to(actual) is False
 
 
 def test_nepalidaterangeextendedtests_except_nonoverlappingexcluderange_returnsoriginalrange() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Removing a range that does not overlap returns the original range."""
+    rng = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    exclude = DateRange(NepaliDate(2080, 2, 1), NepaliDate(2080, 2, 15))
+    assert rng.difference(exclude) == [rng]
 
 
 def test_nepalidaterangeextendedtests_except_excluderangefullycontainsthis_returnsemptyarray() -> (
     None
 ):
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Removing a range that covers this one leaves nothing."""
+    rng = DateRange(NepaliDate(2080, 1, 5), NepaliDate(2080, 1, 15))
+    exclude = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 20))
+    assert rng.difference(exclude) == []
 
 
 def test_nepalidaterangeextendedtests_except_excludeoverlapsstart_returnsrightpart() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Removing the start of a range leaves its right part."""
+    rng = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 20))
+    exclude = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    assert rng.difference(exclude) == [DateRange(NepaliDate(2080, 1, 11), NepaliDate(2080, 1, 20))]
 
 
 def test_nepalidaterangeextendedtests_except_excludeoverlapsend_returnsleftpart() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Removing the end of a range leaves its left part."""
+    rng = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 20))
+    exclude = DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 20))
+    assert rng.difference(exclude) == [DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 14))]
 
 
 def test_nepalidaterangeextendedtests_getenumerator_threedayrange_yieldsexactlythreedates() -> None:
-    """A three-day range yields exactly three dates."""
-    r = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 3))
-    assert list(r) == [
-        NepaliDate(2080, 1, 1),
-        NepaliDate(2080, 1, 2),
-        NepaliDate(2080, 1, 3),
+    """Iterating a three-day range yields the three dates in order."""
+    dates = list(DateRange(NepaliDate(2080, 5, 13), NepaliDate(2080, 5, 15)))
+    assert dates == [
+        NepaliDate(2080, 5, 13),
+        NepaliDate(2080, 5, 14),
+        NepaliDate(2080, 5, 15),
     ]
 
 
 def test_nepalidaterangeextendedtests_getenumerator_emptyrange_yieldsnodates() -> None:
-    """There is no empty DateRange."""
-    pytest.skip("n/a: D-09, no empty DateRange (start > end raises)")
+    """An empty range cannot be built, so there is nothing to iterate (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_getenumerator_singledayrange_yieldsonedate() -> None:
     """A single-day range yields that one date."""
-    d = NepaliDate(2080, 5, 5)
-    assert list(DateRange(d, d)) == [d]
+    single = DateRange.single(NepaliDate(2080, 5, 15))
+    assert list(single) == [NepaliDate(2080, 5, 15)]
 
 
 def test_nepalidaterangeextendedtests_tostring_defaultformat_isstartdashend() -> None:
-    """DateRange has no ToString in the Python API."""
-    pytest.skip("n/a: DateRange has no ToString in the Python API")
+    """``str`` is the two default displays separated by a dash with spaces."""
+    rng = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert str(rng) == "2080/01/01 - 2080/01/15"
 
 
 def test_nepalidaterangeextendedtests_tostring_emptyrange_returnsemptyrangestring() -> None:
-    """DateRange has no ToString in the Python API."""
-    pytest.skip("n/a: DateRange has no ToString in the Python API")
+    """There is no empty range string, because the range cannot be built (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_tostring_withdateformat_usesspecifiedformat() -> None:
-    """DateRange has no ToString in the Python API."""
-    pytest.skip("n/a: DateRange has no ToString in the Python API")
+    """``to_string`` formats both ends with the requested order and separator."""
+    rng = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert rng.to_string(DateOrder.DMY, Separator.DASH) == "01-01-2080 - 15-01-2080"
 
 
 def test_nepalidaterangeextendedtests_tostring_withdateformat_emptyrange_returnsemptyrangestring() -> (
     None
 ):
-    """DateRange has no ToString in the Python API."""
-    pytest.skip("n/a: DateRange has no ToString in the Python API")
+    """There is no empty range string, because the range cannot be built (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 5, 10), NepaliDate(2080, 5, 1))
 
 
 def test_nepalidaterangeextendedtests_equals_identicalranges_returnstrue() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """Ranges with the same two bounds are equal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert first == second
 
 
 def test_nepalidaterangeextendedtests_equals_differentstart_returnsfalse() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """A different start makes the ranges unequal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 2), NepaliDate(2080, 1, 15))
+    assert first != second
 
 
 def test_nepalidaterangeextendedtests_equals_differentend_returnsfalse() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """A different end makes the ranges unequal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 16))
+    assert first != second
 
 
 def test_nepalidaterangeextendedtests_equals_bothempty_returnstrue() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """An empty range cannot be built, so there are no two empty ranges to compare (D-01)."""
+    for start, end in (
+        ((2080, 5, 10), (2080, 5, 1)),
+        ((2079, 3, 10), (2079, 3, 1)),
+    ):
+        with pytest.raises(NepDateError):
+            DateRange(NepaliDate(*start), NepaliDate(*end))
 
 
 def test_nepalidaterangeextendedtests_equals_objectoverload_samerange_returnstrue() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """Equality is value equality, not object identity."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert first == second
+    assert first is not second
 
 
 def test_nepalidaterangeextendedtests_equals_objectoverload_wrongtype_returnsfalse() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """A range is never equal to a value of another type."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert (first == "not a range") is False
+    assert first != "not a range"
 
 
 def test_nepalidaterangeextendedtests_gethashcode_equalranges_samehash() -> None:
-    """DateRange has no hash in the Python API."""
-    pytest.skip("n/a: DateRange has no hash in the Python API")
+    """Equal ranges hash equal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert hash(first) == hash(second)
 
 
 def test_nepalidaterangeextendedtests_operatorequals_identicalranges_returnstrue() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """Two equal ranges compare equal and not unequal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    assert first == second
+    assert (first != second) is False
 
 
 def test_nepalidaterangeextendedtests_operatornotequals_differentranges_returnstrue() -> None:
-    """DateRange has no equality in the Python API."""
-    pytest.skip("n/a: DateRange has no equality in the Python API")
+    """Two different ranges compare unequal and not equal."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 16))
+    assert first != second
+    assert (first == second) is False
 
 
 def test_nepalidaterangetests_constructor_validdates_createsrange() -> None:
@@ -1782,21 +1907,27 @@ def test_nepalidaterangetests_constructor_validdates_createsrange() -> None:
 
 
 def test_nepalidaterangetests_constructor_endbeforestart_createsemptyrange() -> None:
-    """There is no empty DateRange."""
-    pytest.skip("n/a: D-09, no empty DateRange (start > end raises)")
+    """A start after the end is refused, so there is no empty range (D-01)."""
+    with pytest.raises(NepDateError):
+        DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 1))
 
 
 def test_nepalidaterangetests_singleday_createsrangewithoneday() -> None:
-    """A single-day range has that day as both ends."""
-    d = NepaliDate(2080, 1, 1)
-    r = DateRange(d, d)
-    assert r.start == d
-    assert r.end == d
+    """A single-day range has that day as both ends and length one."""
+    day = NepaliDate(2080, 1, 1)
+    rng = DateRange.single(day)
+    assert rng.start == day
+    assert rng.end == day
+    assert len(rng) == 1
 
 
 def test_nepalidaterangetests_fromdaycount_createscorrectrange() -> None:
-    """FromDayCount is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A day count ends on start plus the count minus one."""
+    start = NepaliDate(2080, 1, 1)
+    rng = DateRange.from_day_count(start, 10)
+    assert rng.start == start
+    assert rng.end == start.add_days(9)
+    assert len(rng) == _TEN_DAY_RANGE
 
 
 def test_nepalidaterangetests_formonth_createscorrectrange() -> None:
@@ -1822,48 +1953,76 @@ def test_nepalidaterangetests_contains_dateoutsiderange_returnsfalse() -> None:
 
 
 def test_nepalidaterangetests_contains_rangefullycontained_returnstrue() -> None:
-    """Range containment is not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A range contains an inner range."""
+    outer = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 30))
+    inner = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert outer.contains_range(inner) is True
 
 
 def test_nepalidaterangetests_overlaps_rangesoverlap_returnstrue() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Ranges that share a date overlap."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert first.overlaps(second) is True
 
 
 def test_nepalidaterangetests_overlaps_rangesdontoverlap_returnsfalse() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Ranges with a gap do not overlap."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 20))
+    assert first.overlaps(second) is False
 
 
 def test_nepalidaterangetests_isadjacentto_adjacentranges_returnstrue() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """One range starting the day after the other ends is adjacent."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 10))
+    second = DateRange(NepaliDate(2080, 1, 11), NepaliDate(2080, 1, 20))
+    assert first.is_adjacent_to(second) is True
 
 
 def test_nepalidaterangetests_intersect_overlappingranges_returnsintersection() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """The intersection of two overlapping ranges is their shared days."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    intersection = first.intersect(second)
+    assert intersection == DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 15))
+    assert intersection is not None and len(intersection) == _SIX_OVERLAP_DAYS
 
 
 def test_nepalidaterangetests_union_overlappingranges_returnsunion() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """The union of two overlapping ranges is the smallest covering range."""
+    first = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 15))
+    second = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert first.union(second) == DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 20))
 
 
 def test_nepalidaterangetests_except_removingrangefrommiddle_returnstworanges() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Removing a middle range leaves the two parts around it."""
+    full = DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 30))
+    middle = DateRange(NepaliDate(2080, 1, 10), NepaliDate(2080, 1, 20))
+    assert full.difference(middle) == [
+        DateRange(NepaliDate(2080, 1, 1), NepaliDate(2080, 1, 9)),
+        DateRange(NepaliDate(2080, 1, 21), NepaliDate(2080, 1, 30)),
+    ]
 
 
 def test_nepalidaterangetests_splitbymonth_rangeacrossmonths_splitscorrectly() -> None:
-    """Set operations are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """A range across three months splits into the clipped first, the full second and the last."""
+    parts = DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 3, 10)).split_by_month()
+    assert len(parts) == _THREE_MONTH_PARTS
+    assert parts[0] == DateRange(NepaliDate(2080, 1, 15), NepaliDate(2080, 1, 1).last_of_month())
+    assert parts[1] == DateRange(NepaliDate(2080, 2, 1), NepaliDate(2080, 2, 1).last_of_month())
+    assert parts[2] == DateRange(NepaliDate(2080, 3, 1), NepaliDate(2080, 3, 10))
 
 
 def test_nepalidaterangetests_workingdays_returnscorrectdays() -> None:
-    """Working-day helpers are not ported."""
-    pytest.skip("n/a: D-09, DateRange has no set operations")
+    """Working days are every day of the range except Saturday."""
+    start = NepaliDate(2080, 1, 1)
+    rng = DateRange.from_day_count(start, 14)
+    weekends = [day for day in rng if day.weekday is Weekday.SATURDAY]
+    working = rng.working_days()
+    assert len(working) == 14 - len(weekends)
+    assert all(day.weekday is not Weekday.SATURDAY for day in working)
 
 
 def test_nepalidaterangetests_enumeration_enumeratesalldaysinrange() -> None:
@@ -2021,25 +2180,25 @@ def test_nepalidateparsabletests_parse_via_genericconstraint_returns_correctdate
 
 
 def test_nepalidateparsabletests_tryparse_via_genericconstraint_validdate_returns_true() -> None:
-    """Python has no TryParse: ``parse`` returns the date on success."""
-    assert NepaliDate.parse("2081/04/15") == _FORMAT_DATE
+    """``try_parse`` returns the date of a valid string."""
+    assert NepaliDate.try_parse("2081/04/15") == _FORMAT_DATE
 
 
 def test_nepalidateparsabletests_tryparse_via_genericconstraint_invaliddate_returns_false() -> None:
-    """Python has no TryParse: ``parse`` raises where C# returns false."""
-    _assert_parse_error("invalid", ErrorKind.INVALID_CHARACTER)
+    """``try_parse`` returns None where C# returns false (D-01)."""
+    assert NepaliDate.try_parse("garbage") is None
 
 
 def test_nepalidateparsabletests_spanparse_via_genericconstraint_returns_correctdate() -> None:
-    """C# ReadOnlySpan has no Python equivalent."""
-    pytest.skip("n/a: C# ReadOnlySpan")
+    """A Python string is the only text type, so the span case uses the same parser."""
+    assert NepaliDate.parse("2081-04-15") == _FORMAT_DATE
 
 
 def test_nepalidateparsabletests_spantryparse_via_genericconstraint_validdate_returns_true() -> (
     None
 ):
-    """C# ReadOnlySpan has no Python equivalent."""
-    pytest.skip("n/a: C# ReadOnlySpan")
+    """A Python string is the only text type, so the span case uses the same parser."""
+    assert NepaliDate.try_parse("2081/04/15") == _FORMAT_DATE
 
 
 # --- phase 3: Core/NepaliDateMonthNameTests.cs ---
@@ -2603,18 +2762,20 @@ def test_optimizationverificationtests_smartdateparser_whitespaceinput_throwsexc
 
 
 def test_optimizationverificationtests_smartdateparser_tryparse_validinput_returnstrue() -> None:
-    """Python has no TryParse: ``parse_lenient`` returns the date on success."""
-    assert NepaliDate.parse_lenient("2080/05/15").year == _YEAR_2080
+    """``try_parse_lenient`` returns the date of a valid input."""
+    date = NepaliDate.try_parse_lenient("2080/05/15")
+    assert date is not None
+    assert date.year == _YEAR_2080
 
 
 def test_optimizationverificationtests_smartdateparser_tryparse_invalidinput_returnsfalse() -> None:
-    """Python has no TryParse: ``parse_lenient`` raises where C# returns false."""
-    _assert_lenient_error("garbage", ErrorKind.UNRECOGNIZED)
+    """``try_parse_lenient`` returns None where C# returns false (D-01)."""
+    assert NepaliDate.try_parse_lenient("garbage") is None
 
 
 def test_optimizationverificationtests_smartdateparser_tryparse_nullinput_returnsfalse() -> None:
-    """C# TryParse has no Python equivalent and there is no null reference."""
-    pytest.skip("n/a: C# TryParse and null reference")
+    """C# null has no Python equivalent; empty text is the closest input."""
+    assert NepaliDate.try_parse_lenient("") is None
 
 
 def test_optimizationverificationtests_tostring_everymonthfirstday_roundtripsviaconstructor() -> (
@@ -2700,13 +2861,13 @@ def test_smartdateparsertests_parse_invalidformat_throwsformatexception() -> Non
 
 
 def test_smartdateparsertests_tryparse_validformat_returnstrue() -> None:
-    """Python has no TryParse: ``parse_lenient`` returns the date on success."""
-    assert NepaliDate.parse_lenient("2080/04/15") == NepaliDate(2080, 4, 15)
+    """``try_parse_lenient`` returns the date of a month-name input."""
+    assert NepaliDate.try_parse_lenient("15 Shrawan 2080") == NepaliDate(2080, 4, 15)
 
 
 def test_smartdateparsertests_tryparse_invalidformat_returnsfalse() -> None:
-    """Python has no TryParse: ``parse_lenient`` raises where C# returns false."""
-    _assert_lenient_error("garbage", ErrorKind.UNRECOGNIZED)
+    """``try_parse_lenient`` returns None where C# returns false (D-01)."""
+    assert NepaliDate.try_parse_lenient("not a date") is None
 
 
 def test_smartdateparsertests_extensionmethod_tonepalidate_parsescorrectly() -> None:
@@ -2715,8 +2876,8 @@ def test_smartdateparsertests_extensionmethod_tonepalidate_parsescorrectly() -> 
 
 
 def test_smartdateparsertests_extensionmethod_trytonepalidate_parsescorrectly() -> None:
-    """The Try extension method's success path is ``parse``."""
-    assert NepaliDate.parse("2080/04/15") == NepaliDate(2080, 4, 15)
+    """The Try extension method's success path is the non-throwing lenient parser."""
+    assert NepaliDate.try_parse_lenient("2080/04/15") == NepaliDate(2080, 4, 15)
 
 
 # --- phase 3: Extensions/StringExtensionsTests.cs ---

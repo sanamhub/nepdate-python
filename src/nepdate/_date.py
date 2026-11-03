@@ -29,6 +29,9 @@ if TYPE_CHECKING:
 
 _TOTAL_DAYS = MONTH_START_ORD[-1] - MONTH_START_ORD[0]
 _TOTAL_MONTHS = len(MONTH_LENGTHS)
+_YMD_YEAR = 10000
+_YMD_MONTH = 100
+_QUOTED_LEN = 2
 
 
 class NepaliDate:
@@ -111,6 +114,16 @@ class NepaliDate:
         """The number of days in the month of this date."""
         return MONTH_LENGTHS[(self._y - MIN_YEAR) * 12 + (self._m - 1)]
 
+    @property
+    def year_length(self) -> int:
+        """The number of days in the BS year of this date, 364 through 367 (D-12).
+
+        This is the sum of the twelve month lengths, not the Gregorian leap year of
+        ``to_date().year``.
+        """
+        index = (self._y - MIN_YEAR) * 12
+        return MONTH_START_ORD[index + 12] - MONTH_START_ORD[index]
+
     def first_of_month(self) -> NepaliDate:
         """The first day of the month of this date."""
         return _from_parts(self._y, self._m, 1, self._o - self._d + 1)
@@ -177,6 +190,48 @@ class NepaliDate:
         """
         return _today_from(_now(), tz, cls)
 
+    def is_today(self, tz: datetime.tzinfo | None = None) -> bool:
+        """Whether this date is the current date in ``tz``.
+
+        Args:
+            tz: The time zone to read the clock in; None means Nepal time, as in ``today``.
+
+        Returns:
+            True when ``today(tz)`` equals this date.
+
+        Raises:
+            NepDateError: The clock is outside the supported range.
+        """
+        return self._o == _today_from(_now(), tz, type(self))._o
+
+    def is_yesterday(self, tz: datetime.tzinfo | None = None) -> bool:
+        """Whether this date is the day before the current date in ``tz``.
+
+        Args:
+            tz: The time zone to read the clock in; None means Nepal time, as in ``today``.
+
+        Returns:
+            True when ``today(tz) - 1 day`` equals this date.
+
+        Raises:
+            NepDateError: The clock is outside the supported range.
+        """
+        return self._o == _today_from(_now(), tz, type(self))._o - 1
+
+    def is_tomorrow(self, tz: datetime.tzinfo | None = None) -> bool:
+        """Whether this date is the day after the current date in ``tz``.
+
+        Args:
+            tz: The time zone to read the clock in; None means Nepal time, as in ``today``.
+
+        Returns:
+            True when ``today(tz) + 1 day`` equals this date.
+
+        Raises:
+            NepDateError: The clock is outside the supported range.
+        """
+        return self._o == _today_from(_now(), tz, type(self))._o + 1
+
     @classmethod
     def parse(cls, s: str) -> NepaliDate:
         """Parse a date from the strict form of PARSING §1.
@@ -206,6 +261,75 @@ class NepaliDate:
             NepDateError: No rule matches or the date is invalid.
         """
         return parse_lenient(s, cls)
+
+    @classmethod
+    def fromisoformat(cls, s: str) -> NepaliDate:
+        """Parse the ``YYYY-MM-DD`` form, the inverse of ``isoformat``.
+
+        This is the name a ``datetime.date`` user expects next to ``isoformat``. It is the
+        strict parser, so every separator of PARSING §1 is accepted.
+
+        Args:
+            s: The text, for example ``"2081-04-15"``.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: The text is malformed or names an invalid date.
+        """
+        return parse_strict(s, cls)
+
+    @classmethod
+    def try_parse(cls, s: str) -> NepaliDate | None:
+        """Parse the strict form of PARSING §1, or return None instead of raising.
+
+        Args:
+            s: The text, year then month then day, in ASCII or Devanagari digits.
+
+        Returns:
+            The parsed date, or None when the text is malformed or names an invalid date.
+        """
+        try:
+            return parse_strict(s, cls)
+        except NepDateError:
+            return None
+
+    @classmethod
+    def try_parse_lenient(cls, s: str) -> NepaliDate | None:
+        """Parse the lenient form of PARSING §2, or return None instead of raising.
+
+        Args:
+            s: Human-written text such as ``"15 Shrawan 2080"``.
+
+        Returns:
+            The parsed date, or None when no rule matches or the date is invalid.
+        """
+        try:
+            return parse_lenient(s, cls)
+        except NepDateError:
+            return None
+
+    @classmethod
+    def from_ymd_int(cls, n: int) -> NepaliDate:
+        """Build a date from the canonical ``YYYYMMDD`` integer (D-11).
+
+        The three fields are split with C#'s truncating division, so a negative integer
+        reaches validation rather than wrapping.
+
+        Args:
+            n: The integer, for example ``20810415``.
+
+        Returns:
+            The matching date.
+
+        Raises:
+            NepDateError: The integer names an invalid date.
+        """
+        year = _trunc_div(n, _YMD_YEAR)
+        month = _trunc_mod(_trunc_div(n, _YMD_MONTH), _YMD_MONTH)
+        day = _trunc_mod(n, _YMD_MONTH)
+        return cls(year, month, day)
 
     def add_days(self, n: int) -> NepaliDate:
         """The date ``n`` days from this one, by ordinal addition.
@@ -343,6 +467,45 @@ class NepaliDate:
         """The sortable ``YYYY-MM-DD`` form (D-11)."""
         return format_iso(self._y, self._m, self._d, Lang.EN)
 
+    def to_ymd_int(self) -> int:
+        """The canonical ``YYYYMMDD`` integer of this date (D-11)."""
+        return self._y * _YMD_YEAR + self._m * _YMD_MONTH + self._d
+
+    def to_json(self) -> str:
+        """The JSON text of this date: the quoted ``"YYYY-MM-DD"`` string (D-11).
+
+        The value is already JSON, so it can be written into a document without another
+        encoder; ``from_json`` reads it back.
+        """
+        return f'"{format_iso(self._y, self._m, self._d, Lang.EN)}"'
+
+    @classmethod
+    def from_json(cls, text: str) -> NepaliDate:
+        """Parse the JSON string written by ``to_json`` (D-11).
+
+        A JSON ``null`` or any value that is not a string is refused, because a port has
+        no default date to put in its place (D-01).
+
+        Args:
+            text: The JSON text, for example ``'"2081-04-15"'``.
+
+        Returns:
+            The parsed date.
+
+        Raises:
+            NepDateError: The text is not a quoted date string or names an invalid date.
+        """
+        stripped = text.strip()
+        if (
+            len(stripped) < _QUOTED_LEN
+            or not stripped.startswith('"')
+            or not stripped.endswith('"')
+        ):
+            raise NepDateError(
+                ErrorKind.INVALID_CHARACTER, "the JSON value is not a quoted date string"
+            )
+        return cls.parse(stripped[1:-1])
+
     def short(
         self,
         order: DateOrder = DateOrder.YMD,
@@ -425,7 +588,8 @@ class NepaliDate:
             td: The amount to add; it must be a whole number of days.
 
         Returns:
-            The resulting date.
+            The resulting date, or ``NotImplemented`` (so Python raises ``TypeError``)
+            when ``td`` is not a timedelta.
 
         Raises:
             NepDateError: ``td`` has a fractional day, or the result is out of range.
@@ -444,7 +608,8 @@ class NepaliDate:
 
         Returns:
             ``self - other`` as a timedelta when ``other`` is a date, or the date
-            ``self + (-other)`` when ``other`` is a timedelta.
+            ``self + (-other)`` when ``other`` is a timedelta. Anything else returns
+            ``NotImplemented``, so Python raises ``TypeError``.
 
         Raises:
             NepDateError: A timedelta with a fractional day, or an out-of-range result.
@@ -482,6 +647,21 @@ class NepaliDate:
 
     def __hash__(self) -> int:
         return hash(self._o)
+
+    def __reduce__(self) -> tuple[type[NepaliDate], tuple[int, int, int]]:
+        """Rebuild the same date from ``pickle`` or ``copy``."""
+        return (type(self), (self._y, self._m, self._d))
+
+
+def _trunc_div(n: int, divisor: int) -> int:
+    """Divide towards zero, as C# integer division does."""
+    quotient = abs(n) // divisor
+    return -quotient if n < 0 else quotient
+
+
+def _trunc_mod(n: int, divisor: int) -> int:
+    """Return the remainder of :func:`_trunc_div`, with the sign of ``n`` as in C#."""
+    return n - _trunc_div(n, divisor) * divisor
 
 
 def _from_serial(n: int) -> NepaliDate:

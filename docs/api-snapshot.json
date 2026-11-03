@@ -16,6 +16,8 @@
       "Quarter",
       "Separator",
       "Weekday",
+      "to_english_dates",
+      "to_nepali_dates",
       "to_nepali_digits"
     ],
     "nepdate_patro": [
@@ -120,6 +122,14 @@
       "kind": "method",
       "signature": "(self, d: object) -> bool"
     },
+    "nepdate.DateRange.__eq__": {
+      "kind": "method",
+      "signature": "(self, other: object) -> bool"
+    },
+    "nepdate.DateRange.__hash__": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
     "nepdate.DateRange.__init__": {
       "kind": "method",
       "signature": "(self, start: NepaliDate, end: NepaliDate) -> None"
@@ -132,21 +142,97 @@
       "kind": "method",
       "signature": "(self) -> int"
     },
+    "nepdate.DateRange.__repr__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
     "nepdate.DateRange.__reversed__": {
       "kind": "method",
       "signature": "(self) -> Iterator[NepaliDate]"
+    },
+    "nepdate.DateRange.__str__": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
+    "nepdate.DateRange.contains_range": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> bool"
+    },
+    "nepdate.DateRange.current_calendar_year": {
+      "kind": "method",
+      "signature": "(cls, tz: datetime.tzinfo | None = None) -> DateRange"
+    },
+    "nepdate.DateRange.current_fiscal_year": {
+      "kind": "method",
+      "signature": "(cls, tz: datetime.tzinfo | None = None) -> DateRange"
+    },
+    "nepdate.DateRange.current_month": {
+      "kind": "method",
+      "signature": "(cls, tz: datetime.tzinfo | None = None) -> DateRange"
+    },
+    "nepdate.DateRange.dates_with_interval": {
+      "kind": "method",
+      "signature": "(self, interval: int) -> list[NepaliDate]"
+    },
+    "nepdate.DateRange.difference": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> list[DateRange]"
     },
     "nepdate.DateRange.end": {
       "annotation": "NepaliDate",
       "kind": "property"
     },
+    "nepdate.DateRange.from_day_count": {
+      "kind": "method",
+      "signature": "(cls, start: NepaliDate, days: int) -> DateRange"
+    },
+    "nepdate.DateRange.intersect": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> DateRange | None"
+    },
+    "nepdate.DateRange.is_adjacent_to": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> bool"
+    },
     "nepdate.DateRange.month": {
       "kind": "method",
       "signature": "(cls, year: int, month: int) -> DateRange"
     },
+    "nepdate.DateRange.overlaps": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> bool"
+    },
+    "nepdate.DateRange.single": {
+      "kind": "method",
+      "signature": "(cls, d: NepaliDate) -> DateRange"
+    },
+    "nepdate.DateRange.split_by_fiscal_quarter": {
+      "kind": "method",
+      "signature": "(self) -> list[DateRange]"
+    },
+    "nepdate.DateRange.split_by_month": {
+      "kind": "method",
+      "signature": "(self) -> list[DateRange]"
+    },
     "nepdate.DateRange.start": {
       "annotation": "NepaliDate",
       "kind": "property"
+    },
+    "nepdate.DateRange.to_string": {
+      "kind": "method",
+      "signature": "(self, order: DateOrder = DateOrder.YMD, sep: Separator = Separator.SLASH, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.DateRange.union": {
+      "kind": "method",
+      "signature": "(self, other: DateRange) -> DateRange"
+    },
+    "nepdate.DateRange.weekend_days": {
+      "kind": "method",
+      "signature": "(self, include_sunday: bool = True) -> list[NepaliDate]"
+    },
+    "nepdate.DateRange.working_days": {
+      "kind": "method",
+      "signature": "(self, exclude_sunday: bool = False) -> list[NepaliDate]"
     },
     "nepdate.DateRange.year": {
       "kind": "method",
@@ -385,6 +471,10 @@
       "kind": "method",
       "signature": "(self, other: object) -> bool"
     },
+    "nepdate.NepaliDate.__reduce__": {
+      "kind": "method",
+      "signature": "(self) -> tuple[type[NepaliDate], tuple[int, int, int]]"
+    },
     "nepdate.NepaliDate.__repr__": {
       "kind": "method",
       "signature": "(self) -> str"
@@ -441,9 +531,33 @@
       "kind": "method",
       "signature": "(cls, d: datetime.date) -> NepaliDate"
     },
+    "nepdate.NepaliDate.from_json": {
+      "kind": "method",
+      "signature": "(cls, text: str) -> NepaliDate"
+    },
     "nepdate.NepaliDate.from_ordinal": {
       "kind": "method",
       "signature": "(cls, n: int) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.from_ymd_int": {
+      "kind": "method",
+      "signature": "(cls, n: int) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.fromisoformat": {
+      "kind": "method",
+      "signature": "(cls, s: str) -> NepaliDate"
+    },
+    "nepdate.NepaliDate.is_today": {
+      "kind": "method",
+      "signature": "(self, tz: datetime.tzinfo | None = None) -> bool"
+    },
+    "nepdate.NepaliDate.is_tomorrow": {
+      "kind": "method",
+      "signature": "(self, tz: datetime.tzinfo | None = None) -> bool"
+    },
+    "nepdate.NepaliDate.is_yesterday": {
+      "kind": "method",
+      "signature": "(self, tz: datetime.tzinfo | None = None) -> bool"
     },
     "nepdate.NepaliDate.isoformat": {
       "kind": "method",
@@ -489,7 +603,15 @@
       "kind": "method",
       "signature": "(self) -> datetime.date"
     },
+    "nepdate.NepaliDate.to_json": {
+      "kind": "method",
+      "signature": "(self) -> str"
+    },
     "nepdate.NepaliDate.to_ordinal": {
+      "kind": "method",
+      "signature": "(self) -> int"
+    },
+    "nepdate.NepaliDate.to_ymd_int": {
       "kind": "method",
       "signature": "(self) -> int"
     },
@@ -497,11 +619,23 @@
       "kind": "method",
       "signature": "(cls, tz: datetime.tzinfo | None = None) -> NepaliDate"
     },
+    "nepdate.NepaliDate.try_parse": {
+      "kind": "method",
+      "signature": "(cls, s: str) -> NepaliDate | None"
+    },
+    "nepdate.NepaliDate.try_parse_lenient": {
+      "kind": "method",
+      "signature": "(cls, s: str) -> NepaliDate | None"
+    },
     "nepdate.NepaliDate.weekday": {
       "annotation": "Weekday",
       "kind": "property"
     },
     "nepdate.NepaliDate.year": {
+      "annotation": "int",
+      "kind": "property"
+    },
+    "nepdate.NepaliDate.year_length": {
       "annotation": "int",
       "kind": "property"
     },
@@ -616,6 +750,14 @@
     "nepdate.Weekday.short_label": {
       "kind": "method",
       "signature": "(self, lang: Lang = Lang.EN) -> str"
+    },
+    "nepdate.to_english_dates": {
+      "kind": "function",
+      "signature": "(items: Iterable[NepaliDate | str]) -> list[datetime.date]"
+    },
+    "nepdate.to_nepali_dates": {
+      "kind": "function",
+      "signature": "(dates: Iterable[datetime.date]) -> list[NepaliDate]"
     },
     "nepdate.to_nepali_digits": {
       "kind": "function",
