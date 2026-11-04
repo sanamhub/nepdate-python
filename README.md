@@ -17,10 +17,10 @@ years for Python 3.11 and newer. Part of the NepDate family: the shared data and
 the hub [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate); the C# original is
 [NepDate](https://github.com/RajuPrasai/NepDate).
 
-> **Status:** 0.2.0-rc.1 (`0.2.0rc1` on PyPI), a release candidate. The API is listed in
-> [docs/API.md](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) and may still
-> change before 0.2.0. Patro data (tithi, holidays, events) is informational, not an official
-> calendar.
+> **Status:** 1.0.0-rc.1 (`1.0.0rc1` on PyPI), the release candidate on the 1.0 line. The API is
+> listed in [docs/API.md](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) and is
+> stable from 1.0 (hub ADR-0009). Patro data (tithi, holidays, events) is informational, not an
+> official calendar.
 
 - Import `nepdate`. The core distribution is `nepdate-core`, because `nepdate` on PyPI belongs to
   an unrelated project (ADR-0007).
@@ -37,7 +37,7 @@ the hub [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate); the C# origin
 pip install --pre nepdate-core
 ```
 
-`--pre` is needed while only pre-releases exist; pin `nepdate-core==0.2.0rc1` to stay on this one.
+`--pre` is needed while only pre-releases exist; pin `nepdate-core==1.0.0rc1` to stay on this one.
 
 ## Dates
 
