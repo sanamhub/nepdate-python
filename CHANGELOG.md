@@ -5,7 +5,11 @@ The two distributions share this file and a version number (ADR-0005). The forma
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0-rc.1] - 2026-11-04
+
+### Changed
+
+- The API is stable from 1.0 (hub ADR-0009). No code change in these distributions; released with the family on the 1.0 line.
 
 ## [0.2.0-rc.1] - 2026-11-03
 
