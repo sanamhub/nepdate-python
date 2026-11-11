@@ -58,7 +58,7 @@ dev = [
 ]
 mutation = [
     "hypothesis==6.170.5",
-    "mutmut==3.8.0",
+    "mutmut==3.8.1",
     "pytest-cov==7.1.0",
 ]
 fuzz = [
