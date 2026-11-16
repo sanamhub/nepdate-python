@@ -42,19 +42,19 @@ both distributions with the same version. The core distribution is `nepdate-core
 
 ## Pre-releases
 
-The tag and the changelog use the same spelling as every other NepDate port, `0.1.0-beta.1`. PyPI
-needs PEP 440, so the pyprojects and the files say `0.1.0b1` (`scripts/versions.py` maps one to the
-other; only `alpha`, `beta` and `rc` are accepted). For `v0.1.0-beta.1`:
+The tag and the changelog use the same spelling as every other NepDate port, `1.1.0-beta.1`. PyPI
+needs PEP 440, so the pyprojects and the files say `1.1.0b1` (`scripts/versions.py` maps one to the
+other; only `alpha`, `beta` and `rc` are accepted). For `v1.1.0-beta.1`:
 
-- both pyprojects: `version = "0.1.0b1"`;
-- patro dependency: `nepdate-core>=0.1.0b1,<0.2`. The lower bound names the beta because pip
-  takes a pre-release only when a specifier mentions one; `>=0.1` would refuse `0.1.0b1`;
-- changelog: `## [0.1.0-beta.1] - YYYY-MM-DD`. A stable section does not satisfy a beta tag, nor
+- both pyprojects: `version = "1.1.0b1"`;
+- patro dependency: `nepdate-core>=1.1.0b1,<1.2`. The lower bound names the beta because pip
+  takes a pre-release only when a specifier mentions one; `>=1.1` would refuse `1.1.0b1`;
+- changelog: `## [1.1.0-beta.1] - YYYY-MM-DD`. A stable section does not satisfy a beta tag, nor
   the other way round;
-- `release-check 0.1.0-beta.1` and `pypi-version 0.1.0-beta.1` (prints `0.1.0b1`).
+- `release-check 1.1.0-beta.1` and `pypi-version 1.1.0-beta.1` (prints `1.1.0b1`).
 
 The GitHub Release is marked as a pre-release. Users install it with
-`pip install --pre nepdate-core nepdate-patro` or by pinning `==0.1.0b1`.
+`pip install --pre nepdate-core nepdate-patro` or by pinning `==1.1.0b1`.
 
 ## Releasing
 
