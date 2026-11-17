@@ -279,6 +279,11 @@ def _outside(modules: set[str], package: str, allowed: frozenset[str]) -> list[s
 
 def gate_import_time() -> None:
     """Check what each import loads, that the core never loads the patro, and a coarse ceiling."""
+    # Compiling the patro tables from source loads unicodedata, because the tables use \N{...}
+    # escapes. That is a cost of having no cached bytecode, not of the import, and a shell with
+    # PYTHONDONTWRITEBYTECODE set never gets a cache. compileall writes it anyway, so the
+    # measurements below see an import that runs cached code, as an installed package does.
+    _run(["uv", "run", "python", "-m", "compileall", "-q", "src", "packages/nepdate-patro/src"])
     core_new = _new_modules("", f"import {CORE_MODULE}")
     # What the allowed stdlib modules load themselves differs by version (datetime pulls in
     # math on 3.11), so it is measured on this interpreter instead of listed.
