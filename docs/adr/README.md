@@ -19,3 +19,4 @@ ADR.
 | [0011](0011-release-gates.md) | Release gates and the patro build backend | Accepted |
 | [0012](0012-one-environment-per-distribution.md) | One publishing environment per distribution | Accepted |
 | [0013](0013-mutation-on-library-pull-requests.md) | Mutation testing on library pull requests | Accepted |
+| [0014](0014-patro-pins-the-exact-core-version.md) | The patro requires exactly the same core version | Accepted |

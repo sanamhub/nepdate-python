@@ -54,22 +54,22 @@ def test_prerelease(versions: Any) -> None:
     assert not versions.is_prerelease("0.1.0")
 
 
-def test_core_specifiers_follow_the_minor(versions: Any) -> None:
-    """A stable patro release accepts any core of the same minor."""
-    assert versions.core_specifiers("0.0.0") == {">=0.0", "<0.1"}
-    assert versions.core_specifiers("1.4.2") == {">=1.4", "<1.5"}
+def test_core_specifiers_are_the_exact_version(versions: Any) -> None:
+    """The patro requires exactly the core of the same release."""
+    assert versions.core_specifiers("0.0.0") == {"==0.0.0"}
+    assert versions.core_specifiers("1.4.2") == {"==1.4.2"}
 
 
 def test_core_specifiers_name_the_prerelease(versions: Any) -> None:
-    """A beta patro release names the beta core, which is what lets pip pick it."""
-    assert versions.core_specifiers("0.1.0-beta.1") == {">=0.1.0b1", "<0.2"}
+    """A beta patro release names the beta core in its PEP 440 form."""
+    assert versions.core_specifiers("0.1.0-beta.1") == {"==0.1.0b1"}
 
 
-def test_specifiers_admit_the_beta_core_without_pre(versions: Any) -> None:
-    """The beta range resolves to the beta core, and the stable range alone would not.
+def test_specifier_admits_only_its_own_core_without_pre(versions: Any) -> None:
+    """The pin resolves to the beta core and to no other version.
 
-    This is the reason for naming the pre-release in the lower bound: under PEP 440 an installer
-    takes a pre-release only when a specifier mentions one.
+    Under PEP 440 an installer takes a pre-release only when a specifier mentions one, and the
+    exact pin does.
     """
     from packaging.specifiers import SpecifierSet  # noqa: PLC0415 - test-only dependency
 
@@ -77,4 +77,5 @@ def test_specifiers_admit_the_beta_core_without_pre(versions: Any) -> None:
     stable = SpecifierSet(",".join(sorted(versions.core_specifiers("0.1.0"))))
     assert "0.1.0b1" in beta
     assert "0.1.0b1" not in stable
-    assert "0.2.0b1" not in beta
+    assert "0.1.1" not in stable
+    assert "0.1.0b2" not in beta
