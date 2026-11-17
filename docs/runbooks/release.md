@@ -28,10 +28,10 @@ both distributions with the same version. The core distribution is `nepdate-core
 
 1. `main` is green. `uv run python scripts/ci.py` passes locally.
 2. Both `pyproject.toml` files (root and `packages/nepdate-patro/`) have the PyPI spelling of the
-   version; the patro dependency is `nepdate-core>=X.Y,<X.(Y+1)`; `CHANGELOG.md` has
+   version; the patro dependency is `nepdate-core==X.Y.Z`; `CHANGELOG.md` has
    `## [X.Y.Z] - YYYY-MM-DD`. For a pre-release see below.
 3. `uv run python scripts/ci.py release-check X.Y.Z` passes. It checks both `pyproject.toml`
-   versions, the patro range and the dated changelog heading.
+   versions, the exact patro pin and the dated changelog heading.
 4. The release commit is on `origin/main`. The publish job fetches `origin/main` and runs
    `git merge-base --is-ancestor` on the tagged commit; a tag on a side branch fails before any
    upload.
@@ -47,8 +47,8 @@ needs PEP 440, so the pyprojects and the files say `1.1.0b1` (`scripts/versions.
 other; only `alpha`, `beta` and `rc` are accepted). For `v1.1.0-beta.1`:
 
 - both pyprojects: `version = "1.1.0b1"`;
-- patro dependency: `nepdate-core>=1.1.0b1,<1.2`. The lower bound names the beta because pip
-  takes a pre-release only when a specifier mentions one; `>=1.1` would refuse `1.1.0b1`;
+- patro dependency: `nepdate-core==1.1.0b1`. The pin names the beta because pip
+  takes a pre-release only when a specifier mentions one;
 - changelog: `## [1.1.0-beta.1] - YYYY-MM-DD`. A stable section does not satisfy a beta tag, nor
   the other way round;
 - `release-check 1.1.0-beta.1` and `pypi-version 1.1.0-beta.1` (prints `1.1.0b1`).

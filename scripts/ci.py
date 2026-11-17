@@ -563,7 +563,31 @@ def _changelog_errors(version: str, root: Path) -> list[str]:
     return errors
 
 
-def release_check(  # noqa: PLR0912 - one branch per release file family
+def _patro_core_specifiers(patro_project: dict[str, Any], core_name: str) -> set[str]:
+    """Return the specifiers the patro pyproject puts on the core.
+
+    Args:
+        patro_project: The ``[project]`` table of the patro pyproject.
+        core_name: The core distribution name.
+
+    Returns:
+        The specifier strings, or an empty set when no dependency names the core.
+
+    Raises:
+        ValueError: ``dependencies`` is not a list.
+    """
+    dependencies = patro_project.get("dependencies", [])
+    if not isinstance(dependencies, list):
+        raise ValueError("patro dependencies is not a list")
+    for dependency in dependencies:
+        if isinstance(dependency, str):
+            found = _requirement_specifiers(f"Requires-Dist: {dependency}", core_name)
+            if found:
+                return found
+    return set()
+
+
+def release_check(
     version: str,
     root: Path = ROOT,
     *,
@@ -601,17 +625,11 @@ def release_check(  # noqa: PLR0912 - one branch per release file family
         actual = project.get("version")
         if actual != pypi_version:
             errors.append(f"{label} pyproject version is {actual!r}, expected {pypi_version!r}")
-    dependencies = patro_project.get("dependencies", [])
-    if not isinstance(dependencies, list):
-        errors.append("patro dependencies is not a list")
-        dependencies = []
-    specifiers: set[str] = set()
-    for dependency in dependencies:
-        if isinstance(dependency, str):
-            found = _requirement_specifiers(f"Requires-Dist: {dependency}", core_name)
-            if found:
-                specifiers = found
-                break
+    try:
+        specifiers = _patro_core_specifiers(patro_project, core_name)
+    except ValueError as exc:
+        errors.append(str(exc))
+        specifiers = set()
     expected = versions.core_specifiers(version)
     if specifiers != expected:
         errors.append(
@@ -807,9 +825,8 @@ def _print_version() -> int:
     """
     try:
         core = _project_table(ROOT / "pyproject.toml").get("version")
-        patro = _project_table(ROOT / "packages" / "nepdate-patro" / "pyproject.toml").get(
-            "version"
-        )
+        patro_project = _project_table(ROOT / "packages" / "nepdate-patro" / "pyproject.toml")
+        patro = patro_project.get("version")
     except (OSError, KeyError, tomllib.TOMLDecodeError) as exc:
         print(f"version: {exc}", file=sys.stderr)
         return 1
@@ -820,10 +837,20 @@ def _print_version() -> int:
         print(f"version: core is {core} but patro is {patro}", file=sys.stderr)
         return 1
     try:
-        print(versions.to_semver(core))
+        semver = versions.to_semver(core)
+        specifiers = _patro_core_specifiers(patro_project, CORE_DIST)
+        expected = versions.core_specifiers(semver)
     except ValueError as exc:
         print(f"version: {exc}", file=sys.stderr)
         return 1
+    if specifiers != expected:
+        print(
+            f"version: patro requires {CORE_DIST} with {sorted(specifiers)}, "
+            f"expected {sorted(expected)}",
+            file=sys.stderr,
+        )
+        return 1
+    print(semver)
     return 0
 
 

@@ -41,11 +41,11 @@ def _release(  # noqa: PLR0913 - fixtures mirror the three files release_check r
         root: The temporary repository root.
         core_version: The core pyproject version.
         patro_version: The patro pyproject version.
-        dependency: The patro dependency on the core; the same-minor range when None.
+        dependency: The patro dependency on the core; the exact pin when None.
         changelog: The changelog text; a default dated section when None.
     """
     if dependency is None:
-        dependency = f"{ci.CORE_DIST}>=0.1,<0.2"
+        dependency = f"{ci.CORE_DIST}==0.1.0"
     _write(
         root,
         "pyproject.toml",
@@ -63,7 +63,7 @@ def _release(  # noqa: PLR0913 - fixtures mirror the three files release_check r
 
 
 def test_release_check_passes(ci: Any, tmp_path: Path) -> None:
-    """Matching versions, the same-minor range and a dated section pass."""
+    """Matching versions, the exact pin and a dated section pass."""
     _release(ci, tmp_path)
     assert ci.release_check("0.1.0", tmp_path, data=False) == []
 
@@ -83,8 +83,8 @@ def test_patro_version_mismatch_fails(ci: Any, tmp_path: Path) -> None:
 
 
 def test_wrong_patro_range_fails(ci: Any, tmp_path: Path) -> None:
-    """A dependency range outside the released minor fails."""
-    _release(ci, tmp_path, dependency=f"{ci.CORE_DIST}>=0.1,<0.3")
+    """A dependency range instead of the exact pin fails."""
+    _release(ci, tmp_path, dependency=f"{ci.CORE_DIST}>=0.1,<0.2")
     errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro requires" in error for error in errors)
 
@@ -95,7 +95,7 @@ def test_mismatched_dependency_name_fails(ci: Any, tmp_path: Path) -> None:
     A partial rename leaves the patro pointing at
     ``nepdate`` while the core is built as ``nepdate-core``.
     """
-    _release(ci, tmp_path, dependency=f"{ci.CORE_MODULE}>=0.1,<0.2")
+    _release(ci, tmp_path, dependency=f"{ci.CORE_MODULE}==0.1.0")
     errors = ci.release_check("0.1.0", tmp_path, data=False)
     assert any("patro requires" in error for error in errors)
 
@@ -164,7 +164,7 @@ def _beta(ci: Any, root: Path, **overrides: str) -> None:
     fields = {
         "core_version": "0.1.0b1",
         "patro_version": "0.1.0b1",
-        "dependency": f"{ci.CORE_DIST}>=0.1.0b1,<0.2",
+        "dependency": f"{ci.CORE_DIST}==0.1.0b1",
         "changelog": BETA_CHANGELOG,
     }
     fields.update(overrides)
@@ -184,9 +184,9 @@ def test_beta_pyproject_in_semver_spelling_fails(ci: Any, tmp_path: Path) -> Non
     assert any("expected '0.1.0b1'" in error for error in errors)
 
 
-def test_beta_with_the_stable_range_fails(ci: Any, tmp_path: Path) -> None:
-    """A beta patro that requires >=0.1 could not install the beta core, so it is refused."""
-    _beta(ci, tmp_path, dependency=f"{ci.CORE_DIST}>=0.1,<0.2")
+def test_beta_with_the_stable_pin_fails(ci: Any, tmp_path: Path) -> None:
+    """A beta patro that pins the stable core is refused."""
+    _beta(ci, tmp_path, dependency=f"{ci.CORE_DIST}==0.1.0")
     errors = ci.release_check("0.1.0-beta.1", tmp_path, data=False)
     assert any("patro requires" in error for error in errors)
 
@@ -286,3 +286,23 @@ def test_release_check_fails_without_patro_data(ci: Any, tmp_path: Path) -> None
     _release(ci, tmp_path)
     errors = ci.release_check("0.1.0", tmp_path)
     assert any("no patro JSON" in error for error in errors)
+
+
+def test_version_command_prints_the_semver_when_the_pin_matches(
+    ci: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """The version command prints the tag spelling of the shared version."""
+    _beta(ci, tmp_path)
+    monkeypatch.setattr(ci, "ROOT", tmp_path)
+    assert ci._print_version() == 0
+    assert capsys.readouterr().out.strip() == "0.1.0-beta.1"
+
+
+def test_version_command_fails_when_the_pin_differs(
+    ci: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A patro that requires another core version fails the version command."""
+    _beta(ci, tmp_path, dependency=f"{ci.CORE_DIST}==0.1.0")
+    monkeypatch.setattr(ci, "ROOT", tmp_path)
+    assert ci._print_version() == 1
+    assert "patro requires" in capsys.readouterr().err

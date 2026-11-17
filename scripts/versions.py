@@ -88,24 +88,19 @@ def is_prerelease(version: str) -> bool:
 
 
 def core_specifiers(version: str) -> set[str]:
-    """Return the specifiers the patro release must put on the core.
+    """Return the specifier the patro release must put on the core.
 
-    The upper bound is the next minor, so a patro release never pulls a core with another API.
-    For a pre-release the lower bound names the pre-release itself: PEP 440 lets an installer pick
-    a pre-release only when a specifier mentions one, so ``>=0.1`` would refuse ``0.1.0b1``.
+    The patro reads the core's internals, so it requires exactly the core of the same release
+    (ADR-0014). An exact pin that names a pre-release also lets an installer pick that
+    pre-release without ``--pre``.
 
     Args:
         version: A version accepted by :func:`is_semver`.
 
     Returns:
-        ``{">=X.Y", "<X.(Y+1)"}``, or ``{">=X.Y.ZbN", "<X.(Y+1)"}`` for a pre-release.
+        ``{"==X.Y.Z"}``, or ``{"==X.Y.ZbN"}`` for a pre-release.
 
     Raises:
         ValueError: The version is not accepted by :func:`is_semver`.
     """
-    match = SEMVER.fullmatch(version)
-    if match is None:
-        raise ValueError(f"not a release version: {version}")
-    major, minor, _ = match["release"].split(".")
-    lower = f">={major}.{minor}" if match["kind"] is None else f">={to_pep440(version)}"
-    return {lower, f"<{major}.{int(minor) + 1}"}
+    return {f"=={to_pep440(version)}"}
