@@ -6,12 +6,11 @@ from the core [`nepdate-core`](https://pypi.org/project/nepdate-core/) package. 
 [`sanamhub/nepdate`](https://github.com/sanamhub/nepdate).
 
 ```console
-pip install --pre nepdate-patro
+pip install nepdate-patro
 ```
 
 `nepdate-patro` depends on the core package, so `nepdate-core` arrives with it. The import name is
-`nepdate_patro`. `--pre` is needed while only pre-releases exist (1.0.0-rc.1 is `1.0.0rc1` on
-PyPI). The data is informational, not an official calendar.
+`nepdate_patro`. The data is informational, not an official calendar.
 
 ```python
 >>> from nepdate import NepaliDate
