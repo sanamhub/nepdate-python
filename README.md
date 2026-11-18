@@ -31,10 +31,8 @@ The API is listed in [docs/API.md](https://github.com/sanamhub/nepdate-python/bl
 ## Install
 
 ```console
-pip install --pre nepdate-core
+pip install nepdate-core
 ```
-
-`--pre` is needed while only pre-releases exist; pin `nepdate-core==1.0.0rc1` to stay on this one.
 
 ## Dates
 
@@ -254,7 +252,7 @@ The parse kinds are `INVALID_CHARACTER`, `WRONG_GROUP_COUNT`, `NUMBER_TOO_LONG`,
 The core has no patro data. Install both distributions:
 
 ```console
-pip install --pre nepdate-core nepdate-patro
+pip install nepdate-core nepdate-patro
 ```
 
 ```python
