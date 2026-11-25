@@ -58,22 +58,21 @@ The raw results are in [`benchmarks/results/2026-11-16/`](../benchmarks/results/
 
 ## Results
 
-Time is the pyperf mean per single operation, with its standard deviation. The C# column is the
-.NET 10 column of the hub's
-[`docs/benchmarks/dotnet.md`](https://github.com/sanamhub/nepdate/blob/main/docs/benchmarks/dotnet.md),
-run on the same machine on 2026-11-16. Python and TypeScript report allocations as "not measured";
-the harness has no reliable allocator count for CPython.
+Time is the pyperf mean per single operation, with its standard deviation. Python and TypeScript report allocations as "not measured"; the harness has no
+reliable allocator count for CPython.
 
-| ID | Operation | nepdate ns/op | std ns | C# .NET 10 ns/op | C# bytes/op |
-|---|---|---:|---:|---:|---:|
-| B1 | BS to AD | 612.77 | 4.22 | 13.27 | 0 |
-| B2 | AD to BS | 518.85 | 6.95 | 18.70 | 0 |
-| B3 | add 1000 days | 474.25 | 4.78 | 20.06 | 0 |
-| B4 | add 13 months, Clamp | 431.25 | 3.35 | 19.30 | 0 |
-| B5 | long format, Nepali, weekday | 433.35 | 3.48 | 139.04 | 435 |
-| B6 | strict parse `YYYY/MM/DD` | 1,157.10 | 9.52 | 21.13 | 0 |
-| B7 | patro info | 118.91 | 1.11 | 48.63 | 51 |
-| B8 | patro month grid | 15,840.07 | 135.79 | 3,274.50 | 1,429 |
+The comparison with C# NepDate, the original library, and the target check from `spec/BENCHMARK.md` section 6 are in the hub: [performance page](https://nepdate.com/docs/project/performance/).
+
+| ID | Operation | nepdate ns/op | std ns |
+|---|---|---:|---:|
+| B1 | BS to AD | 612.77 | 4.22 |
+| B2 | AD to BS | 518.85 | 6.95 |
+| B3 | add 1000 days | 474.25 | 4.78 |
+| B4 | add 13 months, Clamp | 431.25 | 3.35 |
+| B5 | long format, Nepali, weekday | 433.35 | 3.48 |
+| B6 | strict parse `YYYY/MM/DD` | 1,157.10 | 9.52 |
+| B7 | patro info | 118.91 | 1.11 |
+| B8 | patro month grid | 15,840.07 | 135.79 |
 
 ## Competitors (B1 and B2)
 

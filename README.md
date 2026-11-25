@@ -289,7 +289,7 @@ The complete signatures, defaults, exceptions and an example per group are in th
 |---|---|
 | [Guides](https://nepdate.com/docs/python/) | Install, usage and examples on nepdate.com |
 | [API](https://github.com/sanamhub/nepdate-python/blob/main/docs/API.md) | The complete public surface, group by group |
-| [Benchmarks](https://github.com/sanamhub/nepdate-python/blob/main/docs/benchmarks.md) | B1 to B8 against the other Python packages and C# NepDate |
+| [Benchmarks](https://github.com/sanamhub/nepdate-python/blob/main/docs/benchmarks.md) | B1 to B8 against the other Python packages |
 | [Competitors](https://github.com/sanamhub/nepdate-python/blob/main/docs/competitors.md) | The Python packages in the benchmark |
 | [Mutation testing](https://github.com/sanamhub/nepdate-python/blob/main/docs/mutation.md) | How the test suite is checked against mutmut |
 | [Fuzzing](https://github.com/sanamhub/nepdate-python/blob/main/docs/fuzzing.md) | How the parsers and formatter are fuzzed with atheris |
